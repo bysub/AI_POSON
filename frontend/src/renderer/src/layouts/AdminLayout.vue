@@ -87,27 +87,16 @@ function toggleSidebar(): void {
           <div
             class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600"
           >
-            <svg
-              class="h-6 w-6 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path
                 d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"
               />
             </svg>
           </div>
           <Transition name="fade">
-            <div
-              v-if="!isSidebarCollapsed"
-              class="overflow-hidden"
-            >
-              <h1 class="text-lg font-bold text-slate-800">
-                POSON
-              </h1>
-              <p class="text-xs text-slate-500">
-                Admin Console
-              </p>
+            <div v-if="!isSidebarCollapsed" class="overflow-hidden">
+              <h1 class="text-lg font-bold text-slate-800">POSON</h1>
+              <p class="text-xs text-slate-500">Admin Console</p>
             </div>
           </Transition>
         </div>
@@ -218,10 +207,7 @@ function toggleSidebar(): void {
             </svg>
           </div>
           <Transition name="fade">
-            <span
-              v-if="!isSidebarCollapsed"
-              class="truncate"
-            >{{ item.label }}</span>
+            <span v-if="!isSidebarCollapsed" class="truncate">{{ item.label }}</span>
           </Transition>
         </RouterLink>
       </nav>
@@ -238,14 +224,7 @@ function toggleSidebar(): void {
             {{ adminInitial }}
           </div>
           <Transition name="fade">
-<<<<<<< ours
             <div v-if="!isSidebarCollapsed" class="min-w-0 flex-1">
-=======
-            <div
-              v-if="!isSidebarCollapsed"
-              class="min-w-0 flex-1"
-            >
->>>>>>> theirs
               <p class="truncate text-sm font-medium text-slate-800">
                 {{ adminDisplayName }}
               </p>
@@ -257,24 +236,12 @@ function toggleSidebar(): void {
         </div>
 
         <!-- Actions -->
-        <div
-          class="mt-2 flex gap-2"
-          :class="isSidebarCollapsed ? 'flex-col' : ''"
-        >
+        <div class="mt-2 flex gap-2" :class="isSidebarCollapsed ? 'flex-col' : ''">
           <RouterLink
             to="/"
             class="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
           >
-<<<<<<< ours
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -288,16 +255,7 @@ function toggleSidebar(): void {
             class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
             @click="handleLogout"
           >
-<<<<<<< ours
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -322,16 +280,7 @@ function toggleSidebar(): void {
             class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
             @click="toggleSidebar"
           >
-<<<<<<< ours
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -344,9 +293,7 @@ function toggleSidebar(): void {
             <h2 class="text-lg font-semibold text-slate-800">
               {{ menuItems.find((m) => m.id === activeMenu)?.label ?? "관리자" }}
             </h2>
-            <p class="text-xs text-slate-500">
-              POSON Kiosk Management System
-            </p>
+            <p class="text-xs text-slate-500">POSON Kiosk Management System</p>
           </div>
         </div>
 
@@ -355,16 +302,7 @@ function toggleSidebar(): void {
           <button
             class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
           >
-<<<<<<< ours
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -376,16 +314,7 @@ function toggleSidebar(): void {
           <button
             class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
           >
-<<<<<<< ours
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"

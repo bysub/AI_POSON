@@ -129,9 +129,7 @@ onUnmounted(() => {
   <div class="flex h-full flex-col items-center justify-center bg-gray-50 p-8">
     <!-- Amount Display -->
     <div class="mb-8 text-center">
-      <p class="text-kiosk-lg text-gray-600">
-        결제 금액
-      </p>
+      <p class="text-kiosk-lg text-gray-600">결제 금액</p>
       <p class="text-kiosk-3xl font-bold text-primary-600">
         {{ formatPrice(amount) }}
         <span class="text-kiosk-xl">원</span>
@@ -200,9 +198,7 @@ onUnmounted(() => {
         <p class="text-kiosk-xl font-medium text-gray-800">
           {{ statusMessage }}
         </p>
-        <p class="mt-2 text-kiosk-base text-gray-500">
-          잠시만 기다려주세요...
-        </p>
+        <p class="mt-2 text-kiosk-base text-gray-500">잠시만 기다려주세요...</p>
       </template>
 
       <!-- Success State -->
@@ -222,20 +218,13 @@ onUnmounted(() => {
             />
           </svg>
         </div>
-        <p class="text-kiosk-xl font-medium text-green-600">
-          결제가 완료되었습니다
-        </p>
+        <p class="text-kiosk-xl font-medium text-green-600">결제가 완료되었습니다</p>
       </template>
 
       <!-- Error State -->
       <template v-else-if="status === 'error'">
         <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-red-100">
-          <svg
-            class="h-16 w-16 text-red-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg class="h-16 w-16 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -252,16 +241,10 @@ onUnmounted(() => {
         </p>
 
         <div class="mt-8 flex gap-4">
-          <button
-            class="btn-kiosk-secondary"
-            @click="cancel"
-          >
+          <button class="btn-kiosk-secondary" @click="cancel">
             {{ t("common.cancel") }}
           </button>
-          <button
-            class="btn-kiosk-primary"
-            @click="retry"
-          >
+          <button class="btn-kiosk-primary" @click="retry">
             {{ t("common.retry") }}
           </button>
         </div>

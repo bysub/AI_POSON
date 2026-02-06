@@ -173,16 +173,7 @@ onMounted(() => {
             class="flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-100 bg-white text-red-500 shadow-sm transition-transform active:scale-95"
             @click="goBack"
           >
-<<<<<<< ours
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -226,10 +217,7 @@ onMounted(() => {
                   <div>
                     <h3 class="text-base font-bold leading-tight text-gray-800">
                       {{ item.name }}
-                      <span
-                        v-if="item.quantity > 1"
-                        class="text-orange-500"
-                      >
+                      <span v-if="item.quantity > 1" class="text-orange-500">
                         x{{ item.quantity }}
                       </span>
                     </h3>
@@ -284,16 +272,7 @@ onMounted(() => {
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600"
                 >
-<<<<<<< ours
                   <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                  <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
->>>>>>> theirs
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -338,16 +317,7 @@ onMounted(() => {
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-900 text-white"
                 >
-<<<<<<< ours
                   <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                  <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
->>>>>>> theirs
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -392,16 +362,7 @@ onMounted(() => {
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600"
                 >
-<<<<<<< ours
                   <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                  <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
->>>>>>> theirs
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -446,16 +407,7 @@ onMounted(() => {
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-400 text-gray-700"
                 >
-<<<<<<< ours
                   <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                  <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
->>>>>>> theirs
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -504,16 +456,7 @@ onMounted(() => {
             <span class="text-xl font-extrabold uppercase tracking-tight text-white">
               {{ t("payment.payNow") }}
             </span>
-<<<<<<< ours
             <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-6 w-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"

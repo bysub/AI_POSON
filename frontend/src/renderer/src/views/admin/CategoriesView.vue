@@ -238,27 +238,14 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-800">
-          카테고리 관리
-        </h2>
-        <p class="mt-1 text-sm text-slate-500">
-          상품을 분류하는 카테고리를 관리합니다
-        </p>
+        <h2 class="text-xl font-bold text-slate-800">카테고리 관리</h2>
+        <p class="mt-1 text-sm text-slate-500">상품을 분류하는 카테고리를 관리합니다</p>
       </div>
       <button
         class="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 font-medium text-white shadow-sm transition-all hover:bg-purple-700 hover:shadow-md"
         @click="openAddForm"
       >
-<<<<<<< ours
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-        <svg
-          class="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
->>>>>>> theirs
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -271,14 +258,7 @@ onMounted(() => {
     </div>
 
     <!-- Categories Grid -->
-<<<<<<< ours
     <div v-if="isLoading" class="flex items-center justify-center py-12">
-=======
-    <div
-      v-if="isLoading"
-      class="flex items-center justify-center py-12"
-    >
->>>>>>> theirs
       <div
         class="h-8 w-8 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"
       />
@@ -301,18 +281,11 @@ onMounted(() => {
           d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
         />
       </svg>
-      <p class="text-lg font-medium text-slate-600">
-        등록된 카테고리가 없습니다
-      </p>
-      <p class="mt-1 text-sm text-slate-400">
-        카테고리를 추가하여 상품을 분류하세요
-      </p>
+      <p class="text-lg font-medium text-slate-600">등록된 카테고리가 없습니다</p>
+      <p class="mt-1 text-sm text-slate-400">카테고리를 추가하여 상품을 분류하세요</p>
     </div>
 
-    <div
-      v-else
-      class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-    >
+    <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <div
         v-for="category in categories"
         :key="category.id"
@@ -570,24 +543,13 @@ onMounted(() => {
                 ($event.target as HTMLImageElement).src =
                   'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22%3E%3Cpath stroke=%22%239ca3af%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z%22/%3E%3C/svg%3E'
               "
-<<<<<<< ours
             />
-=======
-            >
->>>>>>> theirs
           </div>
           <div>
             <h3 class="text-lg font-semibold text-slate-800">
               {{ category.name }}
             </h3>
-<<<<<<< ours
             <p v-if="category.nameEn" class="text-sm text-slate-500">
-=======
-            <p
-              v-if="category.nameEn"
-              class="text-sm text-slate-500"
-            >
->>>>>>> theirs
               {{ category.nameEn }}
             </p>
           </div>
@@ -596,16 +558,7 @@ onMounted(() => {
         <!-- Meta -->
         <div class="mb-4 flex items-center gap-4 text-sm text-slate-500">
           <span class="flex items-center gap-1">
-<<<<<<< ours
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -623,16 +576,7 @@ onMounted(() => {
             class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
             @click="openEditForm(category)"
           >
-<<<<<<< ours
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -646,16 +590,7 @@ onMounted(() => {
             class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-50 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
             @click="deleteCategory(category)"
           >
-<<<<<<< ours
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -686,16 +621,7 @@ onMounted(() => {
                 class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                 @click="showForm = false"
               >
-<<<<<<< ours
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                <svg
-                  class="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
->>>>>>> theirs
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -718,7 +644,7 @@ onMounted(() => {
                     type="text"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                     placeholder="카테고리명"
-                  >
+                  />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700"
@@ -729,7 +655,7 @@ onMounted(() => {
                     type="text"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                     placeholder="Category Name"
-                  >
+                  />
                 </div>
               </div>
 
@@ -740,7 +666,7 @@ onMounted(() => {
                   type="number"
                   class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                   placeholder="1"
-                >
+                />
               </div>
 
               <!-- Icon/Image Selection -->
@@ -774,10 +700,7 @@ onMounted(() => {
                 </div>
 
                 <!-- Preset Icons -->
-                <div
-                  v-if="categoryForm.iconType === 'preset'"
-                  class="grid grid-cols-4 gap-2"
-                >
+                <div v-if="categoryForm.iconType === 'preset'" class="grid grid-cols-4 gap-2">
                   <button
                     v-for="preset in presetIcons"
                     :key="preset.id"
@@ -989,7 +912,7 @@ onMounted(() => {
                     accept="image/jpeg,image/png,image/gif,image/webp"
                     class="hidden"
                     @change="handleFileUpload"
-                  >
+                  />
 
                   <!-- Upload area -->
                   <div
@@ -1014,12 +937,8 @@ onMounted(() => {
                         />
                       </svg>
                     </div>
-                    <p class="text-sm font-medium text-slate-600">
-                      클릭하여 이미지 업로드
-                    </p>
-                    <p class="mt-1 text-xs text-slate-400">
-                      JPG, PNG, GIF, WebP (최대 5MB)
-                    </p>
+                    <p class="text-sm font-medium text-slate-600">클릭하여 이미지 업로드</p>
+                    <p class="mt-1 text-xs text-slate-400">JPG, PNG, GIF, WebP (최대 5MB)</p>
                   </div>
 
                   <!-- Uploading indicator -->
@@ -1030,33 +949,18 @@ onMounted(() => {
                     <div
                       class="mb-3 h-8 w-8 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"
                     />
-<<<<<<< ours
                     <p class="text-sm text-slate-600">업로드 중...</p>
-=======
-                    <p class="text-sm text-slate-600">
-                      업로드 중...
-                    </p>
->>>>>>> theirs
                   </div>
 
                   <!-- Preview with uploaded image -->
-                  <div
-                    v-else
-                    class="relative"
-                  >
+                  <div v-else class="relative">
                     <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
                       <img
                         :src="
                           uploadPreview ||
-<<<<<<< ours
                           (categoryForm.imageUrl.startsWith('/uploads/')
                             ? `http://localhost:3000${categoryForm.imageUrl}`
                             : categoryForm.imageUrl)
-=======
-                            (categoryForm.imageUrl.startsWith('/uploads/')
-                              ? `http://localhost:3000${categoryForm.imageUrl}`
-                              : categoryForm.imageUrl)
->>>>>>> theirs
                         "
                         alt="Preview"
                         class="h-40 w-full object-contain"
@@ -1064,11 +968,7 @@ onMounted(() => {
                           ($event.target as HTMLImageElement).src =
                             'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22%3E%3Cpath stroke=%22%239ca3af%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z%22/%3E%3C/svg%3E'
                         "
-<<<<<<< ours
                       />
-=======
-                      >
->>>>>>> theirs
                     </div>
                     <div class="mt-3 flex gap-2">
                       <button
@@ -1076,16 +976,7 @@ onMounted(() => {
                         class="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
                         @click="triggerFileInput"
                       >
-<<<<<<< ours
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                        <svg
-                          class="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
->>>>>>> theirs
                           <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -1100,16 +991,7 @@ onMounted(() => {
                         class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-50 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
                         @click="removeUploadedImage"
                       >
-<<<<<<< ours
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                        <svg
-                          class="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
->>>>>>> theirs
                           <path
                             stroke-linecap="round"
                             stroke-linejoin="round"

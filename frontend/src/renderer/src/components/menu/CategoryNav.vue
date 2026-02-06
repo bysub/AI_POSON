@@ -61,7 +61,7 @@ const sortedCategories = computed(() =>
             :src="category.imageUrl"
             :alt="getCategoryName(category)"
             class="h-full w-full object-cover"
-          >
+          />
         </div>
 
         <!-- Category Name -->

@@ -191,16 +191,7 @@ onMounted(async () => {
         class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-white"
         @click="router.push('/')"
       >
-<<<<<<< ours
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-        <svg
-          class="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
->>>>>>> theirs
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -210,9 +201,7 @@ onMounted(async () => {
         </svg>
       </button>
 
-      <h1 class="text-xl font-bold text-gray-900">
-        POSON Kiosk
-      </h1>
+      <h1 class="text-xl font-bold text-gray-900">POSON Kiosk</h1>
 
       <div class="w-10" />
     </header>
@@ -249,24 +238,14 @@ onMounted(async () => {
       <!-- Product Grid -->
       <main class="flex-1 overflow-y-auto p-4">
         <!-- Loading State -->
-<<<<<<< ours
         <div v-if="productsStore.isLoading" class="flex h-full items-center justify-center">
-=======
-        <div
-          v-if="productsStore.isLoading"
-          class="flex h-full items-center justify-center"
-        >
->>>>>>> theirs
           <div
             class="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary"
           />
         </div>
 
         <!-- Products -->
-        <div
-          v-else
-          class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
-        >
+        <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           <article
             v-for="product in productsStore.filteredProducts"
             :key="product.id"
@@ -288,7 +267,7 @@ onMounted(async () => {
                 :src="product.imageUrl"
                 :alt="getLocalizedName(product)"
                 class="h-full w-full object-cover"
-              >
+              />
               <div
                 v-else
                 class="flex h-full w-full items-center justify-center text-4xl text-gray-300"
@@ -323,16 +302,7 @@ onMounted(async () => {
               class="flex items-center justify-center gap-1 bg-red-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-600 active:bg-red-700"
               @click.stop="handleAddToCart(product)"
             >
-<<<<<<< ours
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-              <svg
-                class="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
->>>>>>> theirs
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -355,17 +325,11 @@ onMounted(async () => {
           {{ t("cart.orderSummary") }}
         </h2>
 
-        <div
-          v-if="cartStore.isEmpty"
-          class="py-4 text-center text-sm text-gray-400"
-        >
+        <div v-if="cartStore.isEmpty" class="py-4 text-center text-sm text-gray-400">
           {{ t("cart.empty") }}
         </div>
 
-        <div
-          v-else
-          class="max-h-32 space-y-2 overflow-y-auto"
-        >
+        <div v-else class="max-h-32 space-y-2 overflow-y-auto">
           <div
             v-for="item in cartStore.items"
             :key="item.id"
@@ -373,10 +337,7 @@ onMounted(async () => {
           >
             <div class="flex-1">
               <span class="text-gray-800">{{ item.name }}</span>
-              <span
-                v-if="item.options"
-                class="text-xs text-gray-500"
-              >
+              <span v-if="item.options" class="text-xs text-gray-500">
                 {{ getOptionsString(item.options) ? " + " + getOptionsString(item.options) : "" }}
               </span>
             </div>
@@ -442,16 +403,7 @@ onMounted(async () => {
             class="flex w-full items-center justify-center gap-1 py-2 text-sm text-gray-500 hover:text-red-500"
             @click="cancelOrder"
           >
-<<<<<<< ours
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -471,16 +423,7 @@ onMounted(async () => {
         v-if="showToast"
         class="fixed right-4 top-16 z-50 flex items-center gap-3 rounded-lg bg-green-500 px-4 py-3 text-white shadow-lg"
       >
-<<<<<<< ours
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-        <svg
-          class="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
->>>>>>> theirs
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -496,16 +439,7 @@ onMounted(async () => {
             {{ t("cart.added") }}
           </p>
         </div>
-<<<<<<< ours
         <button class="ml-2 opacity-70 hover:opacity-100" @click="showToast = false">✕</button>
-=======
-        <button
-          class="ml-2 opacity-70 hover:opacity-100"
-          @click="showToast = false"
-        >
-          ✕
-        </button>
->>>>>>> theirs
       </div>
     </Transition>
 

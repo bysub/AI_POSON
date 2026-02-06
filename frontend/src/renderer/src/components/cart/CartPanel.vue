@@ -49,10 +49,7 @@ function removeItem(itemId: string): void {
     <header class="border-b border-gray-200 px-6 py-4">
       <h2 class="text-kiosk-xl font-bold text-gray-900">
         {{ t("cart.title") }}
-        <span
-          v-if="cartStore.totalItems > 0"
-          class="text-primary-600"
-        >
+        <span v-if="cartStore.totalItems > 0" class="text-primary-600">
           ({{ cartStore.totalItems }})
         </span>
       </h2>
@@ -79,10 +76,7 @@ function removeItem(itemId: string): void {
       </div>
 
       <!-- Cart Items List -->
-      <ul
-        v-else
-        class="space-y-4"
-      >
+      <ul v-else class="space-y-4">
         <li
           v-for="item in cartStore.items"
           :key="item.id"
@@ -95,7 +89,7 @@ function removeItem(itemId: string): void {
               :src="item.imageUrl"
               :alt="item.name"
               class="h-full w-full object-cover"
-            >
+            />
             <div
               v-else
               class="flex h-full w-full items-center justify-center text-2xl text-gray-400"
@@ -165,19 +159,8 @@ function removeItem(itemId: string): void {
       </div>
 
       <!-- Action Buttons -->
-<<<<<<< ours
       <div v-if="showCheckout" class="flex gap-3">
         <button class="btn-kiosk-secondary flex-1" @click="emit('continueShopping')">
-=======
-      <div
-        v-if="showCheckout"
-        class="flex gap-3"
-      >
-        <button
-          class="btn-kiosk-secondary flex-1"
-          @click="emit('continueShopping')"
-        >
->>>>>>> theirs
           {{ t("cart.continueShopping") }}
         </button>
         <button

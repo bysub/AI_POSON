@@ -18,12 +18,8 @@ function saveSettings(): void {
   <div class="space-y-6">
     <!-- Header -->
     <div>
-      <h2 class="text-xl font-bold text-slate-800">
-        시스템 설정
-      </h2>
-      <p class="mt-1 text-sm text-slate-500">
-        키오스크 시스템 설정을 관리합니다
-      </p>
+      <h2 class="text-xl font-bold text-slate-800">시스템 설정</h2>
+      <p class="mt-1 text-sm text-slate-500">키오스크 시스템 설정을 관리합니다</p>
     </div>
 
     <!-- Settings Sections -->
@@ -62,7 +58,7 @@ function saveSettings(): void {
               v-model="settings.kioskName"
               type="text"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500/20"
-            >
+            />
           </div>
 
           <div>
@@ -75,7 +71,7 @@ function saveSettings(): void {
               min="5"
               max="120"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500/20"
-            >
+            />
           </div>
 
           <div>
@@ -113,12 +109,8 @@ function saveSettings(): void {
         <div class="space-y-4">
           <div class="flex items-center justify-between rounded-xl bg-slate-50 p-4">
             <div>
-              <p class="font-medium text-slate-800">
-                효과음 사용
-              </p>
-              <p class="text-sm text-slate-500">
-                버튼 클릭 시 효과음 재생
-              </p>
+              <p class="font-medium text-slate-800">효과음 사용</p>
+              <p class="text-sm text-slate-500">버튼 클릭 시 효과음 재생</p>
             </div>
             <button
               class="relative h-7 w-12 rounded-full transition-colors"
@@ -134,12 +126,8 @@ function saveSettings(): void {
 
           <div class="flex items-center justify-between rounded-xl bg-slate-50 p-4">
             <div>
-              <p class="font-medium text-slate-800">
-                애니메이션 사용
-              </p>
-              <p class="text-sm text-slate-500">
-                화면 전환 애니메이션
-              </p>
+              <p class="font-medium text-slate-800">애니메이션 사용</p>
+              <p class="text-sm text-slate-500">화면 전환 애니메이션</p>
             </div>
             <button
               class="relative h-7 w-12 rounded-full transition-colors"
@@ -200,16 +188,7 @@ function saveSettings(): void {
       <div class="rounded-2xl border border-red-200 bg-red-50 p-6">
         <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold text-red-800">
           <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100">
-<<<<<<< ours
             <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-5 w-5 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -221,9 +200,7 @@ function saveSettings(): void {
           위험 영역
         </h3>
 
-        <p class="mb-4 text-sm text-red-700">
-          이 작업은 되돌릴 수 없습니다. 신중하게 진행하세요.
-        </p>
+        <p class="mb-4 text-sm text-red-700">이 작업은 되돌릴 수 없습니다. 신중하게 진행하세요.</p>
 
         <div class="space-y-3">
           <button
@@ -246,16 +223,7 @@ function saveSettings(): void {
         class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 font-medium text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md"
         @click="saveSettings"
       >
-<<<<<<< ours
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-        <svg
-          class="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
->>>>>>> theirs
           <path
             stroke-linecap="round"
             stroke-linejoin="round"

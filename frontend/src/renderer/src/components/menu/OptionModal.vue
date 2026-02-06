@@ -136,12 +136,7 @@ function handleBackdropClick(): void {
               class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-500 shadow-md hover:bg-gray-100"
               @click="emit('close')"
             >
-              <svg
-                class="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -162,10 +157,7 @@ function handleBackdropClick(): void {
           <!-- Options Content -->
           <div class="max-h-[50vh] overflow-y-auto p-6">
             <!-- Required Options -->
-            <div
-              v-if="requiredOptions.length > 0"
-              class="mb-6"
-            >
+            <div v-if="requiredOptions.length > 0" class="mb-6">
               <h3 class="mb-3 flex items-center gap-2 text-kiosk-base font-bold text-gray-900">
                 필수 선택
                 <span class="rounded bg-red-100 px-2 py-0.5 text-xs text-red-600">필수</span>
@@ -192,9 +184,7 @@ function handleBackdropClick(): void {
 
             <!-- Optional Options -->
             <div v-if="optionalOptions.length > 0">
-              <h3 class="mb-3 text-kiosk-base font-bold text-gray-900">
-                추가 선택
-              </h3>
+              <h3 class="mb-3 text-kiosk-base font-bold text-gray-900">추가 선택</h3>
               <div class="space-y-2">
                 <button
                   v-for="option in optionalOptions"

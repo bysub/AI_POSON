@@ -36,14 +36,7 @@ function selectLanguage(code: string) {
       </button>
     </div>
 
-<<<<<<< ours
     <button class="btn-kiosk-secondary mt-12" @click="router.back()">
-=======
-    <button
-      class="btn-kiosk-secondary mt-12"
-      @click="router.back()"
-    >
->>>>>>> theirs
       {{ t("common.back") }}
     </button>
   </div>

@@ -276,15 +276,10 @@ onMounted(() => {
   <div class="flex h-full flex-col bg-gray-100">
     <!-- Header -->
     <header class="flex items-center justify-between bg-gray-800 px-6 py-4 text-white">
-      <h1 class="text-xl font-bold">
-        관리자 모드
-      </h1>
+      <h1 class="text-xl font-bold">관리자 모드</h1>
       <div class="flex items-center gap-4">
         <!-- 로그인 사용자 정보 -->
-        <div
-          v-if="authStore.admin"
-          class="flex items-center gap-2 text-sm"
-        >
+        <div v-if="authStore.admin" class="flex items-center gap-2 text-sm">
           <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 font-bold">
             {{ (authStore.admin.name ?? authStore.admin.username).charAt(0).toUpperCase() }}
           </div>
@@ -364,39 +359,22 @@ onMounted(() => {
     <!-- Main Content -->
     <main class="flex-1 overflow-auto p-6">
       <!-- Loading -->
-<<<<<<< ours
       <div v-if="isLoading" class="flex items-center justify-center py-12">
-=======
-      <div
-        v-if="isLoading"
-        class="flex items-center justify-center py-12"
-      >
->>>>>>> theirs
         <div
           class="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"
         />
       </div>
 
       <!-- Error -->
-      <div
-        v-else-if="error"
-        class="rounded-lg bg-red-50 p-4 text-red-600"
-      >
+      <div v-else-if="error" class="rounded-lg bg-red-50 p-4 text-red-600">
         {{ error }}
-        <button
-          class="ml-4 underline"
-          @click="loadData"
-        >
-          다시 시도
-        </button>
+        <button class="ml-4 underline" @click="loadData">다시 시도</button>
       </div>
 
       <!-- Products Tab -->
       <template v-else-if="currentTab === 'products'">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-800">
-            상품 목록 ({{ products.length }}개)
-          </h2>
+          <h2 class="text-lg font-bold text-gray-800">상품 목록 ({{ products.length }}개)</h2>
           <button
             class="rounded-lg bg-blue-500 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-600"
             @click="openAddProductForm"
@@ -409,39 +387,17 @@ onMounted(() => {
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                  바코드
-                </th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                  상품명
-                </th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                  카테고리
-                </th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">
-                  가격
-                </th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">
-                  재고
-                </th>
-                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">
-                  상태
-                </th>
-                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">
-                  관리
-                </th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">바코드</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">상품명</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">카테고리</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">가격</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-600">재고</th>
+                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">상태</th>
+                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">관리</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-<<<<<<< ours
               <tr v-for="product in products" :key="product.id" class="hover:bg-gray-50">
-=======
-              <tr
-                v-for="product in products"
-                :key="product.id"
-                class="hover:bg-gray-50"
-              >
->>>>>>> theirs
                 <td class="px-4 py-3 text-sm text-gray-600">
                   {{ product.barcode }}
                 </td>
@@ -449,14 +405,7 @@ onMounted(() => {
                   <div class="font-medium text-gray-800">
                     {{ product.name }}
                   </div>
-<<<<<<< ours
                   <div v-if="product.nameEn" class="text-xs text-gray-400">
-=======
-                  <div
-                    v-if="product.nameEn"
-                    class="text-xs text-gray-400"
-                  >
->>>>>>> theirs
                     {{ product.nameEn }}
                   </div>
                 </td>
@@ -497,10 +446,7 @@ onMounted(() => {
                 </td>
               </tr>
               <tr v-if="products.length === 0">
-                <td
-                  colspan="7"
-                  class="px-4 py-8 text-center text-gray-400"
-                >
+                <td colspan="7" class="px-4 py-8 text-center text-gray-400">
                   등록된 상품이 없습니다
                 </td>
               </tr>
@@ -512,9 +458,7 @@ onMounted(() => {
       <!-- Categories Tab -->
       <template v-else-if="currentTab === 'categories'">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-800">
-            카테고리 목록 ({{ categories.length }}개)
-          </h2>
+          <h2 class="text-lg font-bold text-gray-800">카테고리 목록 ({{ categories.length }}개)</h2>
           <button
             class="rounded-lg bg-blue-500 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-600"
             @click="openAddCategoryForm"
@@ -527,33 +471,15 @@ onMounted(() => {
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                  순서
-                </th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                  카테고리명
-                </th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                  영문명
-                </th>
-                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">
-                  상태
-                </th>
-                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">
-                  관리
-                </th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">순서</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">카테고리명</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-600">영문명</th>
+                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">상태</th>
+                <th class="px-4 py-3 text-center text-sm font-medium text-gray-600">관리</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-<<<<<<< ours
               <tr v-for="category in categories" :key="category.id" class="hover:bg-gray-50">
-=======
-              <tr
-                v-for="category in categories"
-                :key="category.id"
-                class="hover:bg-gray-50"
-              >
->>>>>>> theirs
                 <td class="px-4 py-3 text-sm text-gray-600">
                   {{ category.sortOrder }}
                 </td>
@@ -591,10 +517,7 @@ onMounted(() => {
                 </td>
               </tr>
               <tr v-if="categories.length === 0">
-                <td
-                  colspan="5"
-                  class="px-4 py-8 text-center text-gray-400"
-                >
+                <td colspan="5" class="px-4 py-8 text-center text-gray-400">
                   등록된 카테고리가 없습니다
                 </td>
               </tr>
@@ -606,18 +529,14 @@ onMounted(() => {
       <!-- Orders Tab -->
       <template v-else-if="currentTab === 'orders'">
         <div class="rounded-lg bg-white p-8 text-center shadow">
-          <p class="text-gray-500">
-            주문 내역 기능 준비 중...
-          </p>
+          <p class="text-gray-500">주문 내역 기능 준비 중...</p>
         </div>
       </template>
 
       <!-- Settings Tab -->
       <template v-else-if="currentTab === 'settings'">
         <div class="rounded-lg bg-white p-8 text-center shadow">
-          <p class="text-gray-500">
-            설정 기능 준비 중...
-          </p>
+          <p class="text-gray-500">설정 기능 준비 중...</p>
         </div>
       </template>
     </main>
@@ -642,7 +561,7 @@ onMounted(() => {
                 type="text"
                 class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
                 placeholder="상품 바코드"
-              >
+              />
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-600">카테고리 *</label>
@@ -650,11 +569,7 @@ onMounted(() => {
                 v-model="productForm.categoryId"
                 class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
               >
-                <option
-                  v-for="cat in categories"
-                  :key="cat.id"
-                  :value="cat.id"
-                >
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                   {{ cat.name }}
                 </option>
               </select>
@@ -669,7 +584,7 @@ onMounted(() => {
                 type="text"
                 class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
                 placeholder="상품명"
-              >
+              />
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-600">상품명 (영문)</label>
@@ -678,7 +593,7 @@ onMounted(() => {
                 type="text"
                 class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
                 placeholder="Product Name"
-              >
+              />
             </div>
           </div>
 
@@ -690,7 +605,7 @@ onMounted(() => {
                 type="number"
                 class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
                 placeholder="0"
-              >
+              />
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-600">원가</label>
@@ -699,7 +614,7 @@ onMounted(() => {
                 type="number"
                 class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
                 placeholder="0"
-              >
+              />
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-600">재고</label>
@@ -708,7 +623,7 @@ onMounted(() => {
                 type="number"
                 class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
                 placeholder="0"
-              >
+              />
             </div>
           </div>
 
@@ -719,7 +634,7 @@ onMounted(() => {
               type="text"
               class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
               placeholder="https://..."
-            >
+            />
           </div>
 
           <div>
@@ -769,7 +684,7 @@ onMounted(() => {
               type="text"
               class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
               placeholder="카테고리명"
-            >
+            />
           </div>
 
           <div>
@@ -779,7 +694,7 @@ onMounted(() => {
               type="text"
               class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
               placeholder="Category Name"
-            >
+            />
           </div>
 
           <div>
@@ -789,7 +704,7 @@ onMounted(() => {
               type="number"
               class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
               placeholder="1"
-            >
+            />
           </div>
         </div>
 

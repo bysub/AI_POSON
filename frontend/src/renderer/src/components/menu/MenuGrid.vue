@@ -65,10 +65,7 @@ function isSoldOut(product: Product): boolean {
 <template>
   <main class="flex-1 overflow-y-auto bg-gray-50 p-4">
     <!-- Loading State -->
-    <div
-      v-if="isLoading"
-      class="flex h-full items-center justify-center"
-    >
+    <div v-if="isLoading" class="flex h-full items-center justify-center">
       <div class="flex flex-col items-center gap-4">
         <div
           class="h-12 w-12 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600"
@@ -78,25 +75,12 @@ function isSoldOut(product: Product): boolean {
     </div>
 
     <!-- Empty State -->
-<<<<<<< ours
     <div v-else-if="products.length === 0" class="flex h-full items-center justify-center">
       <p class="text-kiosk-lg text-gray-500">상품이 없습니다</p>
-=======
-    <div
-      v-else-if="products.length === 0"
-      class="flex h-full items-center justify-center"
-    >
-      <p class="text-kiosk-lg text-gray-500">
-        상품이 없습니다
-      </p>
->>>>>>> theirs
     </div>
 
     <!-- Product Grid -->
-    <div
-      v-else
-      class="menu-grid"
-    >
+    <div v-else class="menu-grid">
       <article
         v-for="product in products"
         :key="product.id"
@@ -115,7 +99,7 @@ function isSoldOut(product: Product): boolean {
             :src="product.imageUrl"
             :alt="getProductName(product)"
             class="h-full w-full object-cover"
-          >
+          />
           <div
             v-else
             class="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"

@@ -102,22 +102,11 @@ function cancel(): void {
     <div class="bg-white p-6 shadow-sm">
       <div class="grid grid-cols-3 gap-4 text-center">
         <div>
-<<<<<<< ours
           <p class="text-kiosk-sm text-gray-500">결제 금액</p>
           <p class="text-kiosk-xl font-bold text-gray-900">{{ formatPrice(amount) }}원</p>
-=======
-          <p class="text-kiosk-sm text-gray-500">
-            결제 금액
-          </p>
-          <p class="text-kiosk-xl font-bold text-gray-900">
-            {{ formatPrice(amount) }}원
-          </p>
->>>>>>> theirs
         </div>
         <div>
-          <p class="text-kiosk-sm text-gray-500">
-            받은 금액
-          </p>
+          <p class="text-kiosk-sm text-gray-500">받은 금액</p>
           <p class="text-kiosk-xl font-bold text-primary-600">
             {{ formatPrice(receivedAmount) }}원
           </p>
@@ -189,12 +178,7 @@ function cancel(): void {
           class="flex h-16 items-center justify-center rounded-xl bg-gray-200 text-kiosk-xl font-bold text-gray-800 transition-colors hover:bg-gray-300 active:bg-gray-400"
           @click="deleteLastDigit"
         >
-          <svg
-            class="h-8 w-8"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -213,29 +197,23 @@ function cancel(): void {
           v-model="showCashReceipt"
           type="checkbox"
           class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-        >
+        />
         <span class="text-kiosk-base text-gray-700">현금영수증 발급</span>
       </label>
 
-      <div
-        v-if="showCashReceipt"
-        class="mt-3"
-      >
+      <div v-if="showCashReceipt" class="mt-3">
         <input
           v-model="cashReceiptPhone"
           type="tel"
           placeholder="휴대폰 번호 입력"
           class="w-full rounded-lg border border-gray-300 px-4 py-3 text-kiosk-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
-        >
+        />
       </div>
     </div>
 
     <!-- Action Buttons -->
     <div class="flex gap-4 bg-white p-6 shadow-lg">
-      <button
-        class="btn-kiosk-secondary flex-1 py-4"
-        @click="cancel"
-      >
+      <button class="btn-kiosk-secondary flex-1 py-4" @click="cancel">
         {{ t("common.cancel") }}
       </button>
       <button

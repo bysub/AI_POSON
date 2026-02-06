@@ -16,14 +16,7 @@ function formatPrice(price: number) {
   <div class="flex h-full flex-col bg-kiosk-background">
     <!-- Header -->
     <header class="flex items-center justify-between bg-white p-4 shadow-sm">
-<<<<<<< ours
       <button class="btn-kiosk-secondary" @click="router.push('/menu')">
-=======
-      <button
-        class="btn-kiosk-secondary"
-        @click="router.push('/menu')"
-      >
->>>>>>> theirs
         {{ t("common.back") }}
       </button>
       <h1 class="text-kiosk-xl font-bold">
@@ -34,23 +27,13 @@ function formatPrice(price: number) {
 
     <!-- Cart items -->
     <main class="flex-1 overflow-y-auto p-4">
-<<<<<<< ours
       <div v-if="cartStore.isEmpty" class="flex h-full items-center justify-center">
-=======
-      <div
-        v-if="cartStore.isEmpty"
-        class="flex h-full items-center justify-center"
-      >
->>>>>>> theirs
         <p class="text-kiosk-lg text-kiosk-muted">
           {{ t("cart.empty") }}
         </p>
       </div>
 
-      <div
-        v-else
-        class="space-y-4"
-      >
+      <div v-else class="space-y-4">
         <div
           v-for="item in cartStore.items"
           :key="item.id"
@@ -62,7 +45,7 @@ function formatPrice(price: number) {
               :src="item.imageUrl"
               :alt="item.name"
               class="h-full w-full rounded-lg object-cover"
-            >
+            />
           </div>
 
           <div class="flex-1">
@@ -102,14 +85,7 @@ function formatPrice(price: number) {
         <span class="text-kiosk-2xl font-bold">{{ formatPrice(cartStore.totalAmount) }}원</span>
       </div>
       <div class="flex gap-4">
-<<<<<<< ours
         <button class="btn-kiosk-secondary flex-1" @click="router.push('/menu')">
-=======
-        <button
-          class="btn-kiosk-secondary flex-1"
-          @click="router.push('/menu')"
-        >
->>>>>>> theirs
           {{ t("cart.continueShopping") }}
         </button>
         <button

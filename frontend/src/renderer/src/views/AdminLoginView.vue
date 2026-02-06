@@ -41,9 +41,7 @@ onMounted(() => {
   <div class="flex h-full flex-col bg-gray-100">
     <!-- Header -->
     <header class="flex items-center justify-between bg-gray-800 px-6 py-4 text-white">
-      <h1 class="text-xl font-bold">
-        관리자 로그인
-      </h1>
+      <h1 class="text-xl font-bold">관리자 로그인</h1>
       <button
         class="rounded-lg bg-gray-600 px-4 py-2 font-medium transition-colors hover:bg-gray-700"
         @click="goBack"
@@ -58,37 +56,18 @@ onMounted(() => {
         <!-- Logo -->
         <div class="mb-8 flex flex-col items-center">
           <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-800">
-<<<<<<< ours
             <svg class="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-=======
-            <svg
-              class="h-8 w-8 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
->>>>>>> theirs
               <path
                 d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"
               />
             </svg>
           </div>
-          <h2 class="text-2xl font-bold text-gray-800">
-            POSON Kiosk
-          </h2>
-          <p class="mt-1 text-sm text-gray-500">
-            관리자 계정으로 로그인하세요
-          </p>
+          <h2 class="text-2xl font-bold text-gray-800">POSON Kiosk</h2>
+          <p class="mt-1 text-sm text-gray-500">관리자 계정으로 로그인하세요</p>
         </div>
 
         <!-- Login Form -->
-<<<<<<< ours
         <form class="space-y-5" @submit.prevent="handleLogin">
-=======
-        <form
-          class="space-y-5"
-          @submit.prevent="handleLogin"
-        >
->>>>>>> theirs
           <!-- Username -->
           <div>
             <label class="mb-2 block text-sm font-medium text-gray-700">아이디</label>
@@ -98,7 +77,7 @@ onMounted(() => {
               autocomplete="username"
               class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               placeholder="관리자 아이디"
-            >
+            />
           </div>
 
           <!-- Password -->
@@ -111,7 +90,7 @@ onMounted(() => {
                 autocomplete="current-password"
                 class="w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 placeholder="비밀번호"
-              >
+              />
               <button
                 type="button"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -131,17 +110,7 @@ onMounted(() => {
                     d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
                   />
                 </svg>
-<<<<<<< ours
                 <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                <svg
-                  v-else
-                  class="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
->>>>>>> theirs
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -160,10 +129,7 @@ onMounted(() => {
           </div>
 
           <!-- Error Message -->
-          <div
-            v-if="authStore.error"
-            class="rounded-lg bg-red-50 p-3 text-sm text-red-600"
-          >
+          <div v-if="authStore.error" class="rounded-lg bg-red-50 p-3 text-sm text-red-600">
             {{ authStore.error }}
           </div>
 
@@ -173,20 +139,8 @@ onMounted(() => {
             :disabled="authStore.isLoading || !username || !password"
             class="w-full rounded-xl bg-blue-500 py-3.5 text-base font-bold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
-<<<<<<< ours
             <span v-if="authStore.isLoading" class="flex items-center justify-center gap-2">
               <svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-=======
-            <span
-              v-if="authStore.isLoading"
-              class="flex items-center justify-center gap-2"
-            >
-              <svg
-                class="h-5 w-5 animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
->>>>>>> theirs
                 <circle
                   class="opacity-25"
                   cx="12"

@@ -51,9 +51,7 @@ onMounted(() => {
       <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-slate-500">
-              전체 상품
-            </p>
+            <p class="text-sm font-medium text-slate-500">전체 상품</p>
             <p class="mt-2 text-3xl font-bold text-slate-800">
               <span
                 v-if="isLoading"
@@ -87,9 +85,7 @@ onMounted(() => {
       <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-slate-500">
-              카테고리
-            </p>
+            <p class="text-sm font-medium text-slate-500">카테고리</p>
             <p class="mt-2 text-3xl font-bold text-slate-800">
               <span
                 v-if="isLoading"
@@ -114,18 +110,14 @@ onMounted(() => {
             </svg>
           </div>
         </div>
-        <p class="mt-3 text-xs text-slate-500">
-          활성 카테고리
-        </p>
+        <p class="mt-3 text-xs text-slate-500">활성 카테고리</p>
       </div>
 
       <!-- Today Orders -->
       <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-slate-500">
-              오늘 주문
-            </p>
+            <p class="text-sm font-medium text-slate-500">오늘 주문</p>
             <p class="mt-2 text-3xl font-bold text-slate-800">
               <span
                 v-if="isLoading"
@@ -159,9 +151,7 @@ onMounted(() => {
       <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-slate-500">
-              오늘 매출
-            </p>
+            <p class="text-sm font-medium text-slate-500">오늘 매출</p>
             <p class="mt-2 text-3xl font-bold text-slate-800">
               <span
                 v-if="isLoading"
@@ -186,17 +176,13 @@ onMounted(() => {
             </svg>
           </div>
         </div>
-        <p class="mt-3 text-xs text-slate-500">
-          전일 대비 <span class="text-green-500">+8%</span>
-        </p>
+        <p class="mt-3 text-xs text-slate-500">전일 대비 <span class="text-green-500">+8%</span></p>
       </div>
     </div>
 
     <!-- Quick Actions -->
     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 class="mb-4 text-lg font-semibold text-slate-800">
-        빠른 작업
-      </h3>
+      <h3 class="mb-4 text-lg font-semibold text-slate-800">빠른 작업</h3>
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <RouterLink
           to="/admin/products"
@@ -296,9 +282,7 @@ onMounted(() => {
 
     <!-- Recent Activity -->
     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 class="mb-4 text-lg font-semibold text-slate-800">
-        최근 활동
-      </h3>
+      <h3 class="mb-4 text-lg font-semibold text-slate-800">최근 활동</h3>
       <div class="space-y-4">
         <div class="flex items-center gap-4 rounded-xl bg-slate-50 p-4">
           <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
@@ -317,12 +301,8 @@ onMounted(() => {
             </svg>
           </div>
           <div class="flex-1">
-            <p class="font-medium text-slate-800">
-              시스템 시작됨
-            </p>
-            <p class="text-sm text-slate-500">
-              관리자 콘솔에 로그인했습니다
-            </p>
+            <p class="font-medium text-slate-800">시스템 시작됨</p>
+            <p class="text-sm text-slate-500">관리자 콘솔에 로그인했습니다</p>
           </div>
           <span class="text-xs text-slate-400">방금 전</span>
         </div>

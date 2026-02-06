@@ -70,15 +70,7 @@ onUnmounted(() => {
     <!-- Header -->
     <header class="flex items-center justify-between p-4 pb-2">
       <div class="flex h-12 w-12 shrink-0 items-center justify-start text-red-500">
-<<<<<<< ours
         <svg class="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
-=======
-        <svg
-          class="h-10 w-10"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-        >
->>>>>>> theirs
           <path
             d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
           />
@@ -143,16 +135,7 @@ onUnmounted(() => {
         <div
           class="relative flex h-40 w-40 items-center justify-center rounded-full border-2 border-dashed border-red-500/30 bg-red-500/5"
         >
-<<<<<<< ours
           <svg class="h-20 w-20 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-          <svg
-            class="h-20 w-20 text-red-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
->>>>>>> theirs
             <path
               stroke-linecap="round"
               stroke-linejoin="round"

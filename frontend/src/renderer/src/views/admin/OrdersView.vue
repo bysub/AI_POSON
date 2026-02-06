@@ -10,44 +10,23 @@ const dateFilter = ref("today");
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-800">
-          주문 내역
-        </h2>
-        <p class="mt-1 text-sm text-slate-500">
-          키오스크 주문 내역을 확인합니다
-        </p>
+        <h2 class="text-xl font-bold text-slate-800">주문 내역</h2>
+        <p class="mt-1 text-sm text-slate-500">키오스크 주문 내역을 확인합니다</p>
       </div>
       <div class="flex gap-2">
         <select
           v-model="dateFilter"
           class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
         >
-          <option value="today">
-            오늘
-          </option>
-          <option value="week">
-            이번 주
-          </option>
-          <option value="month">
-            이번 달
-          </option>
-          <option value="all">
-            전체
-          </option>
+          <option value="today">오늘</option>
+          <option value="week">이번 주</option>
+          <option value="month">이번 달</option>
+          <option value="all">전체</option>
         </select>
         <button
           class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 font-medium text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md"
         >
-<<<<<<< ours
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-          <svg
-            class="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
->>>>>>> theirs
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -80,7 +59,7 @@ const dateFilter = ref("today");
         type="text"
         placeholder="주문번호로 검색..."
         class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-12 pr-4 text-sm transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-      >
+      />
     </div>
 
     <!-- Empty State -->
@@ -88,16 +67,7 @@ const dateFilter = ref("today");
       <div
         class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-100"
       >
-<<<<<<< ours
         <svg class="h-10 w-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-        <svg
-          class="h-10 w-10 text-slate-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
->>>>>>> theirs
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -106,12 +76,8 @@ const dateFilter = ref("today");
           />
         </svg>
       </div>
-      <h3 class="text-lg font-semibold text-slate-700">
-        주문 내역이 없습니다
-      </h3>
-      <p class="mt-2 text-sm text-slate-500">
-        키오스크에서 주문이 들어오면 여기에 표시됩니다
-      </p>
+      <h3 class="text-lg font-semibold text-slate-700">주문 내역이 없습니다</h3>
+      <p class="mt-2 text-sm text-slate-500">키오스크에서 주문이 들어오면 여기에 표시됩니다</p>
     </div>
   </div>
 </template>

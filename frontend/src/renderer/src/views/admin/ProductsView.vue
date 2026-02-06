@@ -140,13 +140,7 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-<<<<<<< ours
         <h2 class="text-xl font-bold text-slate-800">상품 관리</h2>
-=======
-        <h2 class="text-xl font-bold text-slate-800">
-          상품 관리
-        </h2>
->>>>>>> theirs
         <p class="mt-1 text-sm text-slate-500">
           총 {{ products.length }}개의 상품이 등록되어 있습니다
         </p>
@@ -155,16 +149,7 @@ onMounted(() => {
         class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 font-medium text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md"
         @click="openAddForm"
       >
-<<<<<<< ours
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-        <svg
-          class="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
->>>>>>> theirs
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -197,31 +182,21 @@ onMounted(() => {
           type="text"
           placeholder="상품명, 바코드로 검색..."
           class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-12 pr-4 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-        >
+        />
       </div>
     </div>
 
     <!-- Products Table -->
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <!-- Loading -->
-<<<<<<< ours
       <div v-if="isLoading" class="flex items-center justify-center py-12">
-=======
-      <div
-        v-if="isLoading"
-        class="flex items-center justify-center py-12"
-      >
->>>>>>> theirs
         <div
           class="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"
         />
       </div>
 
       <!-- Table -->
-      <table
-        v-else
-        class="w-full"
-      >
+      <table v-else class="w-full">
         <thead>
           <tr class="border-b border-slate-100 bg-slate-50">
             <th
@@ -325,16 +300,7 @@ onMounted(() => {
                   class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-indigo-600"
                   @click="openEditForm(product)"
                 >
-<<<<<<< ours
                   <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                  <svg
-                    class="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
->>>>>>> theirs
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -347,16 +313,7 @@ onMounted(() => {
                   class="rounded-lg p-2 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600"
                   @click="deleteProduct(product)"
                 >
-<<<<<<< ours
                   <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                  <svg
-                    class="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
->>>>>>> theirs
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -369,14 +326,7 @@ onMounted(() => {
             </td>
           </tr>
           <tr v-if="filteredProducts.length === 0">
-<<<<<<< ours
             <td colspan="6" class="px-6 py-12 text-center text-slate-400">
-=======
-            <td
-              colspan="6"
-              class="px-6 py-12 text-center text-slate-400"
-            >
->>>>>>> theirs
               <svg
                 class="mx-auto mb-3 h-12 w-12"
                 fill="none"
@@ -414,16 +364,7 @@ onMounted(() => {
                 class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                 @click="showForm = false"
               >
-<<<<<<< ours
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-=======
-                <svg
-                  class="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
->>>>>>> theirs
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -443,7 +384,7 @@ onMounted(() => {
                     type="text"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="상품 바코드"
-                  >
+                  />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">카테고리 *</label>
@@ -451,11 +392,7 @@ onMounted(() => {
                     v-model="productForm.categoryId"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   >
-                    <option
-                      v-for="cat in categories"
-                      :key="cat.id"
-                      :value="cat.id"
-                    >
+                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                       {{ cat.name }}
                     </option>
                   </select>
@@ -472,7 +409,7 @@ onMounted(() => {
                     type="text"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="상품명"
-                  >
+                  />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700"
@@ -483,7 +420,7 @@ onMounted(() => {
                     type="text"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="Product Name"
-                  >
+                  />
                 </div>
               </div>
 
@@ -495,7 +432,7 @@ onMounted(() => {
                     type="number"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="0"
-                  >
+                  />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">원가</label>
@@ -504,7 +441,7 @@ onMounted(() => {
                     type="number"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="0"
-                  >
+                  />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">재고</label>
@@ -513,7 +450,7 @@ onMounted(() => {
                     type="number"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="0"
-                  >
+                  />
                 </div>
               </div>
 
@@ -524,7 +461,7 @@ onMounted(() => {
                   type="text"
                   class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   placeholder="https://..."
-                >
+                />
               </div>
 
               <div>

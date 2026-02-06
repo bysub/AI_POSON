@@ -66,15 +66,7 @@ function handleLogoTap() {
         class="cursor-default rounded-full bg-white/95 p-4 shadow-2xl backdrop-blur-md transition-transform active:scale-95"
         @click="handleLogoTap"
       >
-<<<<<<< ours
         <svg class="h-12 w-12 text-primary" fill="currentColor" viewBox="0 0 24 24">
-=======
-        <svg
-          class="h-12 w-12 text-primary"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-        >
->>>>>>> theirs
           <path
             d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"
           />
@@ -106,15 +98,7 @@ function handleLogoTap() {
         />
         <!-- 버튼 콘텐츠 -->
         <div class="relative z-20 flex flex-col items-center gap-4">
-<<<<<<< ours
           <svg class="h-16 w-16 text-white" fill="currentColor" viewBox="0 0 24 24">
-=======
-          <svg
-            class="h-16 w-16 text-white"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
->>>>>>> theirs
             <path
               d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.21 0-.59-.34-1.09-.91-1.34z"
             />
@@ -164,11 +148,7 @@ function handleLogoTap() {
                 :alt="lang.code.toUpperCase()"
                 :src="flagImages[lang.code]"
                 class="h-full w-full rounded-full object-cover"
-<<<<<<< ours
               />
-=======
-              >
->>>>>>> theirs
             </div>
             <span
               :class="[
@@ -186,13 +166,7 @@ function handleLogoTap() {
     </footer>
 
     <!-- 버전 정보 (개발용) -->
-<<<<<<< ours
     <div class="absolute bottom-2 right-4 z-10 text-xs text-white/30">v1.0.0</div>
-=======
-    <div class="absolute bottom-2 right-4 z-10 text-xs text-white/30">
-      v1.0.0
-    </div>
->>>>>>> theirs
   </div>
 </template>
 
