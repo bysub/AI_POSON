@@ -1,0 +1,205 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(for:*)",
+      "Bash(do wc -l \"$f\")",
+      "Bash(done)",
+      "Bash(dir:*)",
+      "Bash(claude:*)",
+      "Bash(where:*)",
+      "Bash(npm --version:*)",
+      "Bash(node --version:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(set:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run build:*)",
+      "Bash(tail:*)",
+      "Bash(npm run dev:*)",
+      "Bash(taskkill:*)",
+      "Bash(cat:*)",
+      "Bash(timeout 10 ping:*)",
+      "Bash(exit 0)",
+      "Bash(curl:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(powershell:*)",
+      "Bash(if exist \"node_modules\\\\.vite\" rmdir /s /q \"node_modules\\\\.vite\")",
+      "Bash(npm uninstall:*)",
+      "WebSearch",
+      "Skill(skill-creator)",
+      "Bash(mkdir:*)",
+      "Bash(tree:*)",
+      "Bash(test:*)",
+      "Bash(npm run test:unit:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm run migrate:*)",
+      "Bash(do sed -i 's/^GO$//' \"$file\")",
+      "Bash(node src/db/seed.js:*)",
+      "Bash(xargs:*)",
+      "Bash(node:*)",
+      "Bash(echo:*)",
+      "Bash(ls:*)",
+      "Bash(bash:*)",
+      "Bash(command -v:*)",
+      "Bash(cygpath:*)",
+      "Bash(git restore:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix\\(config\\): gitignore에 임시파일 패턴 추가 및 CLAUDE.md 업데이트\n\n- tmpclaude-*-cwd 패턴 추가 \\(Claude Code 임시파일 무시\\)\n- CLAUDE.md 문서 내용 보완 \\(bcrypt, helmet, Swagger 등\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet sln add:*)",
+      "Bash(dotnet --version:*)",
+      "Bash(dotnet build:*)",
+      "Bash(Select-String \"error\")",
+      "Bash(Select-Object -First 10)",
+      "Bash(dotnet ef:*)",
+      "Bash(dotnet tool install:*)",
+      "Bash(dotnet add package:*)",
+      "Bash(dotnet run)",
+      "Bash(netstat:*)",
+      "Bash(netstat *)",
+      "Bash(sleep:*)",
+      "Bash(sleep *)",
+      "Bash(tail *)",
+      "Bash(cd *)",
+      "Bash(Get-Process *)",
+      "Bash(dotnet run:*)",
+      "Bash(ping:*)",
+      "Bash(Where-Object {$_MainWindowTitle -like \"*POSON*\"})",
+      "Bash(Stop-Process -Force -ErrorAction SilentlyContinue)",
+      "Bash(Start-Sleep -Seconds 2)",
+      "Bash(sqlcmd:*)",
+      "Bash(del C:workspacesAI_POSONinsert_addons.sql)",
+      "Bash(dotnet dev-certs:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(npx tsc:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(timeout:*)",
+      "mcp__automatalabs-playwright-server__browser_navigate",
+      "Bash(npx playwright install:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run test:*)",
+      "Bash(Remove-Item -Recurse -Force C:workspacesAI_POSONfrontendrelease -ErrorAction SilentlyContinue)",
+      "Bash(Set-Location C:workspacesAI_POSONfrontend)",
+      "Bash(npm run package:win:*)",
+      "Bash(SKIP_DB_TESTS=true npm test:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx ts-node -e \"\nconst sql = require\\(''mssql''\\);\nconst config = {\n  server: ''localhost'',\n  port: 1433,\n  database: ''POSON_DRCTS'',\n  user: ''sa'',\n  password: ''1qaz@WSX'',\n  options: { encrypt: false, trustServerCertificate: true }\n};\n\nasync function check\\(\\) {\n  const pool = await sql.connect\\(config\\);\n  const tables = await pool.request\\(\\).query\\(\\\\`\n    SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = ''BASE TABLE''\n  \\\\`\\);\n  console.log\\(''생성된 테이블:'', tables.recordset.map\\(t => t.TABLE_NAME\\).join\\('', ''\\)\\);\n  \n  const categories = await pool.request\\(\\).query\\(''SELECT * FROM Categories''\\);\n  console.log\\(''카테고리 수:'', categories.recordset.length\\);\n  \n  const products = await pool.request\\(\\).query\\(''SELECT * FROM Products''\\);\n  console.log\\(''상품 수:'', products.recordset.length\\);\n  \n  await pool.close\\(\\);\n}\n\ncheck\\(\\).catch\\(console.error\\);\n\")",
+      "Bash(npx ts-node:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3Njk3NTgxMjUsImV4cCI6MTc2OTgwMTMyNX0.oJ5AFOqDMnfoq5DUpSSunYVJ6i7Bv9rRpZesRSUpjMo\")",
+      "Bash(while read pid)",
+      "Bash(do taskkill /F /PID $pid)",
+      "mcp__playwright__playwright_navigate",
+      "mcp__playwright__playwright_screenshot",
+      "mcp__playwright__playwright_click",
+      "mcp__playwright__playwright_console_logs",
+      "mcp__playwright__playwright_close",
+      "Bash(git reset:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nPhase 0 POC: Backend services, tests, Electron setup\n\n- Backend: Redis, session, receipt, transaction services with tests\n- Backend: Cache, metrics utilities with 80%+ coverage\n- Frontend: Electron main/preload, IPC handlers\n- Frontend: Composables \\(useLoading, useModal, usePagination, useToast\\)\n- Frontend: Cart, menu store tests\n- E2E: BDD feature files \\(cart, member, payment\\)\n- Docs: Phase 0 POC report, feature design spec\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(npm run typecheck:*)",
+      "mcp__playwright__playwright_get_visible_html",
+      "Bash(npm run db:generate:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npx tsx:*)",
+      "Bash(ren:*)",
+      "Bash(pnpm dev)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwMjc2OTQ1LCJleHAiOjE3NzAyNzc4NDV9.YaCGji4cABgyS7lX1kEEcChDDMePjpL1VCkqQsSBOGU\")",
+      "mcp__playwright__playwright_fill",
+      "mcp__playwright__playwright_evaluate",
+      "mcp__playwright__playwright_get_visible_text",
+      "Bash(npx prettier:*)",
+      "Bash(npx eslint:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "context7",
+    "sequential-thinking",
+    "filesystem",
+    "automatalabs-playwright-server",
+    "DeepGraph Vue MCP",
+    "google-ads",
+    "fetch"
+  ],
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/cleanup-temp.cjs"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-tool-use.cjs dependency"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-tool-use.cjs eslint"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-tool-use.cjs prettier"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-tool-use.cjs git-add"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-tool-use.cjs"
+          }
+        ]
+      }
+    ]
+  },
+  "prefersReducedMotion": true
+}

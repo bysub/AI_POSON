@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Food-Focused Kiosk Welcome</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8E3524",
+                        "accent": "#C96231",
+                        "cream-bg": "#FDF9F3",
+                        "dark-overlay": "rgba(20, 10, 5, 0.6)",
+                    },
+                    fontFamily: {
+                        "display": ["Outfit", "sans-serif"]
+                    },
+                    borderRadius: { 
+                        "ios": "1.25rem",
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">:root {
+    --primary: #8E3524;
+    --accent: #C96231;
+    --cream-bg: #FDF9F3
+    }
+body {
+    background-color: var(--cream-bg);
+    -webkit-tap-highlight-color: transparent
+    }
+.bg-welcome-food {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAK_DnLiDPJ9O3HbLn9BFbtH3H_1FyL2FQ7FIgcTEpwek7GHCwi4BUG7rqmESRqvbG7FQqGLsz7LwNntE0smrDihvBtWuLn0iRHO2BAMBXyAFu-L0Ftl_KYxwX1tb04D9KPK_-2Y-yn_wY4ORpI_Jnw0Z2lO8VvOCRPWvxDPs8GH8brr3mueuVlf_h_MOCgz9sivv_l7WBd9TFkhJtlYPR7JksPczzGEI1jknYvAkA1EA8tBhMaWnalzX4K9WaELhA4CNUodMOEv1w);
+    background-size: cover;
+    background-position: center
+    }
+.hide-scrollbar::-webkit-scrollbar {
+    display: none
+    }
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none
+    }</style>
+<style>
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display text-white antialiased overflow-hidden">
+<div class="relative flex h-screen w-full flex-col items-center justify-between bg-welcome-food">
+<div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/80"></div>
+<header class="relative z-10 w-full pt-16 flex flex-col items-center gap-2">
+<div class="bg-white/95 p-4 rounded-full shadow-2xl backdrop-blur-md">
+<span class="material-symbols-outlined text-primary text-5xl">restaurant</span>
+</div>
+<h1 class="text-white text-4xl font-bold tracking-tight mt-6 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">Gourmet Hub</h1>
+<p class="text-cream-bg font-semibold tracking-widest text-sm uppercase opacity-90 drop-shadow-md">Select to Begin</p>
+</header>
+<main class="relative z-10 flex-1 w-full flex items-center justify-center px-8">
+<button class="group relative w-full aspect-square max-w-[300px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 duration-300">
+<div class="absolute inset-0 bg-primary/30 rounded-full scale-110 blur-xl"></div>
+<div class="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent rounded-full shadow-[0_0_50px_rgba(142,53,36,0.5)] border-[6px] border-white/30"></div>
+<div class="relative z-20 flex flex-col items-center gap-4">
+<span class="material-symbols-outlined text-7xl text-white">touch_app</span>
+<div class="text-center">
+<h2 class="text-4xl font-bold uppercase tracking-widest leading-none drop-shadow-lg">Touch</h2>
+<p class="text-xl font-medium opacity-95 mt-2 drop-shadow-md">To Order</p>
+</div>
+</div>
+</button>
+</main>
+<footer class="relative z-10 w-full pb-14 px-6">
+<div class="bg-black/40 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-6 flex flex-col gap-6 shadow-2xl">
+<div class="flex flex-col items-center gap-1">
+<p class="text-center text-xs font-bold uppercase tracking-[0.25em] text-cream-bg/80">Language Selection</p>
+<div class="h-1 w-12 bg-accent rounded-full"></div>
+</div>
+<div class="flex items-center justify-center gap-4 overflow-x-auto hide-scrollbar">
+<button class="flex flex-col items-center gap-2 min-w-[72px] active:scale-90 transition-transform">
+<div class="size-14 rounded-full border-2 border-white/40 overflow-hidden shadow-lg bg-white/10 p-0.5">
+<img alt="KR" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlVaOzpdhxagC1fIkss79UmPdixrHc98eq7uYG-rYTTAqi4djSAaSLmyx6w4x5SZnuheYvbrJk4Gg9jurVk5TZeirwJnrpOUn6D7rWa7-d4I6f-yGQETrYLKuBS1Xxau5pbeYNMCoViBh8xnaHN9dkp6iM0EvxmqcsTpzN5MgtiyWuchCl0NPLuyrv5SK0TTUqDvOTFHpEtP3t_9nn7JZNJSpAPpwvryTvsPIb6CMzRim9bLLfQ1o_--kD17uqjxuREu7WJu5qHdQ"/>
+</div>
+<span class="text-[13px] font-bold text-white/90">한국어</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[72px] active:scale-90 transition-transform">
+<div class="size-16 rounded-full border-4 border-accent overflow-hidden shadow-[0_0_15px_rgba(201,98,49,0.5)] bg-white/20 p-0.5 -mt-2">
+<img alt="EN" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYW5DO9iTuTeHmnSDvAD6SBnPJh_O2k4MXpMhDpO94goEjodJfFzsnqBisuW7qVQSDLorKVuB9tm2tT6XRMIvC3z1s4Ikh_x3IMz1ONYA8TI9qrgEM5MHboflzCQ5WhgMew465VSoa21jC_6KmT3Tvi7lxdJuyxxzZC-aLIVR0879vCkgP_vRg-j4wQK29cQbv_KFFzjmdTh2ndKOjgKVOmsMomo4YcLchaJRRZH9GBd5E48xlDyPGoyRM_qHvzvV38AlkZJ-Kp0I"/>
+</div>
+<span class="text-[14px] font-black text-accent">English</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[72px] active:scale-90 transition-transform">
+<div class="size-14 rounded-full border-2 border-white/40 overflow-hidden shadow-lg bg-white/10 p-0.5">
+<img alt="JP" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhPy8WJ8bgEXDa6bSRmjqFfBP_-4D1i2EOJfCvBL2r0h76C6OmdnA3xUe24E4HsovmK23W0Br2kvP-Mc50mELZ01_XVMaqfUnuloRSJoBYV-hpzI1OqTntUmzMt8UTalnvp2GUUKDvwi8io_caOd9h8Dm63nuP8JvCmiKkY8WKiyfLPMHeFFF2Ti48oN0axXdraaJQzcTuYQrEHy0WMaX8KVVlS-D9zejKWLHPknUc25KdpHJVt0c5T1e9H8LQs5laCGjt-pLgFNA"/>
+</div>
+<span class="text-[13px] font-bold text-white/90">日本語</span>
+</button>
+<button class="flex flex-col items-center gap-2 min-w-[72px] active:scale-90 transition-transform">
+<div class="size-14 rounded-full border-2 border-white/40 overflow-hidden shadow-lg bg-white/10 p-0.5">
+<img alt="ZH" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzQNanotutXZD_ciF6B2_HCzE0GElYolKVqJEqejXKgfNhvZ7P2eVbr1GOvLvRW5FtYLohcFxoJQ-O0bKTr9m0_EIF33gjqxLdUTS04mzOQKHcw66C8OJXd_78ySJYZv5Ht29-QrmkoWJumsqZGETbbvXNlHYmraOFIp7Dp5AoYkKKNzygbEHjLSJ8OsdG-09DYCTw7x1xHJULZrcnEBGqdGklwg5OU096NY6LVxOS4n_-DraJWGxKqnLS0J58M8H1qbWRDC14vtQ"/>
+</div>
+<span class="text-[13px] font-bold text-white/90">中文</span>
+</button>
+</div>
+</div>
+</footer>
+</div>
+
+</body></html>

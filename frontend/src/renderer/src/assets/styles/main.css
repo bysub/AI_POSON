@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #app {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: "Pretendard", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Disable text selection for kiosk */
+  * {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Allow text selection only in input fields */
+  input,
+  textarea {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+@layer components {
+  /* Kiosk-optimized button sizes */
+  .btn-kiosk {
+    @apply min-h-[3rem] min-w-[3rem] rounded-kiosk px-6 py-3 font-medium transition-colors duration-150;
+  }
+
+  .btn-kiosk-primary {
+    @apply btn-kiosk bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
+  }
+
+  .btn-kiosk-secondary {
+    @apply btn-kiosk border border-kiosk-border bg-kiosk-surface text-kiosk-text hover:bg-gray-50 active:bg-gray-100;
+  }
+
+  .btn-kiosk-danger {
+    @apply btn-kiosk bg-red-500 text-white hover:bg-red-600 active:bg-red-700;
+  }
+
+  /* Card component */
+  .card-kiosk {
+    @apply rounded-kiosk border border-kiosk-border bg-kiosk-surface shadow-sm;
+  }
+
+  /* Input field */
+  .input-kiosk {
+    @apply min-h-[3rem] w-full rounded-kiosk border border-kiosk-border bg-white px-4 py-3 text-kiosk-text placeholder-kiosk-muted transition-shadow focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500;
+  }
+}
+
+@layer utilities {
+  /* Touch-friendly tap area */
+  .touch-area {
+    @apply relative;
+  }
+
+  .touch-area::after {
+    content: "";
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    bottom: -8px;
+    left: -8px;
+  }
+
+  /* Grid layout for menu items */
+  .menu-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  /* Animation utilities */
+  .animate-press {
+    @apply transition-transform duration-75 active:scale-95;
+  }
+}

@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 카테고리
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(100)
+  nameEn    String?   @map("name_en") @db.VarChar(100)
+  nameJa    String?   @map("name_ja") @db.VarChar(100)
+  nameZh    String?   @map("name_zh") @db.VarChar(100)
+  imageUrl  String?   @map("image_url") @db.VarChar(500)
+  sortOrder Int       @default(0) @map("sort_order")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  products  Product[]
+
+  @@map("categories")
+}
+
+// 상품
+model Product {
+  id          Int             @id @default(autoincrement())
+  barcode     String          @unique @db.VarChar(50)
+  name        String          @db.VarChar(200)
+  nameEn      String?         @map("name_en") @db.VarChar(200)
+  nameJa      String?         @map("name_ja") @db.VarChar(200)
+  nameZh      String?         @map("name_zh") @db.VarChar(200)
+  description String?         @db.Text
+  sellPrice   Decimal         @map("sell_price") @db.Decimal(18, 2)
+  costPrice   Decimal?        @map("cost_price") @db.Decimal(18, 2)
+  stock       Int             @default(0)
+  imageUrl    String?         @map("image_url") @db.VarChar(500)
+  categoryId  Int             @map("category_id")
+  isActive    Boolean         @default(true) @map("is_active")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  category    Category        @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  options     ProductOption[]
+
+  @@index([barcode])
+  @@index([categoryId])
+  @@map("products")
+}
+
+// 상품 옵션
+model ProductOption {
+  id         Int      @id @default(autoincrement())
+  productId  Int      @map("product_id")
+  name       String   @db.VarChar(100)
+  price      Decimal  @db.Decimal(18, 2)
+  isRequired Boolean  @default(false) @map("is_required")
+  createdAt  DateTime @default(now()) @map("created_at")
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_options")
+}
+
+// 주문
+model Order {
+  id          String      @id @default(uuid())
+  orderNumber String      @unique @map("order_number") @db.VarChar(20)
+  kioskId     String?     @map("kiosk_id") @db.VarChar(50)
+  totalAmount Decimal     @map("total_amount") @db.Decimal(18, 2)
+  status      OrderStatus @default(PENDING)
+  memo        String?     @db.Text
+  createdAt   DateTime    @default(now()) @map("created_at")
+  completedAt DateTime?   @map("completed_at")
+  cancelledAt DateTime?   @map("cancelled_at")
+  items       OrderItem[]
+  payments    Payment[]
+
+  @@index([orderNumber])
+  @@index([createdAt])
+  @@index([status])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  COMPLETED
+  CANCELLED
+}
+
+// 주문 상품
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   String   @map("order_id")
+  productId Int      @map("product_id")
+  name      String   @db.VarChar(200)
+  price     Decimal  @db.Decimal(18, 2)
+  quantity  Int
+  options   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+// 결제
+model Payment {
+  id             String        @id @default(uuid())
+  orderId        String        @map("order_id")
+  paymentType    PaymentType   @map("payment_type")
+  amount         Decimal       @db.Decimal(18, 2)
+  status         PaymentStatus @default(PENDING)
+  vanCode        String?       @map("van_code") @db.VarChar(20)
+  approvalNumber String?       @map("approval_number") @db.VarChar(50)
+  transactionId  String?       @map("transaction_id") @db.VarChar(100)
+  errorCode      String?       @map("error_code") @db.VarChar(20)
+  errorMessage   String?       @map("error_message") @db.VarChar(500)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  order          Order         @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([transactionId])
+  @@map("payments")
+}
+
+enum PaymentType {
+  CARD
+  CASH
+  MIXED
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+// 회원
+model Member {
+  id        Int         @id @default(autoincrement())
+  code      String      @unique @db.VarChar(20)
+  name      String      @db.VarChar(100)
+  phone     String      @db.VarChar(20)
+  points    Int         @default(0)
+  grade     MemberGrade @default(NORMAL)
+  isActive  Boolean     @default(true) @map("is_active")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  @@index([phone])
+  @@map("members")
+}
+
+enum MemberGrade {
+  NORMAL
+  SILVER
+  GOLD
+  VIP
+}
+
+// 관리자
+model Admin {
+  id           String    @id @default(uuid())
+  username     String    @unique @db.VarChar(50)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  name         String    @db.VarChar(100)
+  role         AdminRole @default(STAFF)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([username])
+  @@map("admins")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+// 키오스크 설정
+model Kiosk {
+  id           String   @id @default(uuid())
+  kioskCode    String   @unique @map("kiosk_code") @db.VarChar(20)
+  name         String   @db.VarChar(100)
+  location     String?  @db.VarChar(200)
+  vanProvider  String?  @map("van_provider") @db.VarChar(20)
+  printerPort  String?  @map("printer_port") @db.VarChar(50)
+  scannerPort  String?  @map("scanner_port") @db.VarChar(50)
+  isActive     Boolean  @default(true) @map("is_active")
+  lastOnlineAt DateTime? @map("last_online_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("kiosks")
+}
+
+// 시스템 설정
+model SystemSetting {
+  key       String   @id @db.VarChar(100)
+  value     String   @db.Text
+  category  String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("system_settings")
+}

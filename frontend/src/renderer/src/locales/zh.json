@@ -1,0 +1,82 @@
+{
+  "common": {
+    "offlineMode": "离线模式 - 无法使用银行卡支付",
+    "loading": "加载中...",
+    "error": "发生错误",
+    "retry": "重试",
+    "cancel": "取消",
+    "confirm": "确认",
+    "back": "返回",
+    "next": "下一步",
+    "close": "关闭"
+  },
+  "welcome": {
+    "title": "欢迎光临",
+    "subtitle": "开始点餐",
+    "startOrder": "开始点餐",
+    "brandName": "POSON Kiosk",
+    "touch": "点击",
+    "toOrder": "开始点餐"
+  },
+  "language": {
+    "title": "请选择语言",
+    "korean": "한국어",
+    "english": "English",
+    "japanese": "日本語",
+    "chinese": "中文"
+  },
+  "menu": {
+    "title": "菜单",
+    "category": "分类",
+    "soldOut": "售罄",
+    "addToCart": "添加"
+  },
+  "cart": {
+    "title": "购物车",
+    "empty": "购物车是空的",
+    "total": "总计",
+    "checkout": "结账",
+    "continueShopping": "继续",
+    "orderSummary": "订单摘要",
+    "totalAmount": "总金额",
+    "items": "件",
+    "proceedToPayment": "去结账",
+    "added": "已添加"
+  },
+  "payment": {
+    "title": "支付",
+    "yourOrder": "您的订单",
+    "selectMethod": "请选择支付方式",
+    "paymentMethod": "支付方式",
+    "card": "银行卡",
+    "cardDesc": "信用卡、借记卡",
+    "cash": "现金",
+    "cashDesc": "投入现金",
+    "mobilePay": "移动支付",
+    "mobilePayDesc": "微信、支付宝",
+    "scanner": "扫码支付",
+    "scannerDesc": "积分、优惠券、二维码",
+    "processing": "正在处理支付...",
+    "insertCard": "请插入或轻触您的银行卡",
+    "enterCash": "请投入现金",
+    "change": "找零",
+    "failed": "支付失败",
+    "tryAgain": "请重试",
+    "subtotal": "小计",
+    "tax": "税费",
+    "payNow": "立即支付",
+    "secureCheckout": "安全结账 · 加密支付",
+    "offline": "离线"
+  },
+  "complete": {
+    "title": "订单完成",
+    "orderNumber": "订单号",
+    "yourOrderNumber": "您的订单号",
+    "thankYou": "感谢您的订购！",
+    "receiptGuide": "请从下方打印机取走收据。",
+    "printingReceipt": "打印中...",
+    "returnToHome": "返回首页",
+    "autoReset": "秒后自动重置",
+    "approvalNumber": "批准号"
+  }
+}

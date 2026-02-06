@@ -1,0 +1,82 @@
+{
+  "common": {
+    "offlineMode": "オフラインモード - カード決済はご利用いただけません",
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "retry": "再試行",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "back": "戻る",
+    "next": "次へ",
+    "close": "閉じる"
+  },
+  "welcome": {
+    "title": "ようこそ",
+    "subtitle": "注文を開始してください",
+    "startOrder": "注文開始",
+    "brandName": "POSON Kiosk",
+    "touch": "タッチ",
+    "toOrder": "ご注文へ"
+  },
+  "language": {
+    "title": "言語を選択してください",
+    "korean": "한국어",
+    "english": "English",
+    "japanese": "日本語",
+    "chinese": "中文"
+  },
+  "menu": {
+    "title": "メニュー",
+    "category": "カテゴリー",
+    "soldOut": "売り切れ",
+    "addToCart": "追加"
+  },
+  "cart": {
+    "title": "カート",
+    "empty": "カートは空です",
+    "total": "合計",
+    "checkout": "お支払い",
+    "continueShopping": "続ける",
+    "orderSummary": "注文内容",
+    "totalAmount": "合計金額",
+    "items": "点",
+    "proceedToPayment": "お支払いへ",
+    "added": "追加しました"
+  },
+  "payment": {
+    "title": "お支払い",
+    "yourOrder": "ご注文内容",
+    "selectMethod": "お支払い方法を選択してください",
+    "paymentMethod": "お支払い方法",
+    "card": "クレジットカード",
+    "cardDesc": "Visa, Mastercard, JCB",
+    "cash": "現金",
+    "cashDesc": "現金投入",
+    "mobilePay": "モバイル決済",
+    "mobilePayDesc": "Apple Pay, Google Pay",
+    "scanner": "スキャナー",
+    "scannerDesc": "ポイント、クーポン、QRコード",
+    "processing": "決済処理中...",
+    "insertCard": "カードを挿入またはタッチしてください",
+    "enterCash": "現金を投入してください",
+    "change": "お釣り",
+    "failed": "決済に失敗しました",
+    "tryAgain": "もう一度お試しください",
+    "subtotal": "小計",
+    "tax": "消費税",
+    "payNow": "支払う",
+    "secureCheckout": "安全な決済 · 暗号化された取引",
+    "offline": "オフライン"
+  },
+  "complete": {
+    "title": "注文完了",
+    "orderNumber": "注文番号",
+    "yourOrderNumber": "お客様の注文番号",
+    "thankYou": "ご注文ありがとうございます！",
+    "receiptGuide": "下のプリンターからレシートをお取りください。",
+    "printingReceipt": "印刷中...",
+    "returnToHome": "最初に戻る",
+    "autoReset": "秒後に自動的にリセットされます",
+    "approvalNumber": "承認番号"
+  }
+}

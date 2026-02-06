@@ -1,0 +1,82 @@
+{
+  "common": {
+    "offlineMode": "Offline Mode - Card payment is not available",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close"
+  },
+  "welcome": {
+    "title": "Welcome",
+    "subtitle": "Select to Begin",
+    "startOrder": "Start Order",
+    "brandName": "POSON Kiosk",
+    "touch": "Touch",
+    "toOrder": "To Order"
+  },
+  "language": {
+    "title": "Select Language",
+    "korean": "한국어",
+    "english": "English",
+    "japanese": "日本語",
+    "chinese": "中文"
+  },
+  "menu": {
+    "title": "Menu",
+    "category": "Category",
+    "soldOut": "Sold Out",
+    "addToCart": "Add"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "total": "Total",
+    "checkout": "Checkout",
+    "continueShopping": "Continue",
+    "orderSummary": "Order Summary",
+    "totalAmount": "Total Amount",
+    "items": "items",
+    "proceedToPayment": "Proceed to Payment",
+    "added": "Added"
+  },
+  "payment": {
+    "title": "Payment",
+    "yourOrder": "Your Order",
+    "selectMethod": "Select payment method",
+    "paymentMethod": "Payment Method",
+    "card": "Credit Card",
+    "cardDesc": "Visa, Mastercard, AMEX",
+    "cash": "Cash",
+    "cashDesc": "Insert cash",
+    "mobilePay": "Mobile Pay",
+    "mobilePayDesc": "Apple Pay, Google Pay",
+    "scanner": "Kiosk Scanner",
+    "scannerDesc": "Points, Coupons, QR Code",
+    "processing": "Processing payment...",
+    "insertCard": "Please insert or tap your card",
+    "enterCash": "Please insert cash",
+    "change": "Change",
+    "failed": "Payment failed",
+    "tryAgain": "Please try again",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "payNow": "Pay Now",
+    "secureCheckout": "Secure Checkout · Encrypted Payment",
+    "offline": "Offline"
+  },
+  "complete": {
+    "title": "Order Complete",
+    "orderNumber": "Order Number",
+    "yourOrderNumber": "Your Order Number",
+    "thankYou": "Thank you for your order!",
+    "receiptGuide": "Please take your receipt from the printer below.",
+    "printingReceipt": "Printing...",
+    "returnToHome": "Return to Home",
+    "autoReset": "This screen will automatically reset in {seconds} seconds",
+    "approvalNumber": "Approval Number"
+  }
+}

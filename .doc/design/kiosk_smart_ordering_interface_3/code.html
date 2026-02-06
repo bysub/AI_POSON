@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kiosk Checkout and Payment</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-red": "#E31837",
+                        "accent-yellow": "#FFC72C",
+                        "app-bg": "#FAF9F6",
+                        "warm-gray": "#4A433F",
+                        "cream-bg": "#FFFDF5",
+                    },
+                    fontFamily: {
+                        "display": ["Quicksand", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "3xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-app-bg text-warm-gray font-display;
+                height: 100dvh;
+                width: 100vw;
+            }
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col overflow-hidden bg-cream-bg">
+<header class="flex-none px-6 pt-8 pb-4 z-30">
+<div class="flex items-center justify-between max-w-md mx-auto w-full">
+<button class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm active:scale-95 transition-transform text-primary-red border border-orange-100">
+<span class="material-symbols-outlined font-bold text-3xl">arrow_back</span>
+</button>
+<h1 class="text-2xl font-extrabold tracking-tight text-warm-gray">Your Order</h1>
+<div class="w-14"></div> 
+</div>
+</header>
+<main class="flex-1 overflow-y-auto no-scrollbar px-6 pb-6">
+<div class="max-w-md mx-auto flex flex-col gap-6">
+<section class="bg-white rounded-3xl p-6 shadow-sm border border-orange-50">
+<div class="flex flex-col gap-5">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="size-16 rounded-2xl bg-orange-50 bg-cover bg-center shrink-0" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiQkUG1VvkJDa4CGfyk3nL3ZADRaycwIyBcVA-y9Zfbm7y3jmUBG8dq1YoB14bP6EQDiUHi9ec21UYLmXTPH9gGABoCDepyBTKLjb4Wq2q1hECjcn4sjfIU2M7fXWzFSvQNiohB_Q40wBAWq95DiwBQVYydyHEJk0FxO907FCLw5912kXerw4CHJyYSFVvJvzw0PYg9d5VBMMtuYnOg_9HrDN2xSlGbt35p2mSFN3oHkxWdtyA9MQkJwx9JT_JkHaGUooMyFZIlBk');"></div>
+<div>
+<h3 class="font-bold text-lg leading-tight">Double Truffle</h3>
+<p class="text-xs font-semibold text-orange-800/60 mt-1">+ Extra Bacon</p>
+<p class="text-xs font-semibold text-orange-800/60">+ No Onions</p>
+</div>
+</div>
+<span class="font-bold text-lg">$14.49</span>
+</div>
+<hr class="border-orange-50"/>
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="size-16 rounded-2xl bg-orange-50 bg-cover bg-center shrink-0" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDp837DKa8z5Kfh5jMcOKZxp3QtH2xicyfsEwISlHR0-srF23_ddhKlJMtpOXinVFssyZAQYkL3lK1MFApkYQKUqos4HztqzE2jCUh5duVuerBsGnzCF92HeUcwaSKfcCBxadNyrV1-5HvRbN_JaLfvuRCl0tQ0loZyNSNTnHZGNFfBMy1XpHXf8qcLq9B7G6KIOsIEmx1T2HFUTHj81q4VoLMSatRlOX-XzzhAr6mL07n3_DIcoUSqAsTZ4a0LCVVEYdKm5ktfNAA');"></div>
+<div>
+<h3 class="font-bold text-lg leading-tight">Spicy Chicken</h3>
+<p class="text-xs font-semibold text-orange-800/60 mt-1">+ Medium Fries</p>
+<p class="text-xs font-semibold text-orange-800/60">+ Coke Zero</p>
+</div>
+</div>
+<span class="font-bold text-lg">$11.50</span>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t-2 border-dashed border-orange-100 flex flex-col gap-3">
+<div class="flex justify-between items-center text-orange-800/70 font-bold">
+<span>Subtotal</span>
+<span>$25.99</span>
+</div>
+<div class="flex justify-between items-center text-orange-800/70 font-bold">
+<span>Tax (8%)</span>
+<span>$2.08</span>
+</div>
+<div class="flex justify-between items-center text-warm-gray font-black text-2xl mt-2">
+<span>Total</span>
+<span class="text-primary-red">$28.07</span>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-4">
+<h2 class="text-sm font-black text-warm-gray uppercase tracking-widest px-1">Payment Method</h2>
+<div class="grid grid-cols-1 gap-3">
+<button class="flex items-center gap-5 p-5 bg-white border-2 border-transparent active:border-primary-red hover:border-primary-red rounded-3xl transition-all shadow-sm">
+<div class="size-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined text-3xl font-bold">credit_card</span>
+</div>
+<div class="text-left">
+<span class="block font-bold text-lg">Credit Card</span>
+<span class="block text-xs font-semibold text-orange-800/50">Visa, Mastercard, AMEX</span>
+</div>
+<span class="material-symbols-outlined ml-auto text-orange-200">chevron_right</span>
+</button>
+<button class="flex items-center gap-5 p-5 bg-white border-2 border-transparent active:border-primary-red hover:border-primary-red rounded-3xl transition-all shadow-sm">
+<div class="size-14 rounded-2xl bg-black flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl font-bold">contactless</span>
+</div>
+<div class="text-left">
+<span class="block font-bold text-lg">Mobile Pay</span>
+<span class="block text-xs font-semibold text-orange-800/50">Apple Pay, Google Pay</span>
+</div>
+<span class="material-symbols-outlined ml-auto text-orange-200">chevron_right</span>
+</button>
+<button class="flex items-center gap-5 p-5 bg-white border-2 border-transparent active:border-primary-red hover:border-primary-red rounded-3xl transition-all shadow-sm">
+<div class="size-14 rounded-2xl bg-accent-yellow flex items-center justify-center text-warm-gray">
+<span class="material-symbols-outlined text-3xl font-bold">qr_code_scanner</span>
+</div>
+<div class="text-left">
+<span class="block font-bold text-lg">Kiosk Scanner</span>
+<span class="block text-xs font-semibold text-orange-800/50">Points, Coupons, QR Code</span>
+</div>
+<span class="material-symbols-outlined ml-auto text-orange-200">chevron_right</span>
+</button>
+</div>
+</section>
+</div>
+</main>
+<footer class="flex-none bg-white/80 backdrop-blur-md px-6 pt-6 pb-10 border-t border-orange-50 z-30">
+<div class="max-w-md mx-auto w-full">
+<button class="w-full h-20 bg-primary-red rounded-3xl flex items-center justify-center gap-4 shadow-2xl shadow-red-500/30 active:scale-[0.98] transition-all hover:bg-red-700">
+<span class="text-2xl font-black text-white uppercase tracking-tight">Pay Now</span>
+<span class="material-symbols-outlined text-white text-3xl font-bold">payment</span>
+</button>
+<p class="text-center mt-4 text-[10px] font-bold text-orange-800/40 uppercase tracking-[0.2em]">Secure Checkout • Encrypted Payment</p>
+</div>
+</footer>
+
+</body></html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Menu Item Customization Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-red": "#E31837",
+                        "accent-yellow": "#FFC72C",
+                        "app-bg": "#FAF9F6",
+                        "warm-gray": "#4A433F",
+                    },
+                    fontFamily: {
+                        "display": ["Quicksand", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-app-bg text-warm-gray font-display;
+                height: 100dvh;
+                width: 100vw;
+            }
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col overflow-hidden relative">
+<header class="flex-none bg-app-bg px-5 pt-6 pb-4 border-b border-orange-50 z-30">
+<div class="flex items-center justify-between max-w-[1400px] mx-auto w-full">
+<button class="flex size-12 shrink-0 items-center justify-center rounded-full bg-white shadow-md active:scale-95 transition-transform text-primary-red">
+<span class="material-symbols-outlined font-bold">arrow_back</span>
+</button>
+<h1 class="text-2xl font-bold tracking-tight text-warm-gray">Delicious Burgers</h1>
+<button class="flex items-center justify-center px-6 h-12 rounded-full bg-white shadow-sm border border-orange-100 text-primary-red font-bold text-sm active:scale-95">
+                Help
+            </button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<nav class="w-24 flex-none flex flex-col items-center gap-4 py-4 overflow-y-auto no-scrollbar bg-white border-r border-orange-100 z-20">
+<button class="flex flex-col items-center gap-2 p-3 w-20 rounded-2xl bg-accent-yellow shadow-lg shadow-yellow-200 transition-all">
+<div class="size-12 flex items-center justify-center rounded-full bg-white/40 text-warm-gray">
+<span class="material-symbols-outlined text-3xl font-bold">lunch_dining</span>
+</div>
+<span class="text-[10px] font-bold text-warm-gray uppercase tracking-tighter">Burgers</span>
+</button>
+<button class="group flex flex-col items-center gap-2 p-3 w-20 rounded-2xl hover:bg-orange-50 transition-all text-orange-800/60">
+<div class="size-12 flex items-center justify-center rounded-full bg-orange-50 group-hover:bg-orange-100 transition-colors">
+<span class="material-symbols-outlined text-3xl">star</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Popular</span>
+</button>
+<button class="group flex flex-col items-center gap-2 p-3 w-20 rounded-2xl hover:bg-orange-50 transition-all text-orange-800/60">
+<div class="size-12 flex items-center justify-center rounded-full bg-orange-50 group-hover:bg-orange-100 transition-colors">
+<span class="material-symbols-outlined text-3xl">nutrition</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Sides</span>
+</button>
+<button class="group flex flex-col items-center gap-2 p-3 w-20 rounded-2xl hover:bg-orange-50 transition-all text-orange-800/60">
+<div class="size-12 flex items-center justify-center rounded-full bg-orange-50 group-hover:bg-orange-100 transition-colors">
+<span class="material-symbols-outlined text-3xl">local_bar</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Drinks</span>
+</button>
+<button class="group flex flex-col items-center gap-2 p-3 w-20 rounded-2xl hover:bg-orange-50 transition-all text-orange-800/60">
+<div class="size-12 flex items-center justify-center rounded-full bg-orange-50 group-hover:bg-orange-100 transition-colors">
+<span class="material-symbols-outlined text-3xl">icecream</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Desserts</span>
+</button>
+</nav>
+<main class="flex-1 overflow-y-auto no-scrollbar p-4 bg-app-bg pb-24">
+<div class="max-w-[1400px] mx-auto">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+<article class="flex flex-col bg-white rounded-3xl shadow-sm border border-orange-100 overflow-hidden group hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square overflow-hidden bg-orange-50">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiQkUG1VvkJDa4CGfyk3nL3ZADRaycwIyBcVA-y9Zfbm7y3jmUBG8dq1YoB14bP6EQDiUHi9ec21UYLmXTPH9gGABoCDepyBTKLjb4Wq2q1hECjcn4sjfIU2M7fXWzFSvQNiohB_Q40wBAWq95DiwBQVYydyHEJk0FxO907FCLw5912kXerw4CHJyYSFVvJvzw0PYg9d5VBMMtuYnOg_9HrDN2xSlGbt35p2mSFN3oHkxWdtyA9MQkJwx9JT_JkHaGUooMyFZIlBk');"></div>
+<div class="absolute top-2 right-2 bg-accent-yellow px-2 py-0.5 rounded-full shadow-sm">
+<span class="text-[10px] font-bold text-warm-gray">650 kcal</span>
+</div>
+</div>
+<div class="p-4 flex flex-col grow">
+<h3 class="text-base font-bold text-warm-gray leading-tight mb-1 line-clamp-1">Double Truffle</h3>
+<span class="text-lg font-black text-primary-red mb-3">$12.99</span>
+<button class="w-full py-3 flex items-center justify-center gap-1 rounded-xl bg-primary-red text-white active:scale-95 transition-all shadow-md mt-auto">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+<span class="text-xs font-bold">Add</span>
+</button>
+</div>
+</article>
+<article class="flex flex-col bg-white rounded-3xl shadow-sm border border-orange-100 overflow-hidden group hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square overflow-hidden bg-orange-50">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDp837DKa8z5Kfh5jMcOKZxp3QtH2xicyfsEwISlHR0-srF23_ddhKlJMtpOXinVFssyZAQYkL3lK1MFApkYQKUqos4HztqzE2jCUh5duVuerBsGnzCF92HeUcwaSKfcCBxadNyrV1-5HvRbN_JaLfvuRCl0tQ0loZyNSNTnHZGNFfBMy1XpHXf8qcLq9B7G6KIOsIEmx1T2HFUTHj81q4VoLMSatRlOX-XzzhAr6mL07n3_DIcoUSqAsTZ4a0LCVVEYdKm5ktfNAA');"></div>
+<div class="absolute top-2 left-2 bg-primary-red text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm">Hot</div>
+</div>
+<div class="p-4 flex flex-col grow">
+<h3 class="text-base font-bold text-warm-gray leading-tight mb-1 line-clamp-1">Spicy Chicken</h3>
+<span class="text-lg font-black text-primary-red mb-3">$9.50</span>
+<button class="w-full py-3 flex items-center justify-center gap-1 rounded-xl bg-primary-red text-white active:scale-95 transition-all shadow-md mt-auto">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+<span class="text-xs font-bold">Add</span>
+</button>
+</div>
+</article>
+<article class="flex flex-col bg-white rounded-3xl shadow-sm border border-orange-100 overflow-hidden group hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square overflow-hidden bg-orange-50">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAqibwhMHkrghxetcE3T8UD3XuAbq41mqb6qJQp7DNwCCkus5uQ-ZOMF7XY_cMJiR2272WjwhWmv0yTXtrQIfcgH-7XmasGTIJH46Q6Y41AERu-Hs6NFcCtfb0HX9tHZ-rmpcJvxpR7qv2ye4O4CdxOkq0Ywr91mbVJ4SdRu6_QzytY6zCTIHnutmzgDPO9myn93yy0_ZWg8r1FJZ6WXLElX6KhslxwbEajKlHRzZInuC99HjxscU5PLdWW2JnhAqpOL2xFJqqN1tY');"></div>
+<div class="absolute top-2 left-2 bg-accent-yellow text-warm-gray px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm">New</div>
+</div>
+<div class="p-4 flex flex-col grow">
+<h3 class="text-base font-bold text-warm-gray leading-tight mb-1 line-clamp-1">Classic Smash</h3>
+<span class="text-lg font-black text-primary-red mb-3">$8.99</span>
+<button class="w-full py-3 flex items-center justify-center gap-1 rounded-xl bg-primary-red text-white active:scale-95 transition-all shadow-md mt-auto">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+<span class="text-xs font-bold">Add</span>
+</button>
+</div>
+</article>
+<article class="flex flex-col bg-white rounded-3xl shadow-sm border border-orange-100 overflow-hidden group hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square overflow-hidden bg-orange-50">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCncTvPop4sBgnVUAziUeDZvuvNj52ipPJs0lqukh_qsY8xdRVbrmVY9iSYON9qtvYIPgcCHSP0LSTezgJpF1mx9DG_UkjHNdFTrmaXVE1FDFsBn7Oa0qnVe7sWIR5FqYSoYnEWJgQ-KQ-C7-1_zBT-XM4QA_NMP-P7xS4zoP9d8_OAFjBrwtDj08j90tHRo3IoXkAij4nYmTWPqCua8IwFxcTtGtPwxvp-VVmQBp3RtCPS0emFpL3XISUmjnUHxO1VrEuf-H0volo');"></div>
+</div>
+<div class="p-4 flex flex-col grow">
+<h3 class="text-base font-bold text-warm-gray leading-tight mb-1 line-clamp-1">BBQ Bacon King</h3>
+<span class="text-lg font-black text-primary-red mb-3">$13.50</span>
+<button class="w-full py-3 flex items-center justify-center gap-1 rounded-xl bg-primary-red text-white active:scale-95 transition-all shadow-md mt-auto">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+<span class="text-xs font-bold">Add</span>
+</button>
+</div>
+</article>
+</div>
+<div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+<button class="w-full flex items-center justify-center gap-2 bg-white shadow-md border-2 border-accent-yellow rounded-2xl py-4 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-warm-gray font-bold">accessibility_new</span>
+<span class="text-sm font-bold text-warm-gray uppercase tracking-widest">Easy Mode</span>
+</button>
+<button class="size-16 flex flex-none items-center justify-center bg-white shadow-md border-2 border-accent-yellow rounded-2xl active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-warm-gray text-3xl font-bold">mic</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+<footer class="flex-none bg-white border-t border-orange-100 px-5 pt-4 pb-8 shadow-[0_-10px_30px_rgba(227,24,55,0.08)] z-30">
+<div class="flex items-center gap-4 max-w-[1400px] mx-auto w-full">
+<div class="flex flex-col shrink-0 min-w-[100px]">
+<span class="text-[10px] font-bold text-orange-800/60 uppercase tracking-widest">Total</span>
+<span class="text-2xl font-black text-warm-gray leading-none">$22.49</span>
+</div>
+<button class="flex-1 h-16 bg-primary-red rounded-2xl flex items-center justify-between px-8 shadow-xl shadow-red-500/20 active:scale-[0.98] transition-all hover:bg-red-700">
+<span class="text-xl font-extrabold text-white">Checkout</span>
+<div class="flex items-center gap-3">
+<span class="bg-white/20 px-4 py-1.5 rounded-full text-xs font-bold text-white uppercase">2 Items</span>
+<span class="material-symbols-outlined text-white font-bold">arrow_forward</span>
+</div>
+</button>
+</div>
+</footer>
+<div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
+<div class="absolute inset-0 bg-warm-gray/60 backdrop-blur-sm"></div>
+<div class="relative w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90dvh] overflow-hidden">
+<div class="p-6 border-b border-orange-50">
+<div class="flex items-start justify-between gap-4 mb-2">
+<div>
+<h2 class="text-2xl font-extrabold text-warm-gray">Double Truffle</h2>
+<p class="text-sm font-medium text-orange-800/60">Customize your burger</p>
+</div>
+<button class="size-10 flex items-center justify-center rounded-full bg-orange-50 text-warm-gray active:scale-90 transition-transform">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 no-scrollbar">
+<div class="flex items-center gap-2 mb-6">
+<div class="h-6 w-1 bg-accent-yellow rounded-full"></div>
+<h3 class="text-lg font-bold text-warm-gray uppercase tracking-wider text-sm">Add-ons</h3>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
+<div class="flex flex-col">
+<span class="font-bold text-warm-gray">Extra Cheese</span>
+<span class="text-sm font-bold text-primary-red">+$1.50</span>
+</div>
+<div class="flex items-center gap-4 bg-white rounded-xl p-1 shadow-sm border border-orange-100">
+<button class="size-10 flex items-center justify-center rounded-lg bg-orange-50 text-warm-gray hover:bg-orange-100 active:scale-90 transition-all">
+<span class="material-symbols-outlined font-bold">remove</span>
+</button>
+<span class="w-6 text-center font-black text-lg">1</span>
+<button class="size-10 flex items-center justify-center rounded-lg bg-accent-yellow text-warm-gray shadow-md active:scale-90 transition-all">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
+<div class="flex flex-col">
+<span class="font-bold text-warm-gray">Crispy Bacon</span>
+<span class="text-sm font-bold text-primary-red">+$2.25</span>
+</div>
+<div class="flex items-center gap-4 bg-white rounded-xl p-1 shadow-sm border border-orange-100">
+<button class="size-10 flex items-center justify-center rounded-lg bg-orange-50 text-warm-gray hover:bg-orange-100 active:scale-90 transition-all">
+<span class="material-symbols-outlined font-bold">remove</span>
+</button>
+<span class="w-6 text-center font-black text-lg">0</span>
+<button class="size-10 flex items-center justify-center rounded-lg bg-accent-yellow text-warm-gray shadow-md active:scale-90 transition-all">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
+<div class="flex flex-col">
+<span class="font-bold text-warm-gray">Double Patty</span>
+<span class="text-sm font-bold text-primary-red">+$4.50</span>
+</div>
+<div class="flex items-center gap-4 bg-white rounded-xl p-1 shadow-sm border border-orange-100">
+<button class="size-10 flex items-center justify-center rounded-lg bg-orange-50 text-warm-gray hover:bg-orange-100 active:scale-90 transition-all">
+<span class="material-symbols-outlined font-bold">remove</span>
+</button>
+<span class="w-6 text-center font-black text-lg">0</span>
+<button class="size-10 flex items-center justify-center rounded-lg bg-accent-yellow text-warm-gray shadow-md active:scale-90 transition-all">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-orange-50/50 rounded-2xl border border-orange-100">
+<div class="flex flex-col">
+<span class="font-bold text-warm-gray">Caramelized Onions</span>
+<span class="text-sm font-bold text-primary-red">+$0.99</span>
+</div>
+<div class="flex items-center gap-4 bg-white rounded-xl p-1 shadow-sm border border-orange-100">
+<button class="size-10 flex items-center justify-center rounded-lg bg-orange-50 text-warm-gray hover:bg-orange-100 active:scale-90 transition-all">
+<span class="material-symbols-outlined font-bold">remove</span>
+</button>
+<span class="w-6 text-center font-black text-lg">2</span>
+<button class="size-10 flex items-center justify-center rounded-lg bg-accent-yellow text-warm-gray shadow-md active:scale-90 transition-all">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 bg-white border-t border-orange-50">
+<button class="w-full h-16 bg-primary-red text-white rounded-2xl flex items-center justify-between px-8 shadow-xl shadow-red-500/20 active:scale-[0.98] transition-all hover:bg-red-700">
+<span class="text-lg font-extrabold uppercase tracking-tight">Confirm Add</span>
+<span class="text-xl font-black">$15.48</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>
