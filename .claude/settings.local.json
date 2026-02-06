@@ -126,7 +126,8 @@
       "Bash(npx prettier:*)",
       "Bash(npx eslint:*)",
       "Bash(git commit:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
