@@ -1,10 +1,17 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useLocaleStore, type SupportedLocale } from "../stores/locale";
+import { useCartStore } from "../stores/cart";
 
 const router = useRouter();
+const cartStore = useCartStore();
+
+// 웰컴 페이지 진입 시 장바구니 초기화
+onMounted(() => {
+  cartStore.clear();
+});
 const { locale, t } = useI18n();
 const localeStore = useLocaleStore();
 

@@ -9,15 +9,55 @@ const router = Router();
 // 캐시 TTL (5분)
 const CACHE_TTL = 300;
 
+// 매입상품 조회 (거래처별, 매입가/판매가 포함)
+router.get("/purchase", authenticate, async (req, res) => {
+  const { supplierId, search, taxType } = req.query;
+
+  const where: Record<string, unknown> = { isActive: true };
+
+  if (supplierId) {
+    where.supplierId = parseInt(supplierId as string, 10);
+  }
+
+  if (taxType) {
+    where.taxType = taxType as string;
+  }
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search as string, mode: "insensitive" } },
+      { barcode: { contains: search as string } },
+    ];
+  }
+
+  const products = await prisma.product.findMany({
+    where,
+    include: {
+      category: { select: { id: true, name: true } },
+      supplier: { select: { id: true, code: true, name: true, type: true } },
+    },
+    orderBy: { name: "asc" },
+  });
+
+  res.json({
+    success: true,
+    data: products,
+  });
+});
+
 // Get all products (검색어 없을 때만 캐싱)
+// admin=true 파라미터가 있으면 모든 상품 조회 (관리자용)
 router.get("/", async (req, res) => {
-  const { categoryId, search } = req.query;
+  const { categoryId, search, admin } = req.query;
+  const isAdminMode = admin === "true";
 
   // 검색어가 있으면 캐싱하지 않음
   if (search) {
     const products = await prisma.product.findMany({
       where: {
         isActive: true,
+        // 키오스크용: 판매중 상품만, 관리자용: 모든 상품
+        ...(!isAdminMode && { status: "SELLING" }),
         ...(categoryId && { categoryId: parseInt(categoryId as string) }),
         OR: [
           { name: { contains: search as string, mode: "insensitive" } },
@@ -37,7 +77,27 @@ router.get("/", async (req, res) => {
     });
   }
 
-  // 카테고리별 캐싱
+  // 관리자 모드면 캐싱하지 않음 (모든 상태 상품 조회)
+  if (isAdminMode) {
+    const products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        ...(categoryId && { categoryId: parseInt(categoryId as string) }),
+      },
+      include: {
+        category: { select: { id: true, name: true } },
+        options: true,
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return res.json({
+      success: true,
+      data: products,
+    });
+  }
+
+  // 카테고리별 캐싱 (키오스크용 - 판매중 상품만)
   const cacheKey = categoryId
     ? CACHE_KEYS.PRODUCTS_BY_CATEGORY(parseInt(categoryId as string))
     : CACHE_KEYS.PRODUCTS;
@@ -48,6 +108,7 @@ router.get("/", async (req, res) => {
       return prisma.product.findMany({
         where: {
           isActive: true,
+          status: "SELLING", // 키오스크용: 판매중 상품만
           ...(categoryId && { categoryId: parseInt(categoryId as string) }),
         },
         include: {
@@ -143,7 +204,7 @@ router.post(
       description,
       sellPrice,
       costPrice,
-      stock,
+      status,
       categoryId,
       imageUrl,
       options,
@@ -182,8 +243,10 @@ router.post(
         description,
         sellPrice,
         costPrice: costPrice ?? 0,
-        stock: stock ?? 0,
+        taxType: req.body.taxType ?? "TAXABLE",
+        status: status ?? "SELLING",
         categoryId,
+        supplierId: req.body.supplierId ?? null,
         imageUrl,
         isActive: true,
         options: options?.length
@@ -238,7 +301,7 @@ router.patch(
       description,
       sellPrice,
       costPrice,
-      stock,
+      status,
       categoryId,
       imageUrl,
       isActive,
@@ -271,7 +334,9 @@ router.patch(
         ...(description !== undefined && { description }),
         ...(sellPrice !== undefined && { sellPrice }),
         ...(costPrice !== undefined && { costPrice }),
-        ...(stock !== undefined && { stock }),
+        ...(req.body.taxType !== undefined && { taxType: req.body.taxType }),
+        ...(req.body.supplierId !== undefined && { supplierId: req.body.supplierId || null }),
+        ...(status !== undefined && { status }),
         ...(categoryId !== undefined && { categoryId }),
         ...(imageUrl !== undefined && { imageUrl }),
         ...(isActive !== undefined && { isActive }),
@@ -444,11 +509,11 @@ router.delete(
   },
 );
 
-// ========== 재고 관리 API ==========
+// ========== 상품 상태 변경 API ==========
 
-// Update stock
+// Update product status (빠른 상태 변경)
 router.patch(
-  "/:id/stock",
+  "/:id/status",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER", "STAFF"),
   async (req, res, next) => {
@@ -458,11 +523,17 @@ router.patch(
       return next(new AppError(400, "Invalid product ID", "INVALID_ID"));
     }
 
-    const { stock, adjustment } = req.body;
+    const { status } = req.body;
 
-    // stock: 절대값 설정, adjustment: 상대값 조정
-    if (stock === undefined && adjustment === undefined) {
-      return next(new AppError(400, "stock 또는 adjustment가 필요합니다", "MISSING_FIELDS"));
+    const validStatuses = ["SELLING", "SOLD_OUT", "PENDING", "HIDDEN"];
+    if (!status || !validStatuses.includes(status)) {
+      return next(
+        new AppError(
+          400,
+          "유효하지 않은 상태입니다 (SELLING, SOLD_OUT, PENDING, HIDDEN)",
+          "INVALID_STATUS",
+        ),
+      );
     }
 
     const product = await prisma.product.findUnique({ where: { id } });
@@ -470,21 +541,10 @@ router.patch(
       return next(new AppError(404, "Product not found", "PRODUCT_NOT_FOUND"));
     }
 
-    let newStock: number;
-    if (stock !== undefined) {
-      newStock = stock;
-    } else {
-      newStock = product.stock + adjustment;
-    }
-
-    if (newStock < 0) {
-      return next(new AppError(400, "재고는 0 미만이 될 수 없습니다", "INVALID_STOCK"));
-    }
-
     const updated = await prisma.product.update({
       where: { id },
-      data: { stock: newStock },
-      select: { id: true, name: true, stock: true },
+      data: { status },
+      select: { id: true, name: true, status: true },
     });
 
     // 캐시 무효화

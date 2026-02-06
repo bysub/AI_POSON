@@ -46,6 +46,18 @@ function getOptionsString(options?: Record<string, unknown>): string {
 }
 
 /**
+ * 이미지 URL 변환 (/uploads/... -> 전체 URL)
+ */
+function getImageSrc(imageUrl: string | undefined): string {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("/uploads/")) {
+    const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+    return `${baseUrl}${imageUrl}`;
+  }
+  return imageUrl;
+}
+
+/**
  * 결제 수단 선택
  */
 function selectPaymentMethod(method: PaymentMethod): void {
@@ -113,8 +125,22 @@ function goBack(): void {
 /**
  * 카드 결제 성공
  */
-function handleCardSuccess(transactionId: string, approvalNumber: string): void {
+async function handleCardSuccess(transactionId: string, approvalNumber: string): Promise<void> {
   console.log("Card payment success:", { transactionId, approvalNumber });
+
+  // 주문 상태를 PAID로 업데이트
+  if (currentOrder.value?.id) {
+    try {
+      const { apiClient } = await import("@/services/api/client");
+      await apiClient.patch(`/api/v1/orders/${currentOrder.value.id}/status`, {
+        status: "PAID",
+      });
+      console.log("Order status updated to PAID");
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+    }
+  }
+
   const orderNumber = currentOrder.value?.orderNumber ?? "";
   cartStore.clear();
   router.push({
@@ -139,8 +165,22 @@ function handleCardFail(errorCode: string, errorMessage: string): void {
 /**
  * 현금 결제 성공
  */
-function handleCashSuccess(receivedAmount: number, changeAmount: number): void {
+async function handleCashSuccess(receivedAmount: number, changeAmount: number): Promise<void> {
   console.log("Cash payment success:", { receivedAmount, changeAmount });
+
+  // 주문 상태를 PAID로 업데이트
+  if (currentOrder.value?.id) {
+    try {
+      const { apiClient } = await import("@/services/api/client");
+      await apiClient.patch(`/api/v1/orders/${currentOrder.value.id}/status`, {
+        status: "PAID",
+      });
+      console.log("Order status updated to PAID");
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+    }
+  }
+
   const orderNumber = currentOrder.value?.orderNumber ?? "";
   cartStore.clear();
   router.push({
@@ -203,12 +243,15 @@ onMounted(() => {
               >
                 <div class="flex gap-3">
                   <!-- Item Image -->
-                  <div
-                    class="h-14 w-14 flex-shrink-0 rounded-xl bg-orange-50 bg-cover bg-center"
-                    :style="item.imageUrl ? `background-image: url('${item.imageUrl}')` : ''"
-                  >
+                  <div class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-orange-50">
+                    <img
+                      v-if="item.imageUrl"
+                      :src="getImageSrc(item.imageUrl)"
+                      :alt="item.name"
+                      class="h-full w-full object-cover"
+                    />
                     <div
-                      v-if="!item.imageUrl"
+                      v-else
                       class="flex h-full w-full items-center justify-center text-xl text-orange-300"
                     >
                       {{ item.name.charAt(0) }}

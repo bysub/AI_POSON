@@ -12,6 +12,8 @@ const editingCategory = ref<Category | null>(null);
 const categoryForm = ref({
   name: "",
   nameEn: "",
+  nameJa: "",
+  nameZh: "",
   sortOrder: 0,
   imageUrl: "",
   iconType: "preset" as "preset" | "image",
@@ -84,6 +86,8 @@ function openAddForm(): void {
   categoryForm.value = {
     name: "",
     nameEn: "",
+    nameJa: "",
+    nameZh: "",
     sortOrder: categories.value.length + 1,
     imageUrl: "",
     iconType: "preset",
@@ -157,6 +161,8 @@ function openEditForm(category: Category): void {
   categoryForm.value = {
     name: category.name,
     nameEn: category.nameEn ?? "",
+    nameJa: category.nameJa ?? "",
+    nameZh: category.nameZh ?? "",
     sortOrder: category.sortOrder,
     imageUrl: isPreset ? "" : (category.imageUrl ?? ""),
     iconType: isPreset ? "preset" : "image",
@@ -194,6 +200,8 @@ async function saveCategory(): Promise<void> {
     const payload = {
       name: categoryForm.value.name,
       nameEn: categoryForm.value.nameEn,
+      nameJa: categoryForm.value.nameJa,
+      nameZh: categoryForm.value.nameZh,
       sortOrder: categoryForm.value.sortOrder,
       imageUrl,
     };
@@ -655,6 +663,31 @@ onMounted(() => {
                     type="text"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                     placeholder="Category Name"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                    >카테고리명 (일본어)</label
+                  >
+                  <input
+                    v-model="categoryForm.nameJa"
+                    type="text"
+                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                    placeholder="カテゴリ名"
+                  />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                    >카테고리명 (중국어)</label
+                  >
+                  <input
+                    v-model="categoryForm.nameZh"
+                    type="text"
+                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                    placeholder="类别名称"
                   />
                 </div>
               </div>

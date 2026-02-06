@@ -228,4 +228,8 @@ export const CACHE_KEYS = {
   PRODUCTS_BY_CATEGORY: (categoryId: number) => `products:category:${categoryId}`,
   PRODUCT: (id: number) => `product:${id}`,
   PRODUCT_BY_BARCODE: (barcode: string) => `product:barcode:${barcode}`,
+  SUPPLIERS: "suppliers",
+  SUPPLIER: (id: number) => `supplier:${id}`,
+  PURCHASES: "purchases",
+  PURCHASE: (id: number) => `purchase:${id}`,
 } as const;

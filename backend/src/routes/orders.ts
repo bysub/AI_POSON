@@ -20,11 +20,11 @@ router.post("/", async (req, res, next) => {
   }
 
   try {
-    // 재고 확인
+    // 상품 존재 및 판매 상태 확인
     const productIds = items.map((item: { productId: number }) => item.productId);
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, name: true, stock: true },
+      select: { id: true, name: true, status: true },
     });
 
     const productMap = new Map(products.map((p) => [p.id, p]));
@@ -36,13 +36,12 @@ router.post("/", async (req, res, next) => {
           new AppError(404, `상품을 찾을 수 없습니다: ${item.name}`, "PRODUCT_NOT_FOUND"),
         );
       }
-      if (product.stock < item.quantity) {
+      if (product.status === "SOLD_OUT") {
+        return next(new AppError(400, `품절된 상품입니다: ${product.name}`, "PRODUCT_SOLD_OUT"));
+      }
+      if (product.status !== "SELLING") {
         return next(
-          new AppError(
-            400,
-            `재고가 부족합니다: ${product.name} (현재: ${product.stock}, 요청: ${item.quantity})`,
-            "INSUFFICIENT_STOCK",
-          ),
+          new AppError(400, `판매 중이 아닌 상품입니다: ${product.name}`, "PRODUCT_NOT_AVAILABLE"),
         );
       }
     }
@@ -65,55 +64,41 @@ router.post("/", async (req, res, next) => {
       0,
     );
 
-    // 트랜잭션으로 주문 생성 + 재고 차감
-    const order = await prisma.$transaction(async (tx) => {
-      // 재고 차감
-      for (const item of items as { productId: number; quantity: number }[]) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
-      }
-
-      // 주문 생성
-      return tx.order.create({
-        data: {
-          id: uuidv4(),
-          orderNumber,
-          kioskId,
-          totalAmount,
-          status: "PENDING",
-          items: {
-            create: items.map(
-              (item: {
-                productId: number;
-                name: string;
-                price: number;
-                quantity: number;
-                options?: Prisma.InputJsonValue;
-              }) => ({
-                product: { connect: { id: item.productId } },
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                options: item.options ?? Prisma.JsonNull,
-              }),
-            ),
-          },
+    // 주문 생성
+    const order = await prisma.order.create({
+      data: {
+        id: uuidv4(),
+        orderNumber,
+        kioskId,
+        totalAmount,
+        status: "PENDING",
+        items: {
+          create: items.map(
+            (item: {
+              productId: number;
+              name: string;
+              price: number;
+              quantity: number;
+              options?: Prisma.InputJsonValue;
+            }) => ({
+              product: { connect: { id: item.productId } },
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              options: item.options ?? Prisma.JsonNull,
+            }),
+          ),
         },
-        include: {
-          items: true,
-        },
-      });
+      },
+      include: {
+        items: true,
+      },
     });
 
     // 캐시 무효화
     await cacheService.del(CACHE_KEYS.PRODUCTS);
 
-    logger.info(
-      { orderId: order.id, orderNumber: order.orderNumber },
-      "Order created with stock deduction",
-    );
+    logger.info({ orderId: order.id, orderNumber: order.orderNumber }, "Order created");
 
     res.status(201).json({
       success: true,
@@ -316,30 +301,16 @@ router.delete(
       );
     }
 
-    // 트랜잭션으로 주문 취소 + 재고 복구
-    await prisma.$transaction(async (tx) => {
-      // 재고 복구
-      for (const item of existing.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        });
-      }
-
-      // 주문 취소 처리
-      await tx.order.update({
-        where: { id },
-        data: {
-          status: "CANCELLED",
-          cancelledAt: new Date(),
-        },
-      });
+    // 주문 취소 처리
+    await prisma.order.update({
+      where: { id },
+      data: {
+        status: "CANCELLED",
+        cancelledAt: new Date(),
+      },
     });
 
-    // 캐시 무효화
-    await cacheService.del(CACHE_KEYS.PRODUCTS);
-
-    logger.info({ orderId: id }, "Order cancelled with stock restoration");
+    logger.info({ orderId: id }, "Order cancelled");
 
     res.json({
       success: true,

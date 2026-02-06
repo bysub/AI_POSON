@@ -127,7 +127,13 @@
       "Bash(npx eslint:*)",
       "Bash(git commit:*)",
       "Bash(git checkout:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(npx kill-port:*)",
+      "mcp__supabase__execute_sql",
+      "Bash(npx:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwMzYyMjE1LCJleHAiOjE3NzAzNjMxMTV9.KfR204kr0P06N-8TusRHN77U3FIVe-V3t933Bpeks44\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwMzYyNTY5LCJleHAiOjE3NzAzNjM0Njl9.nXP3aWG2K0EBDhIVyL7M1xnOlKtWudoz_SyK1ZjX0Uk\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwMzY3MjMwLCJleHAiOjE3NzAzNjgxMzB9.44EmIgrE_YSH8taoNNIiNnRRInUwWUd_gG66pX70GRI\")"
     ]
   },
   "enableAllProjectMcpServers": true,

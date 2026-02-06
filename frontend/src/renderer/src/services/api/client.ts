@@ -200,8 +200,17 @@ async function request<T>(
       localStorage.removeItem("admin");
     }
 
+    if (!response.ok) {
+      const msg =
+        (data as { error?: { message?: string }; message?: string })?.error?.message ??
+        (data as { message?: string })?.message ??
+        `요청 실패 (${response.status})`;
+      throw new Error(msg);
+    }
+
     return { data: data as T };
-  } catch {
+  } catch (err) {
+    if (err instanceof Error) throw err;
     throw new Error("API request failed");
   }
 }

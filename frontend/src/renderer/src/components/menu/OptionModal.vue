@@ -46,13 +46,16 @@ const optionalOptions = computed(() => props.product?.options?.filter((o) => !o.
 
 // 옵션 추가 금액
 const optionsTotalPrice = computed(() => {
-  return Object.values(selectedOptions.value).reduce((sum, option) => sum + option.price, 0);
+  return Object.values(selectedOptions.value).reduce(
+    (sum, option) => sum + Number(option.price),
+    0,
+  );
 });
 
 // 최종 가격 (상품 + 옵션) * 수량
 const totalPrice = computed(() => {
   if (!props.product) return 0;
-  return (props.product.sellPrice + optionsTotalPrice.value) * quantity.value;
+  return (Number(props.product.sellPrice) + optionsTotalPrice.value) * quantity.value;
 });
 
 // 필수 옵션이 모두 선택되었는지

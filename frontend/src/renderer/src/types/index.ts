@@ -1,4 +1,7 @@
 // Product types
+export type ProductStatus = "SELLING" | "SOLD_OUT" | "PENDING" | "HIDDEN";
+export type TaxType = "TAXABLE" | "TAX_FREE" | "ZERO_RATE";
+
 export interface Product {
   id: number;
   barcode: string;
@@ -7,12 +10,17 @@ export interface Product {
   nameJa?: string;
   nameZh?: string;
   sellPrice: number;
+  costPrice?: number;
+  taxType?: TaxType;
   categoryId: number;
+  supplierId?: number;
   imageUrl?: string;
   description?: string;
-  stock: number;
+  status: ProductStatus;
   isActive: boolean;
   options?: ProductOption[];
+  category?: { id: number; name: string };
+  supplier?: { id: number; code: string; name: string; type: string };
 }
 
 export interface ProductOption {
@@ -82,6 +90,74 @@ export interface Member {
 }
 
 export type MemberGrade = "NORMAL" | "SILVER" | "GOLD" | "VIP";
+
+// Supplier types
+export type SupplierType = "FOOD" | "BEVERAGE" | "SUPPLIES" | "PACKAGING" | "ETC";
+
+export interface Supplier {
+  id: number;
+  code: string;
+  name: string;
+  type: SupplierType;
+  businessNumber?: string;
+  businessType?: string;
+  businessItem?: string;
+  representative?: string;
+  contactName?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  address?: string;
+  addressDetail?: string;
+  discountRate: number;
+  paymentTerms?: string;
+  memo?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { products: number };
+}
+
+// Purchase types
+export type PurchaseStatus = "DRAFT" | "CONFIRMED" | "CANCELLED";
+
+export interface PurchaseItem {
+  id: number;
+  productId: number;
+  quantity: number;
+  unitPrice: number;
+  sellPrice: number;
+  amount: number;
+  product?: {
+    id: number;
+    barcode: string;
+    name: string;
+    sellPrice: number;
+    costPrice?: number;
+  };
+}
+
+export interface Purchase {
+  id: number;
+  purchaseCode: string;
+  supplierId: number;
+  purchaseDate: string;
+  totalAmount: number;
+  taxAmount: number;
+  taxIncluded: boolean;
+  status: PurchaseStatus;
+  memo?: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  supplier?: {
+    id: number;
+    code: string;
+    name: string;
+    type: SupplierType;
+  };
+  items?: PurchaseItem[];
+  _count?: { items: number };
+}
 
 // Payment types
 export interface PaymentRequest {

@@ -116,7 +116,7 @@ async function main() {
         description: "깔끔한 맛의 아메리카노",
         sellPrice: 4500,
         costPrice: 1200,
-        stock: 999,
+
         categoryId: 1,
         isActive: true,
       },
@@ -133,7 +133,7 @@ async function main() {
         description: "부드러운 우유와 에스프레소의 조화",
         sellPrice: 5000,
         costPrice: 1500,
-        stock: 999,
+
         categoryId: 1,
         isActive: true,
       },
@@ -150,7 +150,7 @@ async function main() {
         description: "풍성한 우유 거품의 카푸치노",
         sellPrice: 5000,
         costPrice: 1500,
-        stock: 999,
+
         categoryId: 1,
         isActive: true,
       },
@@ -167,7 +167,7 @@ async function main() {
         description: "달콤한 바닐라 향의 라떼",
         sellPrice: 5500,
         costPrice: 1700,
-        stock: 999,
+
         categoryId: 1,
         isActive: true,
       },
@@ -184,7 +184,7 @@ async function main() {
         description: "달콤한 카라멜 소스가 올라간 마키아또",
         sellPrice: 5800,
         costPrice: 1800,
-        stock: 999,
+
         categoryId: 1,
         isActive: true,
       },
@@ -202,7 +202,7 @@ async function main() {
         description: "깊은 맛의 녹차",
         sellPrice: 4500,
         costPrice: 1000,
-        stock: 999,
+
         categoryId: 2,
         isActive: true,
       },
@@ -219,7 +219,7 @@ async function main() {
         description: "상큼한 유자차",
         sellPrice: 5000,
         costPrice: 1200,
-        stock: 999,
+
         categoryId: 2,
         isActive: true,
       },
@@ -236,7 +236,7 @@ async function main() {
         description: "시원한 아이스티",
         sellPrice: 4000,
         costPrice: 800,
-        stock: 999,
+
         categoryId: 2,
         isActive: true,
       },
@@ -254,7 +254,7 @@ async function main() {
         description: "진한 마스카포네 티라미수",
         sellPrice: 6500,
         costPrice: 2500,
-        stock: 50,
+
         categoryId: 3,
         isActive: true,
       },
@@ -271,7 +271,7 @@ async function main() {
         description: "부드러운 뉴욕 치즈케이크",
         sellPrice: 6000,
         costPrice: 2200,
-        stock: 30,
+
         categoryId: 3,
         isActive: true,
       },
@@ -289,7 +289,7 @@ async function main() {
         description: "바삭한 버터 크루아상",
         sellPrice: 3500,
         costPrice: 1200,
-        stock: 100,
+
         categoryId: 4,
         isActive: true,
       },
@@ -306,7 +306,7 @@ async function main() {
         description: "바삭하고 고소한 소금빵",
         sellPrice: 3000,
         costPrice: 900,
-        stock: 80,
+
         categoryId: 4,
         isActive: true,
       },
@@ -314,18 +314,25 @@ async function main() {
   ]);
   console.log(`Created ${products.length} products`);
 
-  // 4. 상품 옵션 생성
+  // 4. 상품 옵션 생성 (기존 옵션이 없는 경우에만)
   const coffeeProducts = products.filter((p) => p.barcode.startsWith("COFFEE"));
   for (const product of coffeeProducts) {
-    await prisma.productOption.createMany({
-      data: [
-        { productId: product.id, name: "ICE", price: 0, isRequired: false },
-        { productId: product.id, name: "HOT", price: 0, isRequired: false },
-        { productId: product.id, name: "사이즈업 (L)", price: 500, isRequired: false },
-        { productId: product.id, name: "샷 추가", price: 500, isRequired: false },
-      ],
-      skipDuplicates: true,
+    // 해당 상품의 기존 옵션 확인
+    const existingOptions = await prisma.productOption.findMany({
+      where: { productId: product.id },
     });
+
+    // 옵션이 없을 때만 생성
+    if (existingOptions.length === 0) {
+      await prisma.productOption.createMany({
+        data: [
+          { productId: product.id, name: "ICE", price: 0, isRequired: false },
+          { productId: product.id, name: "HOT", price: 0, isRequired: false },
+          { productId: product.id, name: "사이즈업 (L)", price: 500, isRequired: false },
+          { productId: product.id, name: "샷 추가", price: 500, isRequired: false },
+        ],
+      });
+    }
   }
   console.log("Created product options");
 
@@ -424,7 +431,107 @@ async function main() {
   ]);
   console.log(`Created ${settings.length} system settings`);
 
-  // 7. 테스트 회원
+  // 7. 거래처 생성
+  const suppliers = await Promise.all([
+    prisma.supplier.upsert({
+      where: { code: "S001" },
+      update: {},
+      create: {
+        code: "S001",
+        name: "대한커피무역",
+        type: "FOOD",
+        businessNumber: "1234567890",
+        representative: "김대한",
+        contactName: "이승기",
+        contactPhone: "010-1111-2222",
+        contactEmail: "daehan@coffee.com",
+        address: "서울시 강남구 테헤란로 100",
+        discountRate: 5,
+        paymentTerms: "월말 정산",
+        memo: "원두 주요 공급처",
+        isActive: true,
+      },
+    }),
+    prisma.supplier.upsert({
+      where: { code: "S002" },
+      update: {},
+      create: {
+        code: "S002",
+        name: "서울우유",
+        type: "BEVERAGE",
+        businessNumber: "2345678901",
+        representative: "박서울",
+        contactName: "최영호",
+        contactPhone: "010-3333-4444",
+        contactEmail: "seoul@milk.co.kr",
+        address: "경기도 양주시 광적면 덕도리 303",
+        discountRate: 3,
+        paymentTerms: "주 2회 정산",
+        memo: "우유, 크림 공급",
+        isActive: true,
+      },
+    }),
+    prisma.supplier.upsert({
+      where: { code: "S003" },
+      update: {},
+      create: {
+        code: "S003",
+        name: "해피베이커리",
+        type: "FOOD",
+        businessNumber: "3456789012",
+        representative: "정해피",
+        contactName: "강미래",
+        contactPhone: "010-5555-6666",
+        contactEmail: "happy@bakery.com",
+        address: "서울시 마포구 합정동 123",
+        discountRate: 8,
+        paymentTerms: "익월 10일 정산",
+        memo: "빵, 디저트 반제품 공급",
+        isActive: true,
+      },
+    }),
+    prisma.supplier.upsert({
+      where: { code: "S004" },
+      update: {},
+      create: {
+        code: "S004",
+        name: "그린팩 포장",
+        type: "PACKAGING",
+        businessNumber: "4567890123",
+        representative: "윤그린",
+        contactName: "한지수",
+        contactPhone: "010-7777-8888",
+        contactEmail: "green@pack.com",
+        address: "인천시 남동구 남동공단 456",
+        discountRate: 10,
+        paymentTerms: "월말 정산",
+        memo: "컵, 빨대, 포장지 공급",
+        isActive: true,
+      },
+    }),
+    prisma.supplier.upsert({
+      where: { code: "S005" },
+      update: {},
+      create: {
+        code: "S005",
+        name: "클린서플라이",
+        type: "SUPPLIES",
+        businessNumber: "5678901234",
+        representative: "송클린",
+        contactName: "임도현",
+        contactPhone: "010-9999-0000",
+        contactEmail: "clean@supply.kr",
+        address: "서울시 영등포구 여의도동 789",
+        discountRate: 0,
+        paymentTerms: "즉시 결제",
+        memo: "세제, 위생용품 공급",
+        isActive: true,
+      },
+    }),
+  ]);
+  console.log(`Created ${suppliers.length} suppliers`);
+
+  // 8. 테스트 회원
   const members = await Promise.all([
     prisma.member.upsert({
       where: { code: "M0001" },
