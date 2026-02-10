@@ -133,7 +133,20 @@
       "Bash(npx:*)",
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwMzYyMjE1LCJleHAiOjE3NzAzNjMxMTV9.KfR204kr0P06N-8TusRHN77U3FIVe-V3t933Bpeks44\")",
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwMzYyNTY5LCJleHAiOjE3NzAzNjM0Njl9.nXP3aWG2K0EBDhIVyL7M1xnOlKtWudoz_SyK1ZjX0Uk\")",
-      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwMzY3MjMwLCJleHAiOjE3NzAzNjgxMzB9.44EmIgrE_YSH8taoNNIiNnRRInUwWUd_gG66pX70GRI\")"
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwMzY3MjMwLCJleHAiOjE3NzAzNjgxMzB9.44EmIgrE_YSH8taoNNIiNnRRInUwWUd_gG66pX70GRI\")",
+      "Bash(cmd //c \"tasklist /FI \"\"IMAGENAME eq node.exe\"\" /FO CSV /NH\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwNjEzNzYxLCJleHAiOjE3NzA2MTQ2NjF9.FfNW195RFZGhgHuGYwS8uNeLybG8AsJ7lrIg79biEYA\")",
+      "Bash(cmd //c \"taskkill /PID 30972 /F\")",
+      "Bash(cmd //c \"taskkill /PID 16840 /F\")",
+      "Bash(DATABASE_URL=\"postgresql://poson:1qaz%40WSX@192.168.0.165:5433/poson?schema=public\" npx prisma db push:*)",
+      "Bash(netsh advfirewall firewall:*)",
+      "Bash(net stop:*)",
+      "Bash(net start:*)",
+      "Bash(cmd //c \"netstat -ano | findstr :3000 | findstr LISTENING\")",
+      "Bash(cmd //c \"taskkill /PID 33376 /F\")",
+      "Bash(cmd //c \"taskkill /PID 14764 /F\")",
+      "Bash(cmd //c \"taskkill /PID 2172 /F\")",
+      "Bash(git rm:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
