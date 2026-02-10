@@ -61,6 +61,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
+  // Environment IPC handler
+  ipcMain.handle("env:get", (_event, key: string) => process.env[key] ?? "");
+
   // App IPC handlers
   ipcMain.handle("app:version", () => app.getVersion());
   ipcMain.handle("app:quit", () => app.quit());

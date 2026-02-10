@@ -11,6 +11,7 @@ import { purchasesRouter } from "./purchases.js";
 import { purchaseProductsRouter } from "./purchase-products.js";
 import { branchesRouter } from "./branches.js";
 import { settingsRouter } from "./settings.js";
+import { devicesRouter } from "./devices.js";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use("/v1/purchases", purchasesRouter);
 router.use("/v1/purchase-products", purchaseProductsRouter);
 router.use("/v1/branches", branchesRouter);
 router.use("/v1/settings", settingsRouter);
+router.use("/v1/devices", devicesRouter);
 
 export { router as apiRouter };

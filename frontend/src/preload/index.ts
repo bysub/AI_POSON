@@ -8,6 +8,9 @@ const api = {
   quit: () => ipcRenderer.invoke("app:quit"),
   toggleDevTools: () => ipcRenderer.invoke("app:toggleDevTools"),
 
+  // Environment
+  getEnv: (key: string) => ipcRenderer.invoke("env:get", key),
+
   // Printer API
   printer: {
     connect: () => ipcRenderer.invoke("printer:connect"),

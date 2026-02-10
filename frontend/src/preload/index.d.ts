@@ -9,6 +9,9 @@ declare global {
       quit: () => Promise<void>;
       toggleDevTools: () => Promise<void>;
 
+      // Environment
+      getEnv: (key: string) => Promise<string>;
+
       // Printer
       printer: {
         connect: () => Promise<boolean>;
