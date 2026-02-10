@@ -13,13 +13,37 @@ export interface Product {
   costPrice?: number;
   taxType?: TaxType;
   categoryId: number;
-  supplierId?: number;
   imageUrl?: string;
   description?: string;
   status: ProductStatus;
   isActive: boolean;
   options?: ProductOption[];
   category?: { id: number; name: string };
+}
+
+export interface PurchaseProduct {
+  id: number;
+  barcode: string;
+  name: string;
+  sellPrice: number;
+  costPrice: number;
+  spec?: string;
+  productType?: string;
+  purchaseCost: number;
+  vatAmount: number;
+  taxType: TaxType;
+  status: ProductStatus;
+  supplierId?: number;
+  lCode?: string;
+  mCode?: string;
+  sCode?: string;
+  isActive: boolean;
+  usePurchase: boolean;
+  useOrder: boolean;
+  useSales: boolean;
+  useInventory: boolean;
+  createdAt: string;
+  updatedAt: string;
   supplier?: { id: number; code: string; name: string; type: string };
 }
 
@@ -114,7 +138,7 @@ export interface Supplier {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  _count?: { products: number };
+  _count?: { purchaseProducts: number };
 }
 
 // Purchase types
@@ -122,12 +146,12 @@ export type PurchaseStatus = "DRAFT" | "CONFIRMED" | "CANCELLED";
 
 export interface PurchaseItem {
   id: number;
-  productId: number;
+  purchaseProductId: number;
   quantity: number;
   unitPrice: number;
   sellPrice: number;
   amount: number;
-  product?: {
+  purchaseProduct?: {
     id: number;
     barcode: string;
     name: string;
@@ -157,6 +181,34 @@ export interface Purchase {
   };
   items?: PurchaseItem[];
   _count?: { items: number };
+}
+
+// Branch classification types
+export interface LBranch {
+  lCode: string;
+  lName: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { mBranches: number };
+}
+
+export interface MBranch {
+  lCode: string;
+  mCode: string;
+  mName: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { sBranches: number };
+}
+
+export interface SBranch {
+  lCode: string;
+  mCode: string;
+  sCode: string;
+  sName: string;
+  profitRate: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Payment types

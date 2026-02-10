@@ -139,7 +139,7 @@ router.get("/:id", authenticate, async (req, res, next) => {
       },
       items: {
         include: {
-          product: {
+          purchaseProduct: {
             select: { id: true, barcode: true, name: true, sellPrice: true, costPrice: true },
           },
         },
@@ -178,20 +178,22 @@ router.post(
       return next(new AppError(404, "거래처를 찾을 수 없습니다", "SUPPLIER_NOT_FOUND"));
     }
 
-    // 상품 존재 확인
-    const productIds = items.map((item: { productId: number }) => item.productId);
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds } },
+    // 매입상품 존재 확인
+    const purchaseProductIds = items.map(
+      (item: { purchaseProductId: number }) => item.purchaseProductId,
+    );
+    const purchaseProducts = await prisma.purchaseProduct.findMany({
+      where: { id: { in: purchaseProductIds } },
       select: { id: true },
     });
-    const existingIds = new Set(products.map((p) => p.id));
-    const missingIds = productIds.filter((id: number) => !existingIds.has(id));
+    const existingIds = new Set(purchaseProducts.map((p) => p.id));
+    const missingIds = purchaseProductIds.filter((id: number) => !existingIds.has(id));
     if (missingIds.length > 0) {
       return next(
         new AppError(
           404,
-          `존재하지 않는 상품이 포함되어 있습니다 (ID: ${missingIds.join(", ")})`,
-          "PRODUCT_NOT_FOUND",
+          `존재하지 않는 매입상품이 포함되어 있습니다 (ID: ${missingIds.join(", ")})`,
+          "PURCHASE_PRODUCT_NOT_FOUND",
         ),
       );
     }
@@ -201,11 +203,16 @@ router.post(
     // 합계 계산
     let totalAmount = 0;
     const purchaseItems = items.map(
-      (item: { productId: number; quantity: number; unitPrice: number; sellPrice: number }) => {
+      (item: {
+        purchaseProductId: number;
+        quantity: number;
+        unitPrice: number;
+        sellPrice: number;
+      }) => {
         const amount = item.quantity * item.unitPrice;
         totalAmount += amount;
         return {
-          productId: item.productId,
+          purchaseProductId: item.purchaseProductId,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           sellPrice: item.sellPrice ?? 0,
@@ -238,7 +245,7 @@ router.post(
         },
         items: {
           include: {
-            product: {
+            purchaseProduct: {
               select: { id: true, barcode: true, name: true, sellPrice: true, costPrice: true },
             },
           },
@@ -291,12 +298,17 @@ router.patch(
 
       let totalAmount = 0;
       const purchaseItems = items.map(
-        (item: { productId: number; quantity: number; unitPrice: number; sellPrice: number }) => {
+        (item: {
+          purchaseProductId: number;
+          quantity: number;
+          unitPrice: number;
+          sellPrice: number;
+        }) => {
           const amount = item.quantity * item.unitPrice;
           totalAmount += amount;
           return {
             purchaseId: id,
-            productId: item.productId,
+            purchaseProductId: item.purchaseProductId,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             sellPrice: item.sellPrice ?? 0,
@@ -322,7 +334,7 @@ router.patch(
         },
         items: {
           include: {
-            product: {
+            purchaseProduct: {
               select: { id: true, barcode: true, name: true, sellPrice: true, costPrice: true },
             },
           },

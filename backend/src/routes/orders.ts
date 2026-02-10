@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { Prisma } from "@prisma/client";
+import { Prisma, OrderStatus } from "@prisma/client";
 import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { logger } from "../utils/logger.js";
@@ -177,7 +177,7 @@ router.get(
     const skip = (pageNum - 1) * limitNum;
 
     const where: Prisma.OrderWhereInput = {
-      ...(status && { status: status as string }),
+      ...(status && { status: status as OrderStatus }),
       ...(kioskId && { kioskId: kioskId as string }),
       ...((startDate || endDate) && {
         createdAt: {
@@ -408,7 +408,7 @@ router.get(
       const current = dailyMap.get(dateKey);
       if (current) {
         current.count++;
-        current.revenue += order.totalAmount;
+        current.revenue += Number(order.totalAmount);
       }
     }
 

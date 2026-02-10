@@ -9,42 +9,6 @@ const router = Router();
 // 캐시 TTL (5분)
 const CACHE_TTL = 300;
 
-// 매입상품 조회 (거래처별, 매입가/판매가 포함)
-router.get("/purchase", authenticate, async (req, res) => {
-  const { supplierId, search, taxType } = req.query;
-
-  const where: Record<string, unknown> = { isActive: true };
-
-  if (supplierId) {
-    where.supplierId = parseInt(supplierId as string, 10);
-  }
-
-  if (taxType) {
-    where.taxType = taxType as string;
-  }
-
-  if (search) {
-    where.OR = [
-      { name: { contains: search as string, mode: "insensitive" } },
-      { barcode: { contains: search as string } },
-    ];
-  }
-
-  const products = await prisma.product.findMany({
-    where,
-    include: {
-      category: { select: { id: true, name: true } },
-      supplier: { select: { id: true, code: true, name: true, type: true } },
-    },
-    orderBy: { name: "asc" },
-  });
-
-  res.json({
-    success: true,
-    data: products,
-  });
-});
-
 // Get all products (검색어 없을 때만 캐싱)
 // admin=true 파라미터가 있으면 모든 상품 조회 (관리자용)
 router.get("/", async (req, res) => {
@@ -246,7 +210,6 @@ router.post(
         taxType: req.body.taxType ?? "TAXABLE",
         status: status ?? "SELLING",
         categoryId,
-        supplierId: req.body.supplierId ?? null,
         imageUrl,
         isActive: true,
         options: options?.length
@@ -335,7 +298,6 @@ router.patch(
         ...(sellPrice !== undefined && { sellPrice }),
         ...(costPrice !== undefined && { costPrice }),
         ...(req.body.taxType !== undefined && { taxType: req.body.taxType }),
-        ...(req.body.supplierId !== undefined && { supplierId: req.body.supplierId || null }),
         ...(status !== undefined && { status }),
         ...(categoryId !== undefined && { categoryId }),
         ...(imageUrl !== undefined && { imageUrl }),

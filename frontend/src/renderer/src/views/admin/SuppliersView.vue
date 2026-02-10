@@ -205,7 +205,9 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-800">거래처 관리</h2>
+        <h2 class="text-xl font-bold text-slate-800">
+          거래처 관리
+        </h2>
         <p class="mt-1 text-sm text-slate-500">
           총 {{ stats.total }}개 거래처 (활성 {{ stats.active }}개 / 비활성 {{ stats.inactive }}개)
         </p>
@@ -214,7 +216,12 @@ onMounted(() => {
         class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 font-medium text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md"
         @click="openAddForm"
       >
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          class="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -228,7 +235,10 @@ onMounted(() => {
 
     <!-- Search & Filter -->
     <div class="flex flex-wrap gap-3">
-      <div class="relative flex-1" style="min-width: 200px">
+      <div
+        class="relative flex-1"
+        style="min-width: 200px"
+      >
         <svg
           class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
           fill="none"
@@ -247,14 +257,20 @@ onMounted(() => {
           type="text"
           placeholder="거래처명, 코드, 사업자번호, 담당자로 검색..."
           class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-12 pr-4 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-        />
+        >
       </div>
       <select
         v-model="filterType"
         class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
       >
-        <option value="">전체 구분</option>
-        <option v-for="t in supplierTypes" :key="t.value" :value="t.value">
+        <option value="">
+          전체 구분
+        </option>
+        <option
+          v-for="t in supplierTypes"
+          :key="t.value"
+          :value="t.value"
+        >
           {{ t.label }}
         </option>
       </select>
@@ -262,23 +278,35 @@ onMounted(() => {
         v-model="filterActive"
         class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
       >
-        <option value="">전체 상태</option>
-        <option value="true">활성</option>
-        <option value="false">비활성</option>
+        <option value="">
+          전체 상태
+        </option>
+        <option value="true">
+          활성
+        </option>
+        <option value="false">
+          비활성
+        </option>
       </select>
     </div>
 
     <!-- Suppliers Table -->
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <!-- Loading -->
-      <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div
+        v-if="isLoading"
+        class="flex items-center justify-center py-12"
+      >
         <div
           class="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"
         />
       </div>
 
       <!-- Table -->
-      <table v-else class="w-full">
+      <table
+        v-else
+        class="w-full"
+      >
         <thead>
           <tr class="border-b border-slate-100 bg-slate-50">
             <th
@@ -372,11 +400,17 @@ onMounted(() => {
                 <p class="text-sm text-slate-700">
                   {{ supplier.contactName }}
                 </p>
-                <p v-if="supplier.contactPhone" class="text-xs text-slate-400">
+                <p
+                  v-if="supplier.contactPhone"
+                  class="text-xs text-slate-400"
+                >
                   {{ supplier.contactPhone }}
                 </p>
               </div>
-              <span v-else class="text-sm text-slate-400">-</span>
+              <span
+                v-else
+                class="text-sm text-slate-400"
+              >-</span>
             </td>
 
             <!-- 할인율 -->
@@ -387,13 +421,16 @@ onMounted(() => {
               >
                 {{ Number(supplier.discountRate) }}%
               </span>
-              <span v-else class="text-sm text-slate-400">-</span>
+              <span
+                v-else
+                class="text-sm text-slate-400"
+              >-</span>
             </td>
 
             <!-- 상품수 -->
             <td class="px-6 py-4 text-center">
               <span class="text-sm font-medium text-slate-700">
-                {{ supplier._count?.products ?? 0 }}
+                {{ supplier._count?.purchaseProducts ?? 0 }}
               </span>
             </td>
 
@@ -420,7 +457,12 @@ onMounted(() => {
                   title="수정"
                   @click="openEditForm(supplier)"
                 >
-                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    class="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -434,7 +476,12 @@ onMounted(() => {
                   title="삭제"
                   @click="deleteSupplier(supplier)"
                 >
-                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    class="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -447,7 +494,10 @@ onMounted(() => {
             </td>
           </tr>
           <tr v-if="filteredSuppliers.length === 0">
-            <td colspan="8" class="px-6 py-12 text-center text-slate-400">
+            <td
+              colspan="8"
+              class="px-6 py-12 text-center text-slate-400"
+            >
               <svg
                 class="mx-auto mb-3 h-12 w-12"
                 fill="none"
@@ -491,7 +541,12 @@ onMounted(() => {
                 class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                 @click="showForm = false"
               >
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -505,39 +560,48 @@ onMounted(() => {
             <div class="space-y-4">
               <!-- 기본 정보 -->
               <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 class="mb-3 text-sm font-semibold text-slate-700">기본 정보</h4>
+                <h4 class="mb-3 text-sm font-semibold text-slate-700">
+                  기본 정보
+                </h4>
                 <!-- 수정 모드: 거래처 코드 표시 -->
-                <div v-if="editingSupplier" class="mb-3 flex items-center gap-2">
+                <div
+                  v-if="editingSupplier"
+                  class="mb-3 flex items-center gap-2"
+                >
                   <span class="text-sm font-medium text-slate-500">거래처 코드:</span>
                   <span
                     class="rounded-lg bg-indigo-100 px-2.5 py-1 text-sm font-semibold text-indigo-700"
-                    >{{ editingSupplier.code }}</span
-                  >
+                  >{{ editingSupplier.code }}</span>
                 </div>
-                <div v-else class="mb-3">
-                  <p class="text-xs text-slate-400">거래처 코드는 저장 시 자동으로 생성됩니다.</p>
+                <div
+                  v-else
+                  class="mb-3"
+                >
+                  <p class="text-xs text-slate-400">
+                    거래처 코드는 저장 시 자동으로 생성됩니다.
+                  </p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                      >거래처명 *</label
-                    >
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700">거래처명 *</label>
                     <input
                       v-model="supplierForm.name"
                       type="text"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="거래처명"
-                    />
+                    >
                   </div>
                   <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                      >거래처 구분</label
-                    >
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700">거래처 구분</label>
                     <select
                       v-model="supplierForm.type"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     >
-                      <option v-for="t in supplierTypes" :key="t.value" :value="t.value">
+                      <option
+                        v-for="t in supplierTypes"
+                        :key="t.value"
+                        :value="t.value"
+                      >
                         {{ t.label }}
                       </option>
                     </select>
@@ -547,19 +611,19 @@ onMounted(() => {
 
               <!-- 사업자 정보 -->
               <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 class="mb-3 text-sm font-semibold text-slate-700">사업자 정보</h4>
+                <h4 class="mb-3 text-sm font-semibold text-slate-700">
+                  사업자 정보
+                </h4>
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                      >사업자번호</label
-                    >
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700">사업자번호</label>
                     <input
                       v-model="supplierForm.businessNumber"
                       type="text"
                       maxlength="20"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="000-00-00000"
-                    />
+                    >
                   </div>
                   <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700">대표자</label>
@@ -568,7 +632,7 @@ onMounted(() => {
                       type="text"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="대표자명"
-                    />
+                    >
                   </div>
                 </div>
                 <div class="mt-4 grid grid-cols-2 gap-4">
@@ -579,7 +643,7 @@ onMounted(() => {
                       type="text"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="예: 제조업, 도소매업, 서비스업"
-                    />
+                    >
                   </div>
                   <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700">종목</label>
@@ -588,7 +652,7 @@ onMounted(() => {
                       type="text"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="예: 식품, 커피원두, 포장재"
-                    />
+                    >
                   </div>
                 </div>
                 <div class="mt-4">
@@ -598,7 +662,7 @@ onMounted(() => {
                     type="text"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="사업장 주소"
-                  />
+                  >
                 </div>
                 <div class="mt-4">
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">상세주소</label>
@@ -607,13 +671,15 @@ onMounted(() => {
                     type="text"
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="동/호수, 층 등 상세주소"
-                  />
+                  >
                 </div>
               </div>
 
               <!-- 담당자 정보 -->
               <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 class="mb-3 text-sm font-semibold text-slate-700">담당자 정보</h4>
+                <h4 class="mb-3 text-sm font-semibold text-slate-700">
+                  담당자 정보
+                </h4>
                 <div class="grid grid-cols-3 gap-4">
                   <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700">담당자명</label>
@@ -622,7 +688,7 @@ onMounted(() => {
                       type="text"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="담당자명"
-                    />
+                    >
                   </div>
                   <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700">연락처</label>
@@ -631,7 +697,7 @@ onMounted(() => {
                       type="text"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="010-0000-0000"
-                    />
+                    >
                   </div>
                   <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700">이메일</label>
@@ -640,19 +706,19 @@ onMounted(() => {
                       type="email"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="email@example.com"
-                    />
+                    >
                   </div>
                 </div>
               </div>
 
               <!-- 거래 조건 -->
               <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 class="mb-3 text-sm font-semibold text-slate-700">거래 조건</h4>
+                <h4 class="mb-3 text-sm font-semibold text-slate-700">
+                  거래 조건
+                </h4>
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                      >할인율 (%)</label
-                    >
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700">할인율 (%)</label>
                     <input
                       v-model.number="supplierForm.discountRate"
                       type="number"
@@ -661,7 +727,7 @@ onMounted(() => {
                       step="0.1"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="0"
-                    />
+                    >
                   </div>
                   <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700">결제 조건</label>
@@ -670,7 +736,7 @@ onMounted(() => {
                       type="text"
                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                       placeholder="예: 월말 정산, 즉시 결제"
-                    />
+                    >
                   </div>
                 </div>
               </div>

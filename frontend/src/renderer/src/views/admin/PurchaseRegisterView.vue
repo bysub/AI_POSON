@@ -13,7 +13,7 @@ interface ProductSearchResult {
 }
 
 interface PurchaseFormItem {
-  productId: number;
+  purchaseProductId: number;
   barcode: string;
   name: string;
   quantity: number;
@@ -92,7 +92,7 @@ async function loadProducts(): Promise<void> {
     const res = await apiClient.get<{
       success: boolean;
       data: ProductSearchResult[];
-    }>("/api/v1/products", { params: { admin: "true" } });
+    }>("/api/v1/purchase-products");
     if (res.data.success) {
       products.value = res.data.data as unknown as ProductSearchResult[];
     }
@@ -108,7 +108,7 @@ function hideDropdown(): void {
 }
 
 function addProduct(product: ProductSearchResult): void {
-  const existing = purchaseItems.value.find((item) => item.productId === product.id);
+  const existing = purchaseItems.value.find((item) => item.purchaseProductId === product.id);
   if (existing) {
     existing.quantity += 1;
     existing.amount = existing.quantity * existing.unitPrice;
@@ -120,7 +120,7 @@ function addProduct(product: ProductSearchResult): void {
   const unitPrice = Number(product.costPrice ?? product.sellPrice);
   const sellPrice = Number(product.sellPrice);
   purchaseItems.value.push({
-    productId: product.id,
+    purchaseProductId: product.id,
     barcode: product.barcode,
     name: product.name,
     quantity: 1,
@@ -159,7 +159,7 @@ async function savePurchase(): Promise<void> {
       memo: memo.value || null,
       taxIncluded: taxIncluded.value,
       items: purchaseItems.value.map((item) => ({
-        productId: item.productId,
+        purchaseProductId: item.purchaseProductId,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         sellPrice: item.sellPrice,
@@ -353,7 +353,7 @@ onMounted(() => {
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              <tr v-for="(item, index) in purchaseItems" :key="item.productId">
+              <tr v-for="(item, index) in purchaseItems" :key="item.purchaseProductId">
                 <td class="px-4 py-3">
                   <p class="text-sm font-medium text-slate-800">
                     {{ item.name }}

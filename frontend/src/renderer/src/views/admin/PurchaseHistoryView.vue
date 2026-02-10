@@ -245,10 +245,15 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-800">매입내역</h2>
+        <h2 class="text-xl font-bold text-slate-800">
+          매입내역
+        </h2>
         <p class="mt-1 text-sm text-slate-500">
           매입 내역을 조회하고 관리합니다
-          <span v-if="pagination.total > 0" class="font-medium text-slate-700">
+          <span
+            v-if="pagination.total > 0"
+            class="font-medium text-slate-700"
+          >
             (총 {{ pagination.total }}건)
           </span>
         </p>
@@ -257,7 +262,12 @@ onMounted(() => {
         to="/admin/purchase/register"
         class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 font-medium text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md"
       >
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          class="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -311,23 +321,33 @@ onMounted(() => {
     <!-- 통계 카드 -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p class="text-xs font-medium text-slate-500">매입 건수</p>
-        <p class="mt-1 text-xl font-bold text-slate-800">{{ stats.count }}건</p>
+        <p class="text-xs font-medium text-slate-500">
+          매입 건수
+        </p>
+        <p class="mt-1 text-xl font-bold text-slate-800">
+          {{ stats.count }}건
+        </p>
       </div>
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p class="text-xs font-medium text-slate-500">공급가액</p>
+        <p class="text-xs font-medium text-slate-500">
+          공급가액
+        </p>
         <p class="mt-1 text-xl font-bold text-indigo-600">
           {{ formatPrice(stats.supplyAmount) }}
         </p>
       </div>
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p class="text-xs font-medium text-slate-500">부가세</p>
+        <p class="text-xs font-medium text-slate-500">
+          부가세
+        </p>
         <p class="mt-1 text-xl font-bold text-slate-600">
           {{ formatPrice(stats.totalTax) }}
         </p>
       </div>
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p class="text-xs font-medium text-slate-500">합계금액</p>
+        <p class="text-xs font-medium text-slate-500">
+          합계금액
+        </p>
         <p class="mt-1 text-xl font-bold text-emerald-600">
           {{ formatPrice(stats.totalAmount) }}
         </p>
@@ -341,21 +361,27 @@ onMounted(() => {
           v-model="startDate"
           type="date"
           class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-        />
+        >
         <span class="text-slate-400">~</span>
         <input
           v-model="endDate"
           type="date"
           class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-        />
+        >
       </div>
       <select
         v-if="activeTab === 'byDate'"
         v-model="filterSupplier"
         class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
       >
-        <option value="">전체 거래처</option>
-        <option v-for="s in suppliers" :key="s.id" :value="s.id">
+        <option value="">
+          전체 거래처
+        </option>
+        <option
+          v-for="s in suppliers"
+          :key="s.id"
+          :value="s.id"
+        >
           {{ s.name }}
         </option>
       </select>
@@ -364,12 +390,24 @@ onMounted(() => {
         v-model="filterStatus"
         class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
       >
-        <option value="">전체 상태</option>
-        <option value="CONFIRMED">확정</option>
-        <option value="DRAFT">임시저장</option>
-        <option value="CANCELLED">취소</option>
+        <option value="">
+          전체 상태
+        </option>
+        <option value="CONFIRMED">
+          확정
+        </option>
+        <option value="DRAFT">
+          임시저장
+        </option>
+        <option value="CANCELLED">
+          취소
+        </option>
       </select>
-      <div v-if="activeTab === 'byDate'" class="relative flex-1" style="min-width: 180px">
+      <div
+        v-if="activeTab === 'byDate'"
+        class="relative flex-1"
+        style="min-width: 180px"
+      >
         <svg
           class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
           fill="none"
@@ -389,7 +427,7 @@ onMounted(() => {
           placeholder="매입코드, 거래처명, 메모 검색..."
           class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-12 pr-4 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           @keyup.enter="loadPurchases(1)"
-        />
+        >
       </div>
       <button
         class="rounded-xl bg-indigo-600 px-5 py-2.5 font-medium text-white transition-colors hover:bg-indigo-700"
@@ -400,7 +438,10 @@ onMounted(() => {
     </div>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="flex items-center justify-center py-12">
+    <div
+      v-if="isLoading"
+      class="flex items-center justify-center py-12"
+    >
       <div
         class="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"
       />
@@ -502,7 +543,10 @@ onMounted(() => {
               </td>
             </tr>
             <tr v-if="purchases.length === 0">
-              <td colspan="8" class="px-6 py-12 text-center text-slate-400">
+              <td
+                colspan="8"
+                class="px-6 py-12 text-center text-slate-400"
+              >
                 <svg
                   class="mx-auto mb-3 h-12 w-12"
                   fill="none"
@@ -524,7 +568,10 @@ onMounted(() => {
       </div>
 
       <!-- 페이지네이션 -->
-      <div v-if="pagination.totalPages > 1" class="flex items-center justify-center gap-2">
+      <div
+        v-if="pagination.totalPages > 1"
+        class="flex items-center justify-center gap-2"
+      >
         <button
           class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50"
           :disabled="pagination.page <= 1"
@@ -564,10 +611,15 @@ onMounted(() => {
             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
           />
         </svg>
-        <p class="text-slate-400">해당 기간의 매입 내역이 없습니다</p>
+        <p class="text-slate-400">
+          해당 기간의 매입 내역이 없습니다
+        </p>
       </div>
 
-      <div v-else class="space-y-4">
+      <div
+        v-else
+        class="space-y-4"
+      >
         <div
           v-for="group in supplierGroups"
           :key="group.supplierId"
@@ -588,24 +640,32 @@ onMounted(() => {
                 <p class="font-semibold text-slate-800">
                   {{ group.supplierName }}
                 </p>
-                <p class="text-xs text-slate-400">{{ group.supplierCode }} · {{ group.count }}건</p>
+                <p class="text-xs text-slate-400">
+                  {{ group.supplierCode }} · {{ group.count }}건
+                </p>
               </div>
             </div>
             <div class="flex items-center gap-6">
               <div class="text-right">
-                <p class="text-xs text-slate-500">공급가액</p>
+                <p class="text-xs text-slate-500">
+                  공급가액
+                </p>
                 <p class="font-medium text-slate-700">
                   {{ formatPrice(group.supplyAmount) }}
                 </p>
               </div>
               <div class="text-right">
-                <p class="text-xs text-slate-500">부가세</p>
+                <p class="text-xs text-slate-500">
+                  부가세
+                </p>
                 <p class="font-medium text-slate-500">
                   {{ formatPrice(group.taxAmount) }}
                 </p>
               </div>
               <div class="text-right">
-                <p class="text-xs text-slate-500">합계</p>
+                <p class="text-xs text-slate-500">
+                  합계
+                </p>
                 <p class="text-lg font-bold text-indigo-600">
                   {{ formatPrice(group.totalAmount) }}
                 </p>
@@ -632,17 +692,27 @@ onMounted(() => {
             <table class="w-full">
               <thead>
                 <tr class="border-b border-t border-slate-100 bg-white">
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500">매입코드</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500">
+                    매입코드
+                  </th>
                   <th class="px-6 py-3 text-center text-xs font-semibold text-slate-500">
                     매입일자
                   </th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-slate-500">품목수</th>
+                  <th class="px-6 py-3 text-center text-xs font-semibold text-slate-500">
+                    품목수
+                  </th>
                   <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500">
                     공급가액
                   </th>
-                  <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500">부가세</th>
-                  <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500">합계</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500">메모</th>
+                  <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500">
+                    부가세
+                  </th>
+                  <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500">
+                    합계
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500">
+                    메모
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50">
@@ -688,19 +758,25 @@ onMounted(() => {
       <!-- 결제 현황 요약 -->
       <div class="grid grid-cols-3 gap-4">
         <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p class="text-xs font-medium text-slate-500">총 매입액</p>
+          <p class="text-xs font-medium text-slate-500">
+            총 매입액
+          </p>
           <p class="mt-1 text-xl font-bold text-slate-800">
             {{ formatPrice(paymentTotals.total) }}
           </p>
         </div>
         <div class="rounded-xl border border-red-100 bg-red-50 p-4 shadow-sm">
-          <p class="text-xs font-medium text-red-500">미결제</p>
+          <p class="text-xs font-medium text-red-500">
+            미결제
+          </p>
           <p class="mt-1 text-xl font-bold text-red-600">
             {{ formatPrice(paymentTotals.unpaid) }}
           </p>
         </div>
         <div class="rounded-xl border border-green-100 bg-green-50 p-4 shadow-sm">
-          <p class="text-xs font-medium text-green-500">결제완료</p>
+          <p class="text-xs font-medium text-green-500">
+            결제완료
+          </p>
           <p class="mt-1 text-xl font-bold text-green-600">
             {{ formatPrice(paymentTotals.paid) }}
           </p>
@@ -766,7 +842,9 @@ onMounted(() => {
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 text-center text-sm text-slate-600">{{ ps.count }}건</td>
+              <td class="px-6 py-4 text-center text-sm text-slate-600">
+                {{ ps.count }}건
+              </td>
               <td class="px-6 py-4 text-right text-sm font-medium text-slate-800">
                 {{ formatPrice(ps.totalAmount) }}
               </td>
@@ -788,7 +866,10 @@ onMounted(() => {
               </td>
             </tr>
             <tr v-if="paymentSummaries.length === 0">
-              <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+              <td
+                colspan="6"
+                class="px-6 py-12 text-center text-slate-400"
+              >
                 해당 기간의 매입 내역이 없습니다
               </td>
             </tr>
@@ -796,7 +877,9 @@ onMounted(() => {
           <!-- 합계 행 -->
           <tfoot v-if="paymentSummaries.length > 0">
             <tr class="border-t-2 border-slate-200 bg-slate-50 font-semibold">
-              <td class="px-6 py-4 text-slate-700">합계</td>
+              <td class="px-6 py-4 text-slate-700">
+                합계
+              </td>
               <td class="px-6 py-4 text-center text-slate-700">
                 {{ paymentSummaries.reduce((s, p) => s + p.count, 0) }}건
               </td>
@@ -852,7 +935,12 @@ onMounted(() => {
                   class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                   @click="showDetail = false"
                 >
-                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    class="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -868,7 +956,9 @@ onMounted(() => {
             <div class="max-h-[60vh] overflow-y-auto p-6">
               <!-- 상품 목록 -->
               <div class="mb-6">
-                <h4 class="mb-3 font-semibold text-slate-700">매입 상품</h4>
+                <h4 class="mb-3 font-semibold text-slate-700">
+                  매입 상품
+                </h4>
                 <div class="overflow-hidden rounded-xl border border-slate-200">
                   <table class="w-full">
                     <thead>
@@ -894,12 +984,15 @@ onMounted(() => {
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                      <tr v-for="item in selectedPurchase.items" :key="item.id">
+                      <tr
+                        v-for="item in selectedPurchase.items"
+                        :key="item.id"
+                      >
                         <td class="px-4 py-3 text-sm font-medium text-slate-800">
-                          {{ item.product?.name ?? "-" }}
+                          {{ item.purchaseProduct?.name ?? "-" }}
                         </td>
                         <td class="px-4 py-3 font-mono text-xs text-slate-400">
-                          {{ item.product?.barcode ?? "-" }}
+                          {{ item.purchaseProduct?.barcode ?? "-" }}
                         </td>
                         <td class="px-4 py-3 text-center text-sm text-slate-600">
                           {{ item.quantity }}
@@ -951,8 +1044,13 @@ onMounted(() => {
               </div>
 
               <!-- 메모 -->
-              <div v-if="selectedPurchase.memo" class="mt-4 rounded-xl bg-slate-50 p-4">
-                <p class="text-xs font-medium text-slate-500">메모</p>
+              <div
+                v-if="selectedPurchase.memo"
+                class="mt-4 rounded-xl bg-slate-50 p-4"
+              >
+                <p class="text-xs font-medium text-slate-500">
+                  메모
+                </p>
                 <p class="mt-1 text-sm text-slate-700">
                   {{ selectedPurchase.memo }}
                 </p>

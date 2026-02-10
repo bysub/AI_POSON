@@ -8,6 +8,9 @@ import { paymentsRouter } from "./payments.js";
 import { uploadsRouter } from "./uploads.js";
 import { suppliersRouter } from "./suppliers.js";
 import { purchasesRouter } from "./purchases.js";
+import { purchaseProductsRouter } from "./purchase-products.js";
+import { branchesRouter } from "./branches.js";
+import { settingsRouter } from "./settings.js";
 
 const router = Router();
 
@@ -20,5 +23,8 @@ router.use("/v1/payments", paymentsRouter);
 router.use("/v1/uploads", uploadsRouter);
 router.use("/v1/suppliers", suppliersRouter);
 router.use("/v1/purchases", purchasesRouter);
+router.use("/v1/purchase-products", purchaseProductsRouter);
+router.use("/v1/branches", branchesRouter);
+router.use("/v1/settings", settingsRouter);
 
 export { router as apiRouter };

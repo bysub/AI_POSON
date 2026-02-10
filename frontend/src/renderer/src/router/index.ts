@@ -82,6 +82,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/admin/PurchaseProductsView.vue"),
         meta: { title: "매입상품관리", requiresAuth: true },
       },
+      {
+        path: "branch-codes",
+        name: "AdminBranchCodes",
+        component: () => import("@/views/admin/BranchCodeView.vue"),
+        meta: { title: "분류등록관리", requiresAuth: true },
+      },
 
       // 매입관리
       {

@@ -39,7 +39,7 @@ enum TaxType {
   ZERO_RATE  // 영세
 }
 
-// 상품
+// KIOSK 상품
 model Product {
   id          Int             @id @default(autoincrement())
   barcode     String          @unique @db.VarChar(50)
@@ -54,21 +54,51 @@ model Product {
   status      ProductStatus   @default(SELLING)
   imageUrl    String?         @map("image_url") @db.VarChar(500)
   categoryId  Int             @map("category_id")
-  supplierId  Int?            @map("supplier_id")
   isActive    Boolean         @default(true) @map("is_active")
   createdAt   DateTime        @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
   category    Category        @relation(fields: [categoryId], references: [id])
-  supplier      Supplier?       @relation(fields: [supplierId], references: [id])
-  orderItems    OrderItem[]
-  options       ProductOption[]
-  purchaseItems PurchaseItem[]
+  orderItems  OrderItem[]
+  options     ProductOption[]
 
   @@index([barcode])
   @@index([categoryId])
-  @@index([supplierId])
   @@index([status])
   @@map("products")
+}
+
+// 매입 상품 (다국어 불필요)
+model PurchaseProduct {
+  id         Int           @id @default(autoincrement())
+  barcode    String        @unique @db.VarChar(50)
+  name       String        @db.VarChar(200)
+  sellPrice  Decimal       @map("sell_price") @db.Decimal(18, 2)
+  costPrice  Decimal       @default(0) @map("cost_price") @db.Decimal(18, 2)
+  spec         String?       @db.VarChar(100)
+  productType  String?       @map("product_type") @db.VarChar(50)
+  purchaseCost Decimal       @default(0) @map("purchase_cost") @db.Decimal(18, 2)
+  vatAmount    Decimal       @default(0) @map("vat_amount") @db.Decimal(18, 2)
+  taxType    TaxType       @default(TAXABLE) @map("tax_type")
+  status     ProductStatus @default(SELLING)
+  supplierId Int?          @map("supplier_id")
+  lCode      String?       @map("l_code") @db.VarChar(2)
+  mCode      String?       @map("m_code") @db.VarChar(2)
+  sCode      String?       @map("s_code") @db.VarChar(3)
+  isActive     Boolean       @default(true) @map("is_active")
+  usePurchase  Boolean       @default(true) @map("use_purchase")
+  useOrder     Boolean       @default(true) @map("use_order")
+  useSales     Boolean       @default(true) @map("use_sales")
+  useInventory Boolean       @default(true) @map("use_inventory")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+  supplier      Supplier?       @relation(fields: [supplierId], references: [id])
+  purchaseItems PurchaseItem[]
+
+  @@index([barcode])
+  @@index([supplierId])
+  @@index([status])
+  @@index([lCode, mCode, sCode])
+  @@map("purchase_products")
 }
 
 // 상품 옵션
@@ -256,8 +286,8 @@ model Supplier {
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
-  products  Product[]
-  purchases Purchase[]
+  purchaseProducts PurchaseProduct[]
+  purchases        Purchase[]
 
   @@index([name])
   @@index([type])
@@ -297,18 +327,55 @@ model Purchase {
 
 // 매입 상세
 model PurchaseItem {
-  id         Int      @id @default(autoincrement())
-  purchaseId Int      @map("purchase_id")
-  productId  Int      @map("product_id")
-  quantity   Int
-  unitPrice  Decimal  @map("unit_price") @db.Decimal(18, 2)
-  sellPrice  Decimal  @default(0) @map("sell_price") @db.Decimal(18, 2)
-  amount     Decimal  @db.Decimal(18, 2)
-  createdAt  DateTime @default(now()) @map("created_at")
-  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
-  product    Product  @relation(fields: [productId], references: [id])
+  id                Int             @id @default(autoincrement())
+  purchaseId        Int             @map("purchase_id")
+  purchaseProductId Int             @map("purchase_product_id")
+  quantity          Int
+  unitPrice         Decimal         @map("unit_price") @db.Decimal(18, 2)
+  sellPrice         Decimal         @default(0) @map("sell_price") @db.Decimal(18, 2)
+  amount            Decimal         @db.Decimal(18, 2)
+  createdAt         DateTime        @default(now()) @map("created_at")
+  purchase          Purchase        @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  purchaseProduct   PurchaseProduct @relation(fields: [purchaseProductId], references: [id])
 
   @@map("purchase_items")
+}
+
+// 대분류
+model LBranch {
+  lCode     String    @id @map("l_code") @db.VarChar(2)
+  lName     String    @map("l_name") @db.VarChar(100)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  mBranches MBranch[]
+  @@map("l_branch")
+}
+
+// 중분류 (복합키: lCode + mCode)
+model MBranch {
+  lCode     String    @map("l_code") @db.VarChar(2)
+  mCode     String    @map("m_code") @db.VarChar(2)
+  mName     String    @map("m_name") @db.VarChar(100)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  lBranch   LBranch   @relation(fields: [lCode], references: [lCode], onDelete: Restrict)
+  sBranches SBranch[]
+  @@id([lCode, mCode])
+  @@map("m_branch")
+}
+
+// 소분류 (복합키: lCode + mCode + sCode)
+model SBranch {
+  lCode      String   @map("l_code") @db.VarChar(2)
+  mCode      String   @map("m_code") @db.VarChar(2)
+  sCode      String   @map("s_code") @db.VarChar(3)
+  sName      String   @map("s_name") @db.VarChar(100)
+  profitRate Decimal  @default(0) @map("profit_rate") @db.Decimal(5, 2)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  mBranch    MBranch  @relation(fields: [lCode, mCode], references: [lCode, mCode], onDelete: Restrict)
+  @@id([lCode, mCode, sCode])
+  @@map("s_branch")
 }
 
 // 시스템 설정

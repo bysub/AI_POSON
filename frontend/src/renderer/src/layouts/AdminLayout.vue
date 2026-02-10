@@ -45,6 +45,7 @@ const activeMenu = computed(() => {
   if (path.includes("/admin/business")) return "business";
   if (path.includes("/admin/settings")) return "settings";
   if (path.includes("/admin/devices")) return "devices";
+  if (path.includes("/admin/branch-codes")) return "branch-codes";
   return "dashboard";
 });
 
@@ -53,7 +54,15 @@ const activeGroup = computed(() => {
   const menu = activeMenu.value;
   if (menu === "dashboard") return "main";
   if (["products", "categories"].includes(menu)) return "products";
-  if (["purchase-register", "purchase-history", "suppliers", "purchase-products"].includes(menu))
+  if (
+    [
+      "purchase-register",
+      "purchase-history",
+      "suppliers",
+      "purchase-products",
+      "branch-codes",
+    ].includes(menu)
+  )
     return "purchase";
   if (["inventory-status", "inventory-adjust"].includes(menu)) return "inventory";
   if (["sales-register", "sales-history", "customers"].includes(menu)) return "sales";
@@ -87,7 +96,7 @@ const menuGroups = [
     icon: "inventory",
     items: [
       { id: "products", label: "KIOSK상품관리", path: "/admin/products", icon: "package" },
-      { id: "categories", label: "카테고리", path: "/admin/categories", icon: "category" },
+      { id: "categories", label: "KIOSK카테고리", path: "/admin/categories", icon: "category" },
     ],
   },
   {
@@ -133,6 +142,12 @@ const menuGroups = [
         label: "매입상품관리",
         path: "/admin/purchase-products",
         icon: "box",
+      },
+      {
+        id: "branch-codes",
+        label: "분류등록관리",
+        path: "/admin/branch-codes",
+        icon: "category",
       },
     ],
   },

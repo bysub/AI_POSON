@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { SupplierType } from "@prisma/client";
 import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
@@ -17,7 +18,7 @@ router.get("/", authenticate, async (req, res) => {
     const suppliers = await prisma.supplier.findMany({
       where: {
         ...(active !== undefined ? { isActive: active === "true" } : {}),
-        ...(type ? { type: type as string } : {}),
+        ...(type ? { type: type as SupplierType } : {}),
         ...(search
           ? {
               OR: [
@@ -30,7 +31,7 @@ router.get("/", authenticate, async (req, res) => {
           : {}),
       },
       include: {
-        _count: { select: { products: true } },
+        _count: { select: { purchaseProducts: true } },
       },
       orderBy: { name: "asc" },
     });
@@ -47,7 +48,7 @@ router.get("/", authenticate, async (req, res) => {
     async () => {
       return prisma.supplier.findMany({
         include: {
-          _count: { select: { products: true } },
+          _count: { select: { purchaseProducts: true } },
         },
         orderBy: { name: "asc" },
       });
@@ -75,12 +76,12 @@ router.get("/:id", authenticate, async (req, res, next) => {
       return prisma.supplier.findUnique({
         where: { id },
         include: {
-          products: {
+          purchaseProducts: {
             where: { isActive: true },
             select: { id: true, name: true, barcode: true, sellPrice: true, status: true },
             orderBy: { name: "asc" },
           },
-          _count: { select: { products: true } },
+          _count: { select: { purchaseProducts: true } },
         },
       });
     },
@@ -171,7 +172,7 @@ router.post(
         isActive: true,
       },
       include: {
-        _count: { select: { products: true } },
+        _count: { select: { purchaseProducts: true } },
       },
     });
 
@@ -259,7 +260,7 @@ router.patch(
         ...(isActive !== undefined && { isActive }),
       },
       include: {
-        _count: { select: { products: true } },
+        _count: { select: { purchaseProducts: true } },
       },
     });
 
@@ -282,7 +283,7 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
 
   const existing = await prisma.supplier.findUnique({
     where: { id },
-    include: { _count: { select: { products: { where: { isActive: true } } } } },
+    include: { _count: { select: { purchaseProducts: { where: { isActive: true } } } } },
   });
 
   if (!existing) {
@@ -290,11 +291,11 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
   }
 
   // 연결된 상품이 있으면 삭제 불가
-  if (existing._count.products > 0) {
+  if (existing._count.purchaseProducts > 0) {
     return next(
       new AppError(
         400,
-        "거래처에 연결된 상품이 있어 삭제할 수 없습니다. 먼저 상품의 거래처를 변경해주세요.",
+        "거래처에 연결된 매입상품이 있어 삭제할 수 없습니다. 먼저 상품의 거래처를 변경해주세요.",
         "SUPPLIER_HAS_PRODUCTS",
       ),
     );
