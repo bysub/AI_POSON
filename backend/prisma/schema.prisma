@@ -89,6 +89,8 @@ model PurchaseProduct {
   useOrder     Boolean       @default(true) @map("use_order")
   useSales     Boolean       @default(true) @map("use_sales")
   useInventory Boolean       @default(true) @map("use_inventory")
+  stock        Int           @default(0)
+  safeStock    Int           @default(0) @map("safe_stock")
   createdAt  DateTime      @default(now()) @map("created_at")
   updatedAt  DateTime      @updatedAt @map("updated_at")
   supplier      Supplier?       @relation(fields: [supplierId], references: [id])
