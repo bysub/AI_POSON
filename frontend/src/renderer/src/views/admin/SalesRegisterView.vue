@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { apiClient } from "@/services/api/client";
+import { showWarningToast, showSuccessToast, showApiError } from "@/utils/AlertUtils";
 
 interface ProductSearchResult {
   id: number;
@@ -121,7 +122,7 @@ function formatPrice(price: number): string {
 
 async function submitSale(): Promise<void> {
   if (saleItems.value.length === 0) {
-    alert("판매 상품을 추가해주세요");
+    showWarningToast("판매 상품을 추가해주세요");
     return;
   }
 
@@ -134,11 +135,10 @@ async function submitSale(): Promise<void> {
       })),
       memo: memo.value || null,
     });
-    alert("매출이 등록되었습니다.");
+    showSuccessToast("매출이 등록되었습니다");
     router.push("/admin/sales/history");
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "등록에 실패했습니다";
-    alert(`매출 등록 실패: ${msg}`);
+    showApiError(err, "매출 등록에 실패했습니다");
   } finally {
     isSaving.value = false;
   }

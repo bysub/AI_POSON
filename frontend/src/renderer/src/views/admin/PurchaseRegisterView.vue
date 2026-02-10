@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { Supplier } from "@/types";
 import { apiClient } from "@/services/api/client";
+import { showWarningToast, showApiError } from "@/utils/AlertUtils";
 
 interface ProductSearchResult {
   id: number;
@@ -143,11 +144,11 @@ function updateItemAmount(index: number): void {
 
 async function savePurchase(): Promise<void> {
   if (!selectedSupplierId.value) {
-    alert("거래처를 선택해주세요");
+    showWarningToast("거래처를 선택해주세요");
     return;
   }
   if (purchaseItems.value.length === 0) {
-    alert("매입 상품을 추가해주세요");
+    showWarningToast("매입 상품을 추가해주세요");
     return;
   }
 
@@ -167,8 +168,7 @@ async function savePurchase(): Promise<void> {
     });
     router.push("/admin/purchase/history");
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "저장에 실패했습니다";
-    alert(`매입 등록 실패: ${msg}`);
+    showApiError(err, "매입 등록에 실패했습니다");
   } finally {
     isSaving.value = false;
   }

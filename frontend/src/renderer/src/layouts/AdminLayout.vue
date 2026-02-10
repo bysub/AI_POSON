@@ -34,6 +34,7 @@ const activeMenu = computed(() => {
   if (path.includes("/admin/purchase/register")) return "purchase-register";
   if (path.includes("/admin/purchase/history")) return "purchase-history";
   if (path.includes("/admin/inventory/status")) return "inventory-status";
+  if (path.includes("/admin/inventory/history")) return "inventory-history";
   if (path.includes("/admin/inventory/adjust")) return "inventory-adjust";
   if (path.includes("/admin/sales/register")) return "sales-register";
   if (path.includes("/admin/sales/history")) return "sales-history";
@@ -64,7 +65,8 @@ const activeGroup = computed(() => {
     ].includes(menu)
   )
     return "purchase";
-  if (["inventory-status", "inventory-adjust"].includes(menu)) return "inventory";
+  if (["inventory-status", "inventory-adjust", "inventory-history"].includes(menu))
+    return "inventory";
   if (["sales-register", "sales-history", "customers"].includes(menu)) return "sales";
   if (["stats-purchase", "stats-sales", "stats-products"].includes(menu)) return "stats";
   if (["users", "business", "settings", "devices"].includes(menu)) return "settings";
@@ -109,6 +111,12 @@ const menuGroups = [
         label: "재고현황",
         path: "/admin/inventory/status",
         icon: "boxes",
+      },
+      {
+        id: "inventory-history",
+        label: "재고이동이력",
+        path: "/admin/inventory/history",
+        icon: "list",
       },
       {
         id: "inventory-adjust",

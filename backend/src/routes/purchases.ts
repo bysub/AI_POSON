@@ -6,8 +6,6 @@ import { authenticate, authorize } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-const CACHE_TTL = 300;
-
 // 매입 코드 자동생성 (P20260206-001 형식)
 async function generatePurchaseCode(): Promise<string> {
   const today = new Date();
@@ -224,33 +222,63 @@ router.post(
     // 부가세 계산: 포함이면 totalAmount/11, 별도면 totalAmount*0.1
     const taxAmount = taxIncluded ? Math.round(totalAmount / 11) : Math.round(totalAmount * 0.1);
 
-    const purchase = await prisma.purchase.create({
-      data: {
-        purchaseCode,
-        supplierId: parseInt(supplierId, 10),
-        purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
-        totalAmount,
-        taxAmount,
-        taxIncluded: !!taxIncluded,
-        status: "CONFIRMED",
-        memo: memo || null,
-        createdBy: (req as unknown as { user: { username: string } }).user?.username ?? null,
-        items: {
-          create: purchaseItems,
+    const purchase = await prisma.$transaction(async (tx) => {
+      const created = await tx.purchase.create({
+        data: {
+          purchaseCode,
+          supplierId: parseInt(supplierId, 10),
+          purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
+          totalAmount,
+          taxAmount,
+          taxIncluded: !!taxIncluded,
+          status: "CONFIRMED",
+          memo: memo || null,
+          createdBy: (req as unknown as { user: { username: string } }).user?.username ?? null,
+          items: {
+            create: purchaseItems,
+          },
         },
-      },
-      include: {
-        supplier: {
-          select: { id: true, code: true, name: true, type: true },
-        },
-        items: {
-          include: {
-            purchaseProduct: {
-              select: { id: true, barcode: true, name: true, sellPrice: true, costPrice: true },
+        include: {
+          supplier: {
+            select: { id: true, code: true, name: true, type: true },
+          },
+          items: {
+            include: {
+              purchaseProduct: {
+                select: { id: true, barcode: true, name: true, sellPrice: true, costPrice: true },
+              },
             },
           },
         },
-      },
+      });
+
+      // 매입 확정 시 재고 증가 + 이동 기록
+      for (const item of purchaseItems) {
+        const product = await tx.purchaseProduct.findUniqueOrThrow({
+          where: { id: item.purchaseProductId },
+          select: { stock: true },
+        });
+        const stockBefore = product.stock;
+
+        await tx.purchaseProduct.update({
+          where: { id: item.purchaseProductId },
+          data: { stock: { increment: item.quantity } },
+        });
+
+        await tx.stockMovement.create({
+          data: {
+            purchaseProductId: item.purchaseProductId,
+            type: "PURCHASE_IN",
+            quantity: item.quantity,
+            stockBefore,
+            stockAfter: stockBefore + item.quantity,
+            purchaseId: created.id,
+            createdBy: (req as unknown as { user: { username: string } }).user?.username ?? null,
+          },
+        });
+      }
+
+      return created;
     });
 
     await invalidatePurchaseCache();
@@ -292,9 +320,13 @@ router.patch(
     if (status !== undefined) updateData.status = status;
     if (taxIncluded !== undefined) updateData.taxIncluded = !!taxIncluded;
 
-    // 상품 항목 업데이트
+    // 상품 항목 업데이트 (재고 연동)
     if (items && Array.isArray(items)) {
-      await prisma.purchaseItem.deleteMany({ where: { purchaseId: id } });
+      // 기존 항목 조회 (재고 원복용)
+      const oldItems = await prisma.purchaseItem.findMany({
+        where: { purchaseId: id },
+        select: { purchaseProductId: true, quantity: true },
+      });
 
       let totalAmount = 0;
       const purchaseItems = items.map(
@@ -317,12 +349,71 @@ router.patch(
         },
       );
 
-      await prisma.purchaseItem.createMany({ data: purchaseItems });
       updateData.totalAmount = totalAmount;
       const isTaxIncluded = taxIncluded !== undefined ? !!taxIncluded : existing.taxIncluded;
       updateData.taxAmount = isTaxIncluded
         ? Math.round(totalAmount / 11)
         : Math.round(totalAmount * 0.1);
+
+      const username = (req as unknown as { user: { username: string } }).user?.username ?? null;
+
+      await prisma.$transaction(async (tx) => {
+        // 기존 항목 재고 차감 + PURCHASE_CANCEL 이동 기록
+        for (const old of oldItems) {
+          const product = await tx.purchaseProduct.findUniqueOrThrow({
+            where: { id: old.purchaseProductId },
+            select: { stock: true },
+          });
+          const stockBefore = product.stock;
+
+          await tx.purchaseProduct.update({
+            where: { id: old.purchaseProductId },
+            data: { stock: { decrement: old.quantity } },
+          });
+
+          await tx.stockMovement.create({
+            data: {
+              purchaseProductId: old.purchaseProductId,
+              type: "PURCHASE_CANCEL",
+              quantity: -old.quantity,
+              stockBefore,
+              stockAfter: stockBefore - old.quantity,
+              purchaseId: id,
+              createdBy: username,
+            },
+          });
+        }
+
+        // 기존 항목 삭제 → 새 항목 생성
+        await tx.purchaseItem.deleteMany({ where: { purchaseId: id } });
+        await tx.purchaseItem.createMany({ data: purchaseItems });
+
+        // 새 항목 재고 증가 + PURCHASE_IN 이동 기록
+        for (const item of purchaseItems) {
+          const product = await tx.purchaseProduct.findUniqueOrThrow({
+            where: { id: item.purchaseProductId },
+            select: { stock: true },
+          });
+          const stockBefore = product.stock;
+
+          await tx.purchaseProduct.update({
+            where: { id: item.purchaseProductId },
+            data: { stock: { increment: item.quantity } },
+          });
+
+          await tx.stockMovement.create({
+            data: {
+              purchaseProductId: item.purchaseProductId,
+              type: "PURCHASE_IN",
+              quantity: item.quantity,
+              stockBefore,
+              stockAfter: stockBefore + item.quantity,
+              purchaseId: id,
+              createdBy: username,
+            },
+          });
+        }
+      });
     }
 
     const purchase = await prisma.purchase.update({
@@ -368,9 +459,44 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
     return next(new AppError(400, "이미 취소된 매입입니다", "PURCHASE_ALREADY_CANCELLED"));
   }
 
-  await prisma.purchase.update({
-    where: { id },
-    data: { status: "CANCELLED" },
+  // 매입 취소 시 재고 차감 (트랜잭션)
+  const purchaseItems = await prisma.purchaseItem.findMany({
+    where: { purchaseId: id },
+    select: { purchaseProductId: true, quantity: true },
+  });
+
+  const username = (req as unknown as { user: { username: string } }).user?.username ?? null;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.purchase.update({
+      where: { id },
+      data: { status: "CANCELLED" },
+    });
+
+    for (const item of purchaseItems) {
+      const product = await tx.purchaseProduct.findUniqueOrThrow({
+        where: { id: item.purchaseProductId },
+        select: { stock: true },
+      });
+      const stockBefore = product.stock;
+
+      await tx.purchaseProduct.update({
+        where: { id: item.purchaseProductId },
+        data: { stock: { decrement: item.quantity } },
+      });
+
+      await tx.stockMovement.create({
+        data: {
+          purchaseProductId: item.purchaseProductId,
+          type: "PURCHASE_CANCEL",
+          quantity: -item.quantity,
+          stockBefore,
+          stockAfter: stockBefore - item.quantity,
+          purchaseId: id,
+          createdBy: username,
+        },
+      });
+    }
   });
 
   await invalidatePurchaseCache(id);

@@ -9,6 +9,19 @@ const router = Router();
 // 캐시 TTL (5분)
 const CACHE_TTL = 300;
 
+// 공통 include 패턴
+const productInclude = {
+  category: { select: { id: true, name: true } },
+  purchaseProduct: {
+    select: { id: true, barcode: true, name: true, stock: true, safeStock: true },
+  },
+  options: {
+    include: {
+      purchaseProduct: { select: { id: true, barcode: true, name: true, stock: true } },
+    },
+  },
+};
+
 // Get all products (검색어 없을 때만 캐싱)
 // admin=true 파라미터가 있으면 모든 상품 조회 (관리자용)
 router.get("/", async (req, res) => {
@@ -28,10 +41,7 @@ router.get("/", async (req, res) => {
           { barcode: { contains: search as string } },
         ],
       },
-      include: {
-        category: { select: { id: true, name: true } },
-        options: true,
-      },
+      include: productInclude,
       orderBy: { name: "asc" },
     });
 
@@ -48,10 +58,7 @@ router.get("/", async (req, res) => {
         isActive: true,
         ...(categoryId && { categoryId: parseInt(categoryId as string) }),
       },
-      include: {
-        category: { select: { id: true, name: true } },
-        options: true,
-      },
+      include: productInclude,
       orderBy: { name: "asc" },
     });
 
@@ -75,10 +82,7 @@ router.get("/", async (req, res) => {
           status: "SELLING", // 키오스크용: 판매중 상품만
           ...(categoryId && { categoryId: parseInt(categoryId as string) }),
         },
-        include: {
-          category: { select: { id: true, name: true } },
-          options: true,
-        },
+        include: productInclude,
         orderBy: { name: "asc" },
       });
     },
@@ -98,12 +102,9 @@ router.get("/barcode/:barcode", async (req, res, next) => {
   const product = await cacheService.getOrSet(
     CACHE_KEYS.PRODUCT_BY_BARCODE(barcode),
     async () => {
-      return prisma.product.findUnique({
-        where: { barcode },
-        include: {
-          category: { select: { id: true, name: true } },
-          options: true,
-        },
+      return prisma.product.findFirst({
+        where: { barcode, isActive: true, status: "SELLING" },
+        include: productInclude,
       });
     },
     CACHE_TTL,
@@ -132,10 +133,7 @@ router.get("/:id", async (req, res, next) => {
     async () => {
       return prisma.product.findUnique({
         where: { id },
-        include: {
-          category: { select: { id: true, name: true } },
-          options: true,
-        },
+        include: productInclude,
       });
     },
     CACHE_TTL,
@@ -161,13 +159,15 @@ router.post(
   async (req, res, next) => {
     const {
       barcode,
+      purchaseProductId,
       name,
       nameEn,
       nameJa,
       nameZh,
       description,
       sellPrice,
-      costPrice,
+      isDiscount,
+      discountPrice,
       status,
       categoryId,
       imageUrl,
@@ -175,20 +175,26 @@ router.post(
     } = req.body;
 
     // 필수 필드 검증
-    if (!barcode || !name || sellPrice === undefined || !categoryId) {
+    if (!name || sellPrice === undefined || !categoryId) {
       return next(
         new AppError(
           400,
-          "필수 필드가 누락되었습니다 (barcode, name, sellPrice, categoryId)",
+          "필수 필드가 누락되었습니다 (name, sellPrice, categoryId)",
           "MISSING_FIELDS",
         ),
       );
     }
 
-    // 바코드 중복 확인
-    const existing = await prisma.product.findUnique({ where: { barcode } });
-    if (existing) {
-      return next(new AppError(409, "이미 존재하는 바코드입니다", "PRODUCT_BARCODE_DUPLICATE"));
+    // purchaseProductId 검증 및 바코드 자동 설정
+    let resolvedBarcode = barcode ?? "";
+    if (purchaseProductId) {
+      const pp = await prisma.purchaseProduct.findUnique({ where: { id: purchaseProductId } });
+      if (!pp) {
+        return next(new AppError(404, "매입상품을 찾을 수 없습니다", "PURCHASE_PRODUCT_NOT_FOUND"));
+      }
+      if (!resolvedBarcode) {
+        resolvedBarcode = pp.barcode;
+      }
     }
 
     // 카테고리 존재 확인
@@ -199,14 +205,16 @@ router.post(
 
     const product = await prisma.product.create({
       data: {
-        barcode,
+        barcode: resolvedBarcode,
+        purchaseProductId: purchaseProductId ?? null,
         name,
         nameEn,
         nameJa,
         nameZh,
         description,
         sellPrice,
-        costPrice: costPrice ?? 0,
+        isDiscount: isDiscount ?? false,
+        discountPrice: isDiscount ? (discountPrice ?? null) : null,
         taxType: req.body.taxType ?? "TAXABLE",
         status: status ?? "SELLING",
         categoryId,
@@ -214,18 +222,23 @@ router.post(
         isActive: true,
         options: options?.length
           ? {
-              create: options.map((opt: { name: string; price: number; isRequired?: boolean }) => ({
-                name: opt.name,
-                price: opt.price,
-                isRequired: opt.isRequired ?? false,
-              })),
+              create: options.map(
+                (opt: {
+                  name: string;
+                  price: number;
+                  isRequired?: boolean;
+                  purchaseProductId?: number;
+                }) => ({
+                  name: opt.name,
+                  price: opt.price,
+                  isRequired: opt.isRequired ?? false,
+                  purchaseProductId: opt.purchaseProductId ?? null,
+                }),
+              ),
             }
           : undefined,
       },
-      include: {
-        category: { select: { id: true, name: true } },
-        options: true,
-      },
+      include: productInclude,
     });
 
     // 캐시 무효화
@@ -257,24 +270,26 @@ router.patch(
 
     const {
       barcode,
+      purchaseProductId,
       name,
       nameEn,
       nameJa,
       nameZh,
       description,
       sellPrice,
-      costPrice,
+      isDiscount,
+      discountPrice,
       status,
       categoryId,
       imageUrl,
       isActive,
     } = req.body;
 
-    // 바코드 변경 시 중복 확인
-    if (barcode && barcode !== existing.barcode) {
-      const barcodeExists = await prisma.product.findUnique({ where: { barcode } });
-      if (barcodeExists) {
-        return next(new AppError(409, "이미 존재하는 바코드입니다", "PRODUCT_BARCODE_DUPLICATE"));
+    // purchaseProductId 변경 시 검증
+    if (purchaseProductId !== undefined && purchaseProductId !== null) {
+      const pp = await prisma.purchaseProduct.findUnique({ where: { id: purchaseProductId } });
+      if (!pp) {
+        return next(new AppError(404, "매입상품을 찾을 수 없습니다", "PURCHASE_PRODUCT_NOT_FOUND"));
       }
     }
 
@@ -290,23 +305,22 @@ router.patch(
       where: { id },
       data: {
         ...(barcode !== undefined && { barcode }),
+        ...(purchaseProductId !== undefined && { purchaseProductId: purchaseProductId }),
         ...(name !== undefined && { name }),
         ...(nameEn !== undefined && { nameEn }),
         ...(nameJa !== undefined && { nameJa }),
         ...(nameZh !== undefined && { nameZh }),
         ...(description !== undefined && { description }),
         ...(sellPrice !== undefined && { sellPrice }),
-        ...(costPrice !== undefined && { costPrice }),
+        ...(isDiscount !== undefined && { isDiscount }),
+        ...(discountPrice !== undefined && { discountPrice: isDiscount ? discountPrice : null }),
         ...(req.body.taxType !== undefined && { taxType: req.body.taxType }),
         ...(status !== undefined && { status }),
         ...(categoryId !== undefined && { categoryId }),
         ...(imageUrl !== undefined && { imageUrl }),
         ...(isActive !== undefined && { isActive }),
       },
-      include: {
-        category: { select: { id: true, name: true } },
-        options: true,
-      },
+      include: productInclude,
     });
 
     // 캐시 무효화
@@ -369,7 +383,7 @@ router.post(
       return next(new AppError(404, "Product not found", "PRODUCT_NOT_FOUND"));
     }
 
-    const { name, price, isRequired } = req.body;
+    const { name, price, isRequired, purchaseProductId } = req.body;
 
     if (!name || price === undefined) {
       return next(new AppError(400, "필수 필드가 누락되었습니다 (name, price)", "MISSING_FIELDS"));
@@ -381,6 +395,7 @@ router.post(
         name,
         price,
         isRequired: isRequired ?? false,
+        purchaseProductId: purchaseProductId ?? null,
       },
     });
 
@@ -416,7 +431,7 @@ router.patch(
       return next(new AppError(404, "Option not found", "OPTION_NOT_FOUND"));
     }
 
-    const { name, price, isRequired } = req.body;
+    const { name, price, isRequired, purchaseProductId } = req.body;
 
     const updated = await prisma.productOption.update({
       where: { id: optionId },
@@ -424,6 +439,7 @@ router.patch(
         ...(name !== undefined && { name }),
         ...(price !== undefined && { price }),
         ...(isRequired !== undefined && { isRequired }),
+        ...(purchaseProductId !== undefined && { purchaseProductId }),
       },
     });
 

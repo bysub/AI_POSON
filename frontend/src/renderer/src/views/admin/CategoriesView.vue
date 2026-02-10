@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import type { Category } from "@/types";
 import { apiClient } from "@/services/api/client";
+import { showWarningToast, showApiError, showConfirm } from "@/utils/AlertUtils";
 
 const categories = ref<Category[]>([]);
 const isLoading = ref(false);
@@ -111,7 +112,7 @@ async function handleFileUpload(event: Event): Promise<void> {
 
   // 파일 크기 체크 (5MB)
   if (file.size > 5 * 1024 * 1024) {
-    alert("파일 크기는 5MB를 초과할 수 없습니다.");
+    showWarningToast("파일 크기는 5MB를 초과할 수 없습니다.");
     return;
   }
 
@@ -138,7 +139,7 @@ async function handleFileUpload(event: Event): Promise<void> {
     }
   } catch (err) {
     console.error("Upload failed:", err);
-    alert("파일 업로드에 실패했습니다.");
+    showApiError(err, "파일 업로드에 실패했습니다");
     uploadPreview.value = null;
   } finally {
     isUploading.value = false;
@@ -183,7 +184,7 @@ function openEditForm(category: Category): void {
 
 async function saveCategory(): Promise<void> {
   if (!categoryForm.value.name) {
-    alert("카테고리명은 필수입니다");
+    showWarningToast("카테고리명은 필수입니다");
     return;
   }
 
@@ -214,23 +215,22 @@ async function saveCategory(): Promise<void> {
     showForm.value = false;
     await loadData();
   } catch (err) {
-    alert("저장에 실패했습니다");
-    console.error(err);
+    showApiError(err, "저장에 실패했습니다");
   } finally {
     isLoading.value = false;
   }
 }
 
 async function deleteCategory(category: Category): Promise<void> {
-  if (!confirm(`"${category.name}" 카테고리를 삭제하시겠습니까?`)) return;
+  const { isConfirmed } = await showConfirm("카테고리 삭제");
+  if (!isConfirmed) return;
 
   isLoading.value = true;
   try {
     await apiClient.delete(`/api/v1/categories/${category.id}`);
     await loadData();
   } catch (err) {
-    alert("삭제에 실패했습니다 (연결된 상품이 있을 수 있습니다)");
-    console.error(err);
+    showApiError(err, "삭제에 실패했습니다 (연결된 상품이 있을 수 있습니다)");
   } finally {
     isLoading.value = false;
   }

@@ -5,12 +5,14 @@ export type TaxType = "TAXABLE" | "TAX_FREE" | "ZERO_RATE";
 export interface Product {
   id: number;
   barcode: string;
+  purchaseProductId?: number;
   name: string;
   nameEn?: string;
   nameJa?: string;
   nameZh?: string;
   sellPrice: number;
-  costPrice?: number;
+  isDiscount: boolean;
+  discountPrice?: number;
   taxType?: TaxType;
   categoryId: number;
   imageUrl?: string;
@@ -19,6 +21,7 @@ export interface Product {
   isActive: boolean;
   options?: ProductOption[];
   category?: { id: number; name: string };
+  purchaseProduct?: { id: number; barcode: string; name: string; stock: number; safeStock: number };
 }
 
 export interface PurchaseProduct {
@@ -42,6 +45,8 @@ export interface PurchaseProduct {
   useOrder: boolean;
   useSales: boolean;
   useInventory: boolean;
+  stock: number;
+  safeStock: number;
   createdAt: string;
   updatedAt: string;
   supplier?: { id: number; code: string; name: string; type: string };
@@ -52,6 +57,8 @@ export interface ProductOption {
   name: string;
   price: number;
   isRequired: boolean;
+  purchaseProductId?: number;
+  purchaseProduct?: { id: number; barcode: string; name: string; stock: number };
 }
 
 // Category types
@@ -209,6 +216,25 @@ export interface SBranch {
   profitRate: number;
   createdAt: string;
   updatedAt: string;
+}
+
+// StockMovement types
+export type StockMovementType = "PURCHASE_IN" | "PURCHASE_CANCEL" | "ADJUSTMENT" | "SYNC";
+
+export interface StockMovement {
+  id: number;
+  purchaseProductId: number;
+  type: StockMovementType;
+  quantity: number;
+  stockBefore: number;
+  stockAfter: number;
+  purchaseId?: number;
+  reason?: string;
+  memo?: string;
+  createdBy?: string;
+  createdAt: string;
+  purchaseProduct?: { id: number; barcode: string; name: string };
+  purchase?: { purchaseCode: string };
 }
 
 // Payment types

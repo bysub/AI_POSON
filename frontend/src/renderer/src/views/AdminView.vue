@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import type { Product, Category } from "@/types";
 import { apiClient } from "@/services/api/client";
 import { useAuthStore } from "@/stores/auth";
+import { showWarningToast, showApiError, showConfirm } from "@/utils/AlertUtils";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -129,7 +130,7 @@ function openEditProductForm(product: Product): void {
  */
 async function saveProduct(): Promise<void> {
   if (!productForm.value.barcode || !productForm.value.name || !productForm.value.categoryId) {
-    alert("바코드, 상품명, 카테고리는 필수입니다");
+    showWarningToast("바코드, 상품명, 카테고리는 필수입니다");
     return;
   }
 
@@ -147,8 +148,7 @@ async function saveProduct(): Promise<void> {
     showProductForm.value = false;
     await loadData();
   } catch (err) {
-    alert("저장에 실패했습니다");
-    console.error(err);
+    showApiError(err, "저장에 실패했습니다");
   } finally {
     isLoading.value = false;
   }
@@ -158,9 +158,8 @@ async function saveProduct(): Promise<void> {
  * 상품 삭제
  */
 async function deleteProduct(product: Product): Promise<void> {
-  if (!confirm(`"${product.name}" 상품을 삭제하시겠습니까?`)) {
-    return;
-  }
+  const { isConfirmed } = await showConfirm("상품 삭제");
+  if (!isConfirmed) return;
 
   isLoading.value = true;
 
@@ -168,8 +167,7 @@ async function deleteProduct(product: Product): Promise<void> {
     await apiClient.delete(`/api/v1/products/${product.id}`);
     await loadData();
   } catch (err) {
-    alert("삭제에 실패했습니다");
-    console.error(err);
+    showApiError(err, "삭제에 실패했습니다");
   } finally {
     isLoading.value = false;
   }
@@ -208,7 +206,7 @@ function openEditCategoryForm(category: Category): void {
  */
 async function saveCategory(): Promise<void> {
   if (!categoryForm.value.name) {
-    alert("카테고리명은 필수입니다");
+    showWarningToast("카테고리명은 필수입니다");
     return;
   }
 
@@ -224,8 +222,7 @@ async function saveCategory(): Promise<void> {
     showCategoryForm.value = false;
     await loadData();
   } catch (err) {
-    alert("저장에 실패했습니다");
-    console.error(err);
+    showApiError(err, "저장에 실패했습니다");
   } finally {
     isLoading.value = false;
   }
@@ -235,9 +232,8 @@ async function saveCategory(): Promise<void> {
  * 카테고리 삭제
  */
 async function deleteCategory(category: Category): Promise<void> {
-  if (!confirm(`"${category.name}" 카테고리를 삭제하시겠습니까?`)) {
-    return;
-  }
+  const { isConfirmed } = await showConfirm("카테고리 삭제");
+  if (!isConfirmed) return;
 
   isLoading.value = true;
 
@@ -245,8 +241,7 @@ async function deleteCategory(category: Category): Promise<void> {
     await apiClient.delete(`/api/v1/categories/${category.id}`);
     await loadData();
   } catch (err) {
-    alert("삭제에 실패했습니다 (연결된 상품이 있을 수 있습니다)");
-    console.error(err);
+    showApiError(err, "삭제에 실패했습니다 (연결된 상품이 있을 수 있습니다)");
   } finally {
     isLoading.value = false;
   }

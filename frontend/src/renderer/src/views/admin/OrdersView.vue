@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { apiClient } from "@/services/api/client";
+import { showApiError, showConfirm } from "@/utils/AlertUtils";
 
 interface OrderItem {
   id: number;
@@ -183,13 +184,14 @@ async function updateOrderStatus(
     }
   } catch (err) {
     console.error("Failed to update order status:", err);
-    alert("주문 상태 변경에 실패했습니다");
+    showApiError(err, "주문 상태 변경에 실패했습니다");
   }
 }
 
 // 주문 취소
 async function cancelOrder(orderId: string): Promise<void> {
-  if (!confirm("정말로 이 주문을 취소하시겠습니까?")) return;
+  const { isConfirmed } = await showConfirm("주문 취소");
+  if (!isConfirmed) return;
 
   try {
     const response = await apiClient.delete<{ success: boolean }>(`/api/v1/orders/${orderId}`);
@@ -200,7 +202,7 @@ async function cancelOrder(orderId: string): Promise<void> {
     }
   } catch (err) {
     console.error("Failed to cancel order:", err);
-    alert("주문 취소에 실패했습니다");
+    showApiError(err, "주문 취소에 실패했습니다");
   }
 }
 

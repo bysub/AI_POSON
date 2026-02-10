@@ -270,6 +270,64 @@ router.delete(
   },
 );
 
+// ========== 분류코드 명칭 일괄 조회 ==========
+
+// POST /resolve — [{lCode, mCode?, sCode?}] → 명칭 포함 응답
+router.post("/resolve", authenticate, async (req, res) => {
+  const items: { lCode: string; mCode?: string; sCode?: string }[] = req.body;
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.json({ success: true, data: [] });
+  }
+
+  // 고유한 lCode 목록
+  const lCodes = [...new Set(items.map((i) => i.lCode).filter(Boolean))];
+  const lBranches = await prisma.lBranch.findMany({ where: { lCode: { in: lCodes } } });
+  const lMap = new Map(lBranches.map((b) => [b.lCode, b.lName]));
+
+  // 고유한 (lCode, mCode) 쌍
+  const mPairs = [...new Set(items.filter((i) => i.mCode).map((i) => `${i.lCode}|${i.mCode}`))];
+  const mBranches =
+    mPairs.length > 0
+      ? await prisma.mBranch.findMany({
+          where: {
+            OR: mPairs.map((p) => {
+              const [lCode, mCode] = p.split("|");
+              return { lCode, mCode };
+            }),
+          },
+        })
+      : [];
+  const mMap = new Map(mBranches.map((b) => [`${b.lCode}|${b.mCode}`, b.mName]));
+
+  // 고유한 (lCode, mCode, sCode) 쌍
+  const sPairs = [
+    ...new Set(items.filter((i) => i.sCode).map((i) => `${i.lCode}|${i.mCode}|${i.sCode}`)),
+  ];
+  const sBranches =
+    sPairs.length > 0
+      ? await prisma.sBranch.findMany({
+          where: {
+            OR: sPairs.map((p) => {
+              const [lCode, mCode, sCode] = p.split("|");
+              return { lCode, mCode, sCode };
+            }),
+          },
+        })
+      : [];
+  const sMap = new Map(sBranches.map((b) => [`${b.lCode}|${b.mCode}|${b.sCode}`, b.sName]));
+
+  const result = items.map((item) => ({
+    lCode: item.lCode,
+    mCode: item.mCode || null,
+    sCode: item.sCode || null,
+    lName: lMap.get(item.lCode) || null,
+    mName: item.mCode ? mMap.get(`${item.lCode}|${item.mCode}`) || null : null,
+    sName: item.sCode ? sMap.get(`${item.lCode}|${item.mCode}|${item.sCode}`) || null : null,
+  }));
+
+  res.json({ success: true, data: result });
+});
+
 // ========== 캐시 관리 ==========
 
 async function invalidateBranchCache(lCode?: string, mCode?: string): Promise<void> {

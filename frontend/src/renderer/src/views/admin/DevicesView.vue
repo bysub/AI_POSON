@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
+import { showApiError, showConfirm } from "@/utils/AlertUtils";
 
 // ─── 타입 ───
 type DeviceType = "POS" | "KIOSK" | "KITCHEN";
@@ -54,7 +55,6 @@ const tabsByDevice = computed(() => {
       { id: "van", label: "VAN 결제" },
       { id: "selfCash", label: "현금 결제" },
       { id: "selfBag", label: "봉투/저울" },
-      { id: "selfUI", label: "고객 UI" },
       { id: "selfAuto", label: "자동 운영" },
       { id: "selfPoint", label: "포인트/알림" },
       { id: "selfPrint", label: "인쇄/출력" },
@@ -130,28 +130,6 @@ const selfBagConfig = ref({
   selfLastBag: "1",
   selfScalePort: "0",
   selfScaleLimitG: "0",
-});
-
-const selfUIConfig = ref({
-  selfSoundGuide: "1",
-  selfCusNum4: "1",
-  selfNoCustomer: "0",
-  selfCusSelect: "1",
-  selfCusAddUse: "0",
-  selfCusAddEtc: "0",
-  selfCusTopMsg: "",
-  selfCusBTMsg1: "",
-  selfCusBTMsg2: "",
-  selfTouchSoundYN: "1",
-  selfMainPage: "1",
-  selfBTInit: "1",
-  selfOneCancel: "1",
-  selfZHotKey: "1",
-  selfCountYN: "1",
-  selfStartHotKey: "0",
-  selfPriceUse: "0",
-  selfPriceType: "0",
-  selfReader: "2",
 });
 
 const selfAutoConfig = ref({
@@ -232,11 +210,6 @@ const categoryMap: Record<
     prefix: "selfBag",
     apiCategory: "SELF_BAG",
   },
-  selfUI: {
-    ref: selfUIConfig as ReturnType<typeof ref<SettingsRecord>>,
-    prefix: "selfUI",
-    apiCategory: "SELF_UI",
-  },
   selfAuto: {
     ref: selfAutoConfig as ReturnType<typeof ref<SettingsRecord>>,
     prefix: "selfAuto",
@@ -288,20 +261,6 @@ const selfBagToggles: ToggleItem[] = [
   { key: "selfStartBag", title: "시작시 봉투", desc: "시작 시 봉투 선택 화면" },
   { key: "selfMBagSell", title: "복수 봉투 판매", desc: "봉투 여러 장 판매" },
   { key: "selfLastBag", title: "마지막 봉투", desc: "마지막에 봉투 추가" },
-];
-
-const selfUIToggles: ToggleItem[] = [
-  { key: "selfSoundGuide", title: "음성 안내", desc: "음성 안내 사용" },
-  { key: "selfCusNum4", title: "회원번호 4자리", desc: "4자리 회원번호 입력" },
-  { key: "selfNoCustomer", title: "비회원 판매", desc: "비회원 판매 허용" },
-  { key: "selfCusAddUse", title: "고객 추가", desc: "고객 추가 기능 사용" },
-  { key: "selfTouchSoundYN", title: "터치 소리", desc: "터치 시 효과음" },
-  { key: "selfMainPage", title: "메인페이지 표시", desc: "메인 페이지 표시" },
-  { key: "selfBTInit", title: "초기화 버튼", desc: "초기화 버튼 표시" },
-  { key: "selfOneCancel", title: "개별 취소", desc: "개별 상품 취소 버튼" },
-  { key: "selfZHotKey", title: "Z 핫키", desc: "Z 핫키 사용" },
-  { key: "selfCountYN", title: "계수 버튼", desc: "계수 버튼 표시" },
-  { key: "selfPriceUse", title: "가격 조정", desc: "가격 조정 기능 사용" },
 ];
 
 const selfAutoToggles: ToggleItem[] = [
@@ -369,14 +328,13 @@ async function addDevice(): Promise<void> {
       newDevice.value = { id: "", name: "", type: "POS" };
     }
   } catch (err: unknown) {
-    const axErr = err as { response?: { data?: { message?: string } } };
-    const msg = axErr.response?.data?.message ?? (err instanceof Error ? err.message : "등록 실패");
-    alert(msg);
+    showApiError(err, "기기 등록에 실패했습니다");
   }
 }
 
 async function deleteDevice(id: string): Promise<void> {
-  if (!confirm(`기기 "${id}"를 삭제하시겠습니까? 설정도 모두 삭제됩니다.`)) return;
+  const { isConfirmed } = await showConfirm("삭제", "delete");
+  if (!isConfirmed) return;
   try {
     await apiClient.delete(`/api/v1/devices/${id}`);
     devices.value = devices.value.filter((d) => d.id !== id);
@@ -1028,102 +986,6 @@ onMounted(async () => {
                       class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
                       :class="
                         (selfBagConfig as SettingsRecord)[item.key] === '1' ? 'translate-x-4' : ''
-                      "
-                    />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- ═══ 셀프: 고객 UI ═══ -->
-            <div
-              v-show="activeTab === 'selfUI'"
-              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h3 class="mb-4 text-base font-semibold text-slate-800">고객 인터페이스</h3>
-              <div class="mb-6 grid gap-5 md:grid-cols-3">
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700">상단 메시지</label>
-                  <input
-                    v-model="selfUIConfig.selfCusTopMsg"
-                    type="text"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >버튼 메시지 1</label
-                  >
-                  <input
-                    v-model="selfUIConfig.selfCusBTMsg1"
-                    type="text"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >버튼 메시지 2</label
-                  >
-                  <input
-                    v-model="selfUIConfig.selfCusBTMsg2"
-                    type="text"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >고객 선택 방식</label
-                  >
-                  <select
-                    v-model="selfUIConfig.selfCusSelect"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  >
-                    <option value="0">방식 0</option>
-                    <option value="1">방식 1</option>
-                    <option value="2">방식 2</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >ID 리더기 유형</label
-                  >
-                  <select
-                    v-model="selfUIConfig.selfReader"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  >
-                    <option value="0">미사용</option>
-                    <option value="1">바코드</option>
-                    <option value="2">RF</option>
-                  </select>
-                </div>
-              </div>
-              <div class="grid gap-3 md:grid-cols-2">
-                <div
-                  v-for="item in selfUIToggles"
-                  :key="item.key"
-                  class="flex items-center justify-between rounded-xl bg-slate-50 p-3"
-                >
-                  <div>
-                    <p class="text-sm font-medium text-slate-800">
-                      {{ item.title }}
-                    </p>
-                    <p class="text-xs text-slate-500">
-                      {{ item.desc }}
-                    </p>
-                  </div>
-                  <button
-                    class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
-                    :class="
-                      (selfUIConfig as SettingsRecord)[item.key] === '1'
-                        ? 'bg-indigo-600'
-                        : 'bg-slate-300'
-                    "
-                    @click="toggleValue(selfUIConfig as SettingsRecord, item.key)"
-                  >
-                    <span
-                      class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
-                      :class="
-                        (selfUIConfig as SettingsRecord)[item.key] === '1' ? 'translate-x-4' : ''
                       "
                     />
                   </button>

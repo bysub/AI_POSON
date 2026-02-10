@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
+import { showSuccessToast, showApiError } from "@/utils/AlertUtils";
 
 const isLoading = ref(false);
 const isSavingBusiness = ref(false);
@@ -85,10 +86,9 @@ async function saveBusiness(): Promise<void> {
       "biz.email": businessInfo.value.email,
     };
     await apiClient.put("/api/v1/settings/business", payload);
-    alert("사업자 정보가 저장되었습니다.");
+    showSuccessToast("사업자 정보가 저장되었습니다");
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "저장에 실패했습니다";
-    alert(`저장 실패: ${msg}`);
+    showApiError(err, "저장에 실패했습니다");
   } finally {
     isSavingBusiness.value = false;
   }
@@ -103,10 +103,9 @@ async function saveReceipt(): Promise<void> {
       "rcp.footer": receiptInfo.value.receiptFooter,
     };
     await apiClient.put("/api/v1/settings/receipt", payload);
-    alert("영수증 설정이 저장되었습니다.");
+    showSuccessToast("영수증 설정이 저장되었습니다");
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "저장에 실패했습니다";
-    alert(`저장 실패: ${msg}`);
+    showApiError(err, "저장에 실패했습니다");
   } finally {
     isSavingReceipt.value = false;
   }

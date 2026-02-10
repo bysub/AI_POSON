@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { RouterLink } from "vue-router";
 import { apiClient } from "@/services/api/client";
 
 interface Supplier {
@@ -214,6 +215,9 @@ onMounted(() => loadData());
             <th class="px-5 py-3 text-center text-xs font-semibold uppercase text-slate-500">
               상태
             </th>
+            <th class="px-5 py-3 text-center text-xs font-semibold uppercase text-slate-500">
+              이력
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -257,6 +261,14 @@ onMounted(() => loadData());
               >
                 {{ getStockStatus(product).label }}
               </span>
+            </td>
+            <td class="px-5 py-3 text-center">
+              <RouterLink
+                :to="`/admin/inventory/history?productId=${product.id}`"
+                class="text-xs font-medium text-indigo-600 hover:text-indigo-800"
+              >
+                이력보기
+              </RouterLink>
             </td>
           </tr>
         </tbody>

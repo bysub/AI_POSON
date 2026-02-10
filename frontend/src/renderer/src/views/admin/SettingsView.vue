@@ -107,6 +107,26 @@ const pointConfig = ref({
   noBillMessage: "0",
   noBillSound: "0",
   noBillCusPoint: "0",
+  // 고객 UI (키오스크) — ASIS: DevicesView selfUI → 매장 공통으로 이동
+  selfSoundGuide: "1",
+  selfCusNum4: "1",
+  selfNoCustomer: "0",
+  selfCusSelect: "1",
+  selfCusAddUse: "0",
+  selfCusAddEtc: "0",
+  selfCusTopMsg: "",
+  selfCusBTMsg1: "",
+  selfCusBTMsg2: "",
+  selfTouchSoundYN: "1",
+  selfMainPage: "1",
+  selfBTInit: "1",
+  selfOneCancel: "1",
+  selfZHotKey: "1",
+  selfCountYN: "1",
+  selfStartHotKey: "0",
+  selfPriceUse: "0",
+  selfPriceType: "0",
+  selfReader: "2",
 });
 
 // ─── 바코드/중량 (ASIS: [Length] + S_Config) ───
@@ -289,6 +309,20 @@ const pointToggles: ToggleItem[] = [
   { key: "noBillMessage", title: "무영수증 메시지", desc: "무영수증 시 메시지 표시" },
   { key: "noBillSound", title: "무영수증 소리", desc: "무영수증 시 효과음" },
   { key: "noBillCusPoint", title: "무영수증 포인트", desc: "무영수증 시 포인트 적용" },
+];
+
+const selfUIToggles: ToggleItem[] = [
+  { key: "selfSoundGuide", title: "음성 안내", desc: "음성 안내 사용" },
+  { key: "selfCusNum4", title: "회원번호 4자리", desc: "4자리 회원번호 입력" },
+  { key: "selfNoCustomer", title: "비회원 판매", desc: "비회원 판매 허용" },
+  { key: "selfCusAddUse", title: "고객 추가", desc: "고객 추가 기능 사용" },
+  { key: "selfTouchSoundYN", title: "터치 소리", desc: "터치 시 효과음" },
+  { key: "selfMainPage", title: "메인페이지 표시", desc: "메인 페이지 표시" },
+  { key: "selfBTInit", title: "초기화 버튼", desc: "초기화 버튼 표시" },
+  { key: "selfOneCancel", title: "개별 취소", desc: "개별 상품 취소 버튼" },
+  { key: "selfZHotKey", title: "Z 핫키", desc: "Z 핫키 사용" },
+  { key: "selfCountYN", title: "계수 버튼", desc: "계수 버튼 표시" },
+  { key: "selfPriceUse", title: "가격 조정", desc: "가격 조정 기능 사용" },
 ];
 
 const systemToggles: ToggleItem[] = [
@@ -676,9 +710,119 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="grid gap-3 md:grid-cols-2">
+        <div class="mb-6 grid gap-3 md:grid-cols-2">
           <div
             v-for="item in pointToggles"
+            :key="item.key"
+            class="flex items-center justify-between rounded-xl bg-slate-50 p-3"
+          >
+            <div>
+              <p class="text-sm font-medium text-slate-800">
+                {{ item.title }}
+              </p>
+              <p class="text-xs text-slate-500">
+                {{ item.desc }}
+              </p>
+            </div>
+            <button
+              class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
+              :class="
+                (pointConfig as SettingsRecord)[item.key] === '1' ? 'bg-indigo-600' : 'bg-slate-300'
+              "
+              @click="toggleValue(pointConfig as SettingsRecord, item.key)"
+            >
+              <span
+                class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                :class="(pointConfig as SettingsRecord)[item.key] === '1' ? 'translate-x-4' : ''"
+              />
+            </button>
+          </div>
+        </div>
+
+        <!-- 고객 UI (키오스크) -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">고객 인터페이스 (키오스크)</h4>
+        <div class="mb-6 grid gap-5 md:grid-cols-3">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">상단 메시지</label>
+            <input
+              v-model="pointConfig.selfCusTopMsg"
+              type="text"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">버튼 메시지 1</label>
+            <input
+              v-model="pointConfig.selfCusBTMsg1"
+              type="text"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">버튼 메시지 2</label>
+            <input
+              v-model="pointConfig.selfCusBTMsg2"
+              type="text"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">고객 선택 방식</label>
+            <select
+              v-model="pointConfig.selfCusSelect"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="0">방식 0</option>
+              <option value="1">방식 1</option>
+              <option value="2">방식 2</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">ID 리더기 유형</label>
+            <select
+              v-model="pointConfig.selfReader"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="0">미사용</option>
+              <option value="1">바코드</option>
+              <option value="2">RF</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">시작 핫키</label>
+            <select
+              v-model="pointConfig.selfStartHotKey"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="0">미사용</option>
+              <option value="1">사용</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">가격 표시 유형</label>
+            <select
+              v-model="pointConfig.selfPriceType"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="0">기본</option>
+              <option value="1">유형 1</option>
+              <option value="2">유형 2</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">고객추가 기타</label>
+            <select
+              v-model="pointConfig.selfCusAddEtc"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="0">미사용</option>
+              <option value="1">사용</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div
+            v-for="item in selfUIToggles"
             :key="item.key"
             class="flex items-center justify-between rounded-xl bg-slate-50 p-3"
           >

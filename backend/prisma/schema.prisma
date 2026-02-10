@@ -41,29 +41,33 @@ enum TaxType {
 
 // KIOSK 상품
 model Product {
-  id          Int             @id @default(autoincrement())
-  barcode     String          @unique @db.VarChar(50)
-  name        String          @db.VarChar(200)
-  nameEn      String?         @map("name_en") @db.VarChar(200)
-  nameJa      String?         @map("name_ja") @db.VarChar(200)
-  nameZh      String?         @map("name_zh") @db.VarChar(200)
-  description String?         @db.Text
-  sellPrice   Decimal         @map("sell_price") @db.Decimal(18, 2)
-  costPrice   Decimal?        @map("cost_price") @db.Decimal(18, 2)
-  taxType     TaxType         @default(TAXABLE) @map("tax_type")
-  status      ProductStatus   @default(SELLING)
-  imageUrl    String?         @map("image_url") @db.VarChar(500)
-  categoryId  Int             @map("category_id")
-  isActive    Boolean         @default(true) @map("is_active")
-  createdAt   DateTime        @default(now()) @map("created_at")
-  updatedAt   DateTime        @updatedAt @map("updated_at")
-  category    Category        @relation(fields: [categoryId], references: [id])
-  orderItems  OrderItem[]
-  options     ProductOption[]
+  id                 Int              @id @default(autoincrement())
+  barcode            String           @db.VarChar(50)
+  purchaseProductId  Int?             @map("purchase_product_id")
+  name               String           @db.VarChar(200)
+  nameEn             String?          @map("name_en") @db.VarChar(200)
+  nameJa             String?          @map("name_ja") @db.VarChar(200)
+  nameZh             String?          @map("name_zh") @db.VarChar(200)
+  description        String?          @db.Text
+  sellPrice          Decimal          @map("sell_price") @db.Decimal(18, 2)
+  isDiscount         Boolean          @default(false) @map("is_discount")
+  discountPrice      Decimal?         @map("discount_price") @db.Decimal(18, 2)
+  taxType            TaxType          @default(TAXABLE) @map("tax_type")
+  status             ProductStatus    @default(SELLING)
+  imageUrl           String?          @map("image_url") @db.VarChar(500)
+  categoryId         Int              @map("category_id")
+  isActive           Boolean          @default(true) @map("is_active")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  category           Category         @relation(fields: [categoryId], references: [id])
+  purchaseProduct    PurchaseProduct? @relation(fields: [purchaseProductId], references: [id])
+  orderItems         OrderItem[]
+  options            ProductOption[]
 
   @@index([barcode])
   @@index([categoryId])
   @@index([status])
+  @@index([purchaseProductId])
   @@map("products")
 }
 
@@ -93,8 +97,11 @@ model PurchaseProduct {
   safeStock    Int           @default(0) @map("safe_stock")
   createdAt  DateTime      @default(now()) @map("created_at")
   updatedAt  DateTime      @updatedAt @map("updated_at")
-  supplier      Supplier?       @relation(fields: [supplierId], references: [id])
-  purchaseItems PurchaseItem[]
+  supplier       Supplier?        @relation(fields: [supplierId], references: [id])
+  purchaseItems  PurchaseItem[]
+  stockMovements StockMovement[]
+  products       Product[]
+  productOptions ProductOption[]
 
   @@index([barcode])
   @@index([supplierId])
@@ -105,14 +112,17 @@ model PurchaseProduct {
 
 // 상품 옵션
 model ProductOption {
-  id         Int      @id @default(autoincrement())
-  productId  Int      @map("product_id")
-  name       String   @db.VarChar(100)
-  price      Decimal  @db.Decimal(18, 2)
-  isRequired Boolean  @default(false) @map("is_required")
-  createdAt  DateTime @default(now()) @map("created_at")
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id                 Int              @id @default(autoincrement())
+  productId          Int              @map("product_id")
+  purchaseProductId  Int?             @map("purchase_product_id")
+  name               String           @db.VarChar(100)
+  price              Decimal          @db.Decimal(18, 2)
+  isRequired         Boolean          @default(false) @map("is_required")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  product            Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  purchaseProduct    PurchaseProduct? @relation(fields: [purchaseProductId], references: [id])
 
+  @@index([purchaseProductId])
   @@map("product_options")
 }
 
@@ -318,8 +328,9 @@ model Purchase {
   createdBy    String?        @map("created_by") @db.VarChar(100)
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
-  supplier     Supplier       @relation(fields: [supplierId], references: [id])
-  items        PurchaseItem[]
+  supplier       Supplier        @relation(fields: [supplierId], references: [id])
+  items          PurchaseItem[]
+  stockMovements StockMovement[]
 
   @@index([supplierId])
   @@index([purchaseDate])
@@ -341,6 +352,30 @@ model PurchaseItem {
   purchaseProduct   PurchaseProduct @relation(fields: [purchaseProductId], references: [id])
 
   @@map("purchase_items")
+}
+
+// 재고이동이력
+model StockMovement {
+  id                Int      @id @default(autoincrement())
+  purchaseProductId Int      @map("purchase_product_id")
+  type              String   @db.VarChar(20) // PURCHASE_IN, PURCHASE_CANCEL, ADJUSTMENT, SYNC
+  quantity          Int      // signed: +입고, -출고
+  stockBefore       Int      @map("stock_before")
+  stockAfter        Int      @map("stock_after")
+  purchaseId        Int?     @map("purchase_id")
+  reason            String?  @db.VarChar(50) // inventory_check, damage, gift, etc
+  memo              String?  @db.Text
+  createdBy         String?  @map("created_by") @db.VarChar(100)
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  purchaseProduct PurchaseProduct @relation(fields: [purchaseProductId], references: [id])
+  purchase        Purchase?       @relation(fields: [purchaseId], references: [id])
+
+  @@index([purchaseProductId])
+  @@index([type])
+  @@index([purchaseId])
+  @@index([createdAt])
+  @@map("stock_movements")
 }
 
 // 대분류

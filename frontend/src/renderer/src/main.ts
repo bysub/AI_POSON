@@ -4,6 +4,7 @@ import { createI18n } from "vue-i18n";
 import router from "./router";
 import App from "./App.vue";
 import "./assets/styles/main.css";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 // i18n messages
 import ko from "./locales/ko.json";

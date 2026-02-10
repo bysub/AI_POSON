@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
+import { showApiError, showConfirm } from "@/utils/AlertUtils";
 
 interface Admin {
   id: string;
@@ -22,14 +23,12 @@ const editId = ref("");
 const form = ref({ username: "", password: "", name: "", role: "STAFF" });
 
 const roleLabels: Record<string, string> = {
-  SUPER_ADMIN: "최고 관리자",
   ADMIN: "관리자",
   MANAGER: "매니저",
   STAFF: "스태프",
 };
 
 const roleColors: Record<string, string> = {
-  SUPER_ADMIN: "bg-red-100 text-red-700",
   ADMIN: "bg-indigo-100 text-indigo-700",
   MANAGER: "bg-blue-100 text-blue-700",
   STAFF: "bg-slate-100 text-slate-600",
@@ -74,8 +73,7 @@ async function saveAdmin(): Promise<void> {
     showModal.value = false;
     await loadAdmins();
   } catch (err: unknown) {
-    const axErr = err as { response?: { data?: { message?: string } } };
-    alert(axErr.response?.data?.message ?? "저장 실패");
+    showApiError(err, "저장 실패");
   }
 }
 
@@ -89,13 +87,13 @@ async function toggleActive(admin: Admin): Promise<void> {
 }
 
 async function deleteAdmin(admin: Admin): Promise<void> {
-  if (!confirm(`"${admin.name}" 사용자를 삭제하시겠습니까?`)) return;
+  const { isConfirmed } = await showConfirm("사용자 삭제");
+  if (!isConfirmed) return;
   try {
     await apiClient.delete(`/api/v1/admins/${admin.id}`);
     await loadAdmins();
   } catch (err: unknown) {
-    const axErr = err as { response?: { data?: { message?: string } } };
-    alert(axErr.response?.data?.message ?? "삭제 실패");
+    showApiError(err, "삭제 실패");
   }
 }
 
@@ -286,7 +284,6 @@ onMounted(() => loadAdmins());
               v-model="form.role"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="SUPER_ADMIN">최고 관리자</option>
               <option value="ADMIN">관리자</option>
               <option value="MANAGER">매니저</option>
               <option value="STAFF">스태프</option>

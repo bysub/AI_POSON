@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { apiClient } from "@/services/api/client";
+import { showWarningToast, showSuccessToast, showApiError, showConfirm } from "@/utils/AlertUtils";
 
 interface PurchaseProductResult {
   id: number;
@@ -25,6 +26,7 @@ const isSaving = ref(false);
 
 // 조정 사유
 const adjustReason = ref("");
+const adjustMemo = ref("");
 const reasonOptions = [
   { value: "inventory_check", label: "재고실사" },
   { value: "damage", label: "파손/폐기" },
@@ -120,32 +122,33 @@ const itemsToAdjust = computed(() => adjustItems.value.filter((item) => item.adj
 
 async function submitAdjust(): Promise<void> {
   if (itemsToAdjust.value.length === 0) {
-    alert("조정할 상품이 없습니다. 조정수량을 입력해주세요.");
+    showWarningToast("조정할 상품이 없습니다. 조정수량을 입력해주세요.");
     return;
   }
   if (!adjustReason.value) {
-    alert("조정 사유를 선택해주세요.");
+    showWarningToast("조정 사유를 선택해주세요.");
     return;
   }
 
-  if (!confirm(`${itemsToAdjust.value.length}개 상품의 재고를 조정하시겠습니까?`)) {
-    return;
-  }
+  const { isConfirmed } = await showConfirm("재고 조정");
+  if (!isConfirmed) return;
 
   isSaving.value = true;
   try {
-    // 순차 처리: 각 상품의 stock을 업데이트
-    for (const item of itemsToAdjust.value) {
-      await apiClient.patch(`/api/v1/purchase-products/${item.productId}`, {
-        stock: item.afterStock,
-      });
-    }
-    alert("재고 조정이 완료되었습니다.");
+    await apiClient.post("/api/v1/stock-movements/adjust", {
+      items: itemsToAdjust.value.map((item) => ({
+        productId: item.productId,
+        adjustQty: item.adjustQty,
+      })),
+      reason: adjustReason.value,
+      memo: adjustMemo.value || undefined,
+    });
+    showSuccessToast("재고 조정이 완료되었습니다.");
     adjustItems.value = [];
     adjustReason.value = "";
+    adjustMemo.value = "";
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "조정에 실패했습니다";
-    alert(`재고 조정 실패: ${msg}`);
+    showApiError(err, "재고 조정에 실패했습니다");
   } finally {
     isSaving.value = false;
   }
@@ -167,7 +170,7 @@ onMounted(() => {
     <!-- 검색 & 사유 -->
     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <h3 class="mb-4 font-semibold text-slate-700">조정 정보</h3>
-      <div class="grid gap-4 md:grid-cols-2">
+      <div class="grid gap-4 md:grid-cols-3">
         <!-- 상품 검색 -->
         <div class="relative">
           <label class="mb-1.5 block text-sm font-medium text-slate-700">상품 검색</label>
@@ -243,6 +246,17 @@ onMounted(() => {
               {{ opt.label }}
             </option>
           </select>
+        </div>
+
+        <!-- 메모 -->
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">메모</label>
+          <input
+            v-model="adjustMemo"
+            type="text"
+            placeholder="조정 사유 상세..."
+            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          />
         </div>
       </div>
     </div>

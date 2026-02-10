@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import type { LBranch, MBranch, SBranch } from "@/types";
 import { apiClient } from "@/services/api/client";
+import { showWarningToast, showApiError, showConfirm } from "@/utils/AlertUtils";
 
 // 목록 데이터
 const largeBranches = ref<LBranch[]>([]);
@@ -34,8 +35,8 @@ async function loadLargeBranches(): Promise<void> {
       "/api/v1/branches/large",
     );
     largeBranches.value = res.data.data;
-  } catch {
-    alert("대분류 목록 조회에 실패했습니다.");
+  } catch (err) {
+    showApiError(err, "대분류 목록 조회에 실패했습니다");
   } finally {
     isLoading.value.large = false;
   }
@@ -76,7 +77,7 @@ function resetLargeForm(): void {
 
 async function saveLarge(): Promise<void> {
   if (!largeForm.value.lCode || !largeForm.value.lName) {
-    alert("코드와 이름을 입력해주세요.");
+    showWarningToast("코드와 이름을 입력해주세요.");
     return;
   }
   try {
@@ -90,30 +91,20 @@ async function saveLarge(): Promise<void> {
       resetLargeForm();
     }
   } catch (err: unknown) {
-    const msg =
-      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-      "저장에 실패했습니다.";
-    alert(msg);
+    showApiError(err, "저장에 실패했습니다");
   }
 }
 
 async function deleteLarge(): Promise<void> {
   if (!selectedLarge.value) return;
-  if (
-    !confirm(
-      `대분류 [${selectedLarge.value.lCode}] ${selectedLarge.value.lName}을(를) 삭제하시겠습니까?`,
-    )
-  )
-    return;
+  const { isConfirmed: confirmed1 } = await showConfirm("대분류 삭제");
+  if (!confirmed1) return;
   try {
     await apiClient.delete(`/api/v1/branches/large/${selectedLarge.value.lCode}`);
     resetLargeForm();
     await loadLargeBranches();
   } catch (err: unknown) {
-    const msg =
-      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-      "삭제에 실패했습니다.";
-    alert(msg);
+    showApiError(err, "삭제에 실패했습니다");
   }
 }
 
@@ -126,8 +117,8 @@ async function loadMediumBranches(lCode: string): Promise<void> {
       `/api/v1/branches/medium?lCode=${lCode}`,
     );
     mediumBranches.value = res.data.data;
-  } catch {
-    alert("중분류 목록 조회에 실패했습니다.");
+  } catch (err) {
+    showApiError(err, "중분류 목록 조회에 실패했습니다");
   } finally {
     isLoading.value.medium = false;
   }
@@ -164,11 +155,11 @@ function resetMediumForm(): void {
 
 async function saveMedium(): Promise<void> {
   if (!selectedLarge.value) {
-    alert("대분류를 먼저 선택해주세요.");
+    showWarningToast("대분류를 먼저 선택해주세요.");
     return;
   }
   if (!mediumForm.value.mCode || !mediumForm.value.mName) {
-    alert("코드와 이름을 입력해주세요.");
+    showWarningToast("코드와 이름을 입력해주세요.");
     return;
   }
   try {
@@ -184,21 +175,14 @@ async function saveMedium(): Promise<void> {
       resetMediumForm();
     }
   } catch (err: unknown) {
-    const msg =
-      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-      "저장에 실패했습니다.";
-    alert(msg);
+    showApiError(err, "저장에 실패했습니다");
   }
 }
 
 async function deleteMedium(): Promise<void> {
   if (!selectedMedium.value) return;
-  if (
-    !confirm(
-      `중분류 [${selectedMedium.value.mCode}] ${selectedMedium.value.mName}을(를) 삭제하시겠습니까?`,
-    )
-  )
-    return;
+  const { isConfirmed: confirmed2 } = await showConfirm("중분류 삭제");
+  if (!confirmed2) return;
   try {
     await apiClient.delete(
       `/api/v1/branches/medium/${selectedMedium.value.lCode}/${selectedMedium.value.mCode}`,
@@ -208,10 +192,7 @@ async function deleteMedium(): Promise<void> {
       await loadMediumBranches(selectedLarge.value.lCode);
     }
   } catch (err: unknown) {
-    const msg =
-      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-      "삭제에 실패했습니다.";
-    alert(msg);
+    showApiError(err, "삭제에 실패했습니다");
   }
 }
 
@@ -224,8 +205,8 @@ async function loadSmallBranches(lCode: string, mCode: string): Promise<void> {
       `/api/v1/branches/small?lCode=${lCode}&mCode=${mCode}`,
     );
     smallBranches.value = res.data.data;
-  } catch {
-    alert("소분류 목록 조회에 실패했습니다.");
+  } catch (err) {
+    showApiError(err, "소분류 목록 조회에 실패했습니다");
   } finally {
     isLoading.value.small = false;
   }
@@ -252,11 +233,11 @@ function resetSmallForm(): void {
 
 async function saveSmall(): Promise<void> {
   if (!selectedLarge.value || !selectedMedium.value) {
-    alert("대분류와 중분류를 먼저 선택해주세요.");
+    showWarningToast("대분류와 중분류를 먼저 선택해주세요.");
     return;
   }
   if (!smallForm.value.sCode || !smallForm.value.sName) {
-    alert("코드와 이름을 입력해주세요.");
+    showWarningToast("코드와 이름을 입력해주세요.");
     return;
   }
   try {
@@ -268,19 +249,14 @@ async function saveSmall(): Promise<void> {
     await loadSmallBranches(selectedLarge.value.lCode, selectedMedium.value.mCode);
     resetSmallForm();
   } catch (err: unknown) {
-    const msg =
-      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-      "저장에 실패했습니다.";
-    alert(msg);
+    showApiError(err, "저장에 실패했습니다");
   }
 }
 
 async function deleteSmall(): Promise<void> {
   if (!selectedLarge.value || !selectedMedium.value || !smallForm.value.sCode) return;
-  if (
-    !confirm(`소분류 [${smallForm.value.sCode}] ${smallForm.value.sName}을(를) 삭제하시겠습니까?`)
-  )
-    return;
+  const { isConfirmed: confirmed3 } = await showConfirm("소분류 삭제");
+  if (!confirmed3) return;
   try {
     await apiClient.delete(
       `/api/v1/branches/small/${selectedLarge.value.lCode}/${selectedMedium.value.mCode}/${smallForm.value.sCode}`,
@@ -288,10 +264,7 @@ async function deleteSmall(): Promise<void> {
     resetSmallForm();
     await loadSmallBranches(selectedLarge.value.lCode, selectedMedium.value.mCode);
   } catch (err: unknown) {
-    const msg =
-      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-      "삭제에 실패했습니다.";
-    alert(msg);
+    showApiError(err, "삭제에 실패했습니다");
   }
 }
 
@@ -313,7 +286,7 @@ onMounted(() => {
     </div>
 
     <!-- 3-Panel Layout -->
-    <div class="grid grid-cols-3 gap-4" >
+    <div class="grid grid-cols-3 gap-4">
       <!-- 대분류 패널 -->
       <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">

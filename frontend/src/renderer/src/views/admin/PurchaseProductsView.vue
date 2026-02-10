@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import type { PurchaseProduct, TaxType } from "@/types";
 import { apiClient } from "@/services/api/client";
+import { showApiError, showConfirm } from "@/utils/AlertUtils";
 import BranchSelectModal from "@/components/BranchSelectModal.vue";
 
 const taxTypeConfig: Record<TaxType, { label: string; bg: string; text: string }> = {
@@ -36,11 +37,12 @@ const form = ref({
   costPrice: 0,
   purchaseCost: 0,
   vatAmount: 0,
-  taxType: "TAXABLE" as TaxType,
+  taxType: "" as TaxType | "",
   lCode: "",
   mCode: "",
   sCode: "",
   branchLabel: "",
+  safeStock: 0,
   isActive: true,
   usePurchase: true,
   useOrder: true,
@@ -68,13 +70,17 @@ watch(
   },
 );
 
-// 상품구분 변경 시 공산품이 아니면 매입원가/부가세 초기화
+// 상품구분 변경 시 공산품이 아니면 매입원가/부가세 초기화 + 바코드 재생성
 watch(
   () => form.value.productType,
-  (newType) => {
+  async (newType, oldType) => {
     if (newType !== "GENERAL") {
       form.value.purchaseCost = 0;
       form.value.vatAmount = 0;
+    }
+    // 신규 등록 시에만 상품구분 변경에 따라 바코드 자동 재생성
+    if (!isEditing.value && oldType !== undefined) {
+      form.value.barcode = await fetchNextBarcode(newType || undefined);
     }
   },
 );
@@ -106,6 +112,61 @@ const stats = computed(() => {
   };
 });
 
+// ─── 분류 명칭 캐시 ───
+type BranchNames = { lName: string | null; mName: string | null; sName: string | null };
+const branchNameMap = ref<Map<string, BranchNames>>(new Map());
+
+function branchKey(lCode: string, mCode?: string | null, sCode?: string | null): string {
+  return [lCode, mCode || "", sCode || ""].join("|");
+}
+
+async function resolveBranchNames(
+  items: { lCode: string; mCode?: string | null; sCode?: string | null }[],
+): Promise<void> {
+  const toResolve = items.filter(
+    (i) => i.lCode && !branchNameMap.value.has(branchKey(i.lCode, i.mCode, i.sCode)),
+  );
+  if (toResolve.length === 0) return;
+  try {
+    const res = await apiClient.post<{
+      success: boolean;
+      data: (BranchNames & { lCode: string; mCode: string | null; sCode: string | null })[];
+    }>("/api/v1/branches/resolve", toResolve);
+    if (res.data.success) {
+      for (const b of res.data.data) {
+        branchNameMap.value.set(branchKey(b.lCode, b.mCode, b.sCode), {
+          lName: b.lName,
+          mName: b.mName,
+          sName: b.sName,
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Failed to resolve branch names:", err);
+  }
+}
+
+function formatBranchLabel(
+  lCode?: string | null,
+  mCode?: string | null,
+  sCode?: string | null,
+): string {
+  if (!lCode) return "";
+  const names = branchNameMap.value.get(branchKey(lCode, mCode, sCode));
+  const parts: string[] = [];
+  if (names?.lName) parts.push(`${names.lName}(${lCode})`);
+  else parts.push(lCode);
+  if (mCode) {
+    if (names?.mName) parts.push(`${names.mName}(${mCode})`);
+    else parts.push(mCode);
+  }
+  if (sCode) {
+    if (names?.sName) parts.push(`${names.sName}(${sCode})`);
+    else parts.push(sCode);
+  }
+  return parts.join("-");
+}
+
 async function loadProducts(): Promise<void> {
   isLoading.value = true;
   try {
@@ -118,6 +179,13 @@ async function loadProducts(): Promise<void> {
     );
     if (res.data.success) {
       products.value = res.data.data;
+      // 분류 명칭 일괄 조회
+      const branchItems = products.value
+        .filter((p) => p.lCode)
+        .map((p) => ({ lCode: p.lCode!, mCode: p.mCode, sCode: p.sCode }));
+      if (branchItems.length > 0) {
+        await resolveBranchNames(branchItems);
+      }
     }
   } catch (err) {
     console.error("Failed to load products:", err);
@@ -126,9 +194,34 @@ async function loadProducts(): Promise<void> {
   }
 }
 
-function openAddModal(): void {
+const barcodePrefix = ref("");
+const isLoadingBarcode = ref(false);
+
+async function fetchNextBarcode(productType?: string): Promise<string> {
+  try {
+    isLoadingBarcode.value = true;
+    const params: Record<string, string> = {};
+    if (productType) params.productType = productType;
+    const res = await apiClient.get<{
+      success: boolean;
+      data: { barcode: string; prefix: string };
+    }>("/api/v1/purchase-products/next-barcode", { params });
+    if (res.data.success) {
+      barcodePrefix.value = res.data.data.prefix;
+      return res.data.data.barcode;
+    }
+  } catch (err) {
+    console.error("Failed to fetch next barcode:", err);
+  } finally {
+    isLoadingBarcode.value = false;
+  }
+  return "";
+}
+
+async function openAddModal(): Promise<void> {
   isEditing.value = false;
   editingProduct.value = null;
+  formErrors.value = {};
   form.value = {
     barcode: "",
     name: "",
@@ -138,11 +231,12 @@ function openAddModal(): void {
     costPrice: 0,
     purchaseCost: 0,
     vatAmount: 0,
-    taxType: "TAXABLE",
+    taxType: "",
     lCode: "",
     mCode: "",
     sCode: "",
     branchLabel: "",
+    safeStock: 0,
     isActive: true,
     usePurchase: true,
     useOrder: true,
@@ -150,15 +244,13 @@ function openAddModal(): void {
     useInventory: true,
   };
   showModal.value = true;
+  form.value.barcode = await fetchNextBarcode();
 }
 
 function openEditModal(product: PurchaseProduct): void {
   isEditing.value = true;
   editingProduct.value = product;
-  const branchParts: string[] = [];
-  if (product.lCode) branchParts.push(product.lCode);
-  if (product.mCode) branchParts.push(product.mCode);
-  if (product.sCode) branchParts.push(product.sCode);
+  formErrors.value = {};
   form.value = {
     barcode: product.barcode,
     name: product.name,
@@ -172,7 +264,8 @@ function openEditModal(product: PurchaseProduct): void {
     lCode: product.lCode ?? "",
     mCode: product.mCode ?? "",
     sCode: product.sCode ?? "",
-    branchLabel: branchParts.join("-"),
+    branchLabel: formatBranchLabel(product.lCode, product.mCode, product.sCode),
+    safeStock: Number(product.safeStock ?? 0),
     isActive: product.isActive ?? true,
     usePurchase: product.usePurchase ?? true,
     useOrder: product.useOrder ?? true,
@@ -197,19 +290,44 @@ function clearBranch(): void {
   form.value.branchLabel = "";
 }
 
-function formatBranchCode(product: PurchaseProduct): string {
-  if (!product.lCode) return "";
-  const parts = [product.lCode];
-  if (product.mCode) parts.push(product.mCode);
-  if (product.sCode) parts.push(product.sCode);
-  return parts.join("-");
+// ─── 유효성 검사 ───
+const formErrors = ref<Record<string, string>>({});
+
+function validateForm(): boolean {
+  const errors: Record<string, string> = {};
+
+  if (!form.value.barcode.trim()) {
+    errors.barcode = "바코드는 필수입니다";
+  }
+  if (!form.value.name.trim()) {
+    errors.name = "상품명은 필수입니다";
+  }
+  if (!form.value.productType) {
+    errors.productType = "상품구분을 선택해주세요";
+  }
+  if (!form.value.lCode) {
+    errors.branch = "분류코드를 선택해주세요";
+  }
+  if (!form.value.taxType) {
+    errors.taxType = "과세유형을 선택해주세요";
+  }
+  // 사용여부: 최소 1개 이상 체크
+  const hasUsage =
+    form.value.isActive ||
+    form.value.usePurchase ||
+    form.value.useOrder ||
+    form.value.useSales ||
+    form.value.useInventory;
+  if (!hasUsage) {
+    errors.usage = "사용 설정을 최소 1개 이상 선택해주세요";
+  }
+
+  formErrors.value = errors;
+  return Object.keys(errors).length === 0;
 }
 
 async function saveProduct(): Promise<void> {
-  if (!form.value.barcode || !form.value.name) {
-    alert("바코드, 상품명은 필수입니다");
-    return;
-  }
+  if (!validateForm()) return;
 
   isSaving.value = true;
   try {
@@ -217,15 +335,16 @@ async function saveProduct(): Promise<void> {
       barcode: form.value.barcode,
       name: form.value.name,
       spec: form.value.spec || null,
-      productType: form.value.productType || null,
+      productType: form.value.productType,
       sellPrice: form.value.sellPrice,
       costPrice: form.value.costPrice,
       purchaseCost: form.value.purchaseCost,
       vatAmount: form.value.vatAmount,
       taxType: form.value.taxType,
-      lCode: form.value.lCode || null,
+      lCode: form.value.lCode,
       mCode: form.value.mCode || null,
       sCode: form.value.sCode || null,
+      safeStock: form.value.safeStock,
       isActive: form.value.isActive,
       usePurchase: form.value.usePurchase,
       useOrder: form.value.useOrder,
@@ -240,21 +359,20 @@ async function saveProduct(): Promise<void> {
     showModal.value = false;
     await loadProducts();
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "저장에 실패했습니다";
-    alert(`상품 저장 실패: ${msg}`);
+    showApiError(err, "상품 저장에 실패했습니다");
   } finally {
     isSaving.value = false;
   }
 }
 
 async function deleteProduct(product: PurchaseProduct): Promise<void> {
-  if (!confirm(`'${product.name}' 상품을 삭제하시겠습니까?`)) return;
+  const { isConfirmed } = await showConfirm("상품 삭제");
+  if (!isConfirmed) return;
   try {
     await apiClient.delete(`/api/v1/purchase-products/${product.id}`);
     await loadProducts();
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "삭제에 실패했습니다";
-    alert(`삭제 실패: ${msg}`);
+    showApiError(err, "삭제에 실패했습니다");
   }
 }
 
@@ -424,6 +542,11 @@ onMounted(() => {
               <th
                 class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500"
               >
+                재고/적정
+              </th>
+              <th
+                class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
                 사용여부
               </th>
               <th
@@ -464,10 +587,10 @@ onMounted(() => {
               </td>
               <td class="px-4 py-3 text-center">
                 <span
-                  v-if="formatBranchCode(product)"
-                  class="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 font-mono text-xs font-medium text-purple-700"
+                  v-if="product.lCode"
+                  class="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700"
                 >
-                  {{ formatBranchCode(product) }}
+                  {{ formatBranchLabel(product.lCode, product.mCode, product.sCode) }}
                 </span>
                 <span v-else class="text-sm text-slate-300">-</span>
               </td>
@@ -504,6 +627,18 @@ onMounted(() => {
                   "
                 >
                   {{ calcMargin(Number(product.sellPrice), Number(product.costPrice)) }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <span
+                  class="text-sm"
+                  :class="
+                    product.safeStock > 0 && product.stock <= product.safeStock
+                      ? 'font-medium text-amber-600'
+                      : 'text-slate-600'
+                  "
+                >
+                  {{ product.stock }} / {{ product.safeStock ?? 0 }}
                 </span>
               </td>
               <td class="px-4 py-3 text-center">
@@ -580,7 +715,7 @@ onMounted(() => {
               </td>
             </tr>
             <tr v-if="filteredProducts.length === 0 && !isLoading">
-              <td colspan="12" class="px-6 py-12 text-center text-slate-400">
+              <td colspan="13" class="px-6 py-12 text-center text-slate-400">
                 <svg
                   class="mx-auto mb-3 h-12 w-12"
                   fill="none"
@@ -621,26 +756,84 @@ onMounted(() => {
               <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">바코드 *</label>
-                  <input
-                    v-model="form.barcode"
-                    type="text"
-                    placeholder="상품 바코드"
-                    :disabled="isEditing"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100"
-                  />
+                  <div class="flex gap-2">
+                    <input
+                      v-model="form.barcode"
+                      type="text"
+                      placeholder="상품 바코드"
+                      :disabled="isEditing"
+                      :class="
+                        formErrors.barcode
+                          ? 'border-red-400 ring-2 ring-red-100'
+                          : 'border-slate-200'
+                      "
+                      class="flex-1 rounded-xl border px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100"
+                      @input="formErrors.barcode = ''"
+                    />
+                    <button
+                      v-if="!isEditing"
+                      type="button"
+                      class="whitespace-nowrap rounded-xl bg-indigo-50 px-3 py-2.5 text-sm font-medium text-indigo-600 transition-colors hover:bg-indigo-100 disabled:opacity-50"
+                      :disabled="isLoadingBarcode"
+                      @click="
+                        form.barcode = '';
+                        fetchNextBarcode(form.productType || undefined).then(
+                          (v) => (form.barcode = v),
+                        );
+                      "
+                    >
+                      {{ isLoadingBarcode ? "..." : "자동생성" }}
+                    </button>
+                  </div>
+                  <p v-if="barcodePrefix && !isEditing" class="mt-1 text-xs text-slate-400">
+                    {{ form.productType === "WEIGHT" ? "중량상품" : "일반" }} 프리픽스:
+                    {{ barcodePrefix }} (환경설정 > 바코드/중량)
+                  </p>
+                  <p v-if="formErrors.barcode" class="mt-1 text-xs text-red-500">
+                    {{ formErrors.barcode }}
+                  </p>
                 </div>
+
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">상품구분 *</label>
+                  <select
+                    v-model="form.productType"
+                    :disabled="isEditing"
+                    :class="
+                      formErrors.productType
+                        ? 'border-red-400 ring-2 ring-red-100'
+                        : 'border-slate-200'
+                    "
+                    class="w-full rounded-xl border px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-100 disabled:text-slate-500"
+                    @change="formErrors.productType = ''"
+                  >
+                    <option v-for="opt in productTypeOptions" :key="opt.value" :value="opt.value">
+                      {{ opt.label }}
+                    </option>
+                  </select>
+                  <p v-if="formErrors.productType" class="mt-1 text-xs text-red-500">
+                    {{ formErrors.productType }}
+                  </p>
+                </div>
+              </div>
+              <!-- 규격 / 상품구분 -->
+              <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">상품명 *</label>
                   <input
                     v-model="form.name"
                     type="text"
                     placeholder="상품명 입력"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    :class="
+                      formErrors.name ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'
+                    "
+                    class="w-full rounded-xl border px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    @input="formErrors.name = ''"
                   />
+                  <p v-if="formErrors.name" class="mt-1 text-xs text-red-500">
+                    {{ formErrors.name }}
+                  </p>
                 </div>
-              </div>
-              <!-- 규격 / 상품구분 -->
-              <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">규격</label>
                   <input
@@ -650,32 +843,26 @@ onMounted(() => {
                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />
                 </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700">상품구분</label>
-                  <select
-                    v-model="form.productType"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  >
-                    <option v-for="opt in productTypeOptions" :key="opt.value" :value="opt.value">
-                      {{ opt.label }}
-                    </option>
-                  </select>
-                </div>
               </div>
               <!-- 분류코드 선택 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">분류코드</label>
+                <label class="mb-1.5 block text-sm font-medium text-slate-700">분류코드 *</label>
                 <div class="flex items-center gap-2">
                   <input
                     :value="
-                      form.branchLabel ||
-                      (form.lCode ? `${form.lCode}-${form.mCode}-${form.sCode}` : '')
+                      form.branchLabel || formatBranchLabel(form.lCode, form.mCode, form.sCode)
                     "
                     type="text"
                     readonly
                     placeholder="분류를 선택해주세요"
-                    class="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700"
-                    @click="showBranchModal = true"
+                    :class="
+                      formErrors.branch ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'
+                    "
+                    class="flex-1 cursor-pointer rounded-xl border bg-slate-50 px-4 py-2.5 text-sm text-slate-700"
+                    @click="
+                      showBranchModal = true;
+                      formErrors.branch = '';
+                    "
                   />
                   <button
                     type="button"
@@ -693,18 +880,28 @@ onMounted(() => {
                     초기화
                   </button>
                 </div>
+                <p v-if="formErrors.branch" class="mt-1 text-xs text-red-500">
+                  {{ formErrors.branch }}
+                </p>
               </div>
               <!-- 과세유형 -->
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">과세유형</label>
+                <label class="mb-1.5 block text-sm font-medium text-slate-700">과세유형 *</label>
                 <select
                   v-model="form.taxType"
-                  class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  :class="
+                    formErrors.taxType ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'
+                  "
+                  class="w-full rounded-xl border px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  @change="formErrors.taxType = ''"
                 >
+                  <option value="">선택</option>
                   <option value="TAXABLE">과세</option>
                   <option value="TAX_FREE">면세</option>
-                  <option value="ZERO_RATE">영세</option>
                 </select>
+                <p v-if="formErrors.taxType" class="mt-1 text-xs text-red-500">
+                  {{ formErrors.taxType }}
+                </p>
               </div>
               <!-- 매입원가 / 부가세 -->
               <div class="grid gap-4 sm:grid-cols-2">
@@ -770,11 +967,32 @@ onMounted(() => {
                   </span>
                 </div>
               </div>
+
+              <!-- 적정재고 -->
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">적정재고</label>
+                  <input
+                    v-model.number="form.safeStock"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                  <p class="mt-1 text-xs text-slate-400">
+                    재고가 적정재고 이하로 떨어지면 부족 경고가 표시됩니다
+                  </p>
+                </div>
+              </div>
               <!-- 사용여부 체크박스 -->
               <div>
-                <label class="mb-2 block text-sm font-medium text-slate-700">사용 설정</label>
+                <label class="mb-2 block text-sm font-medium text-slate-700">사용 설정 *</label>
                 <div
-                  class="flex flex-wrap gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+                  :class="
+                    formErrors.usage ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200'
+                  "
+                  class="flex flex-wrap gap-4 rounded-xl border bg-slate-50 px-4 py-3"
+                  @click="formErrors.usage = ''"
                 >
                   <label class="inline-flex cursor-pointer items-center gap-2">
                     <input
@@ -817,6 +1035,9 @@ onMounted(() => {
                     <span class="text-sm text-slate-700">재고</span>
                   </label>
                 </div>
+                <p v-if="formErrors.usage" class="mt-1 text-xs text-red-500">
+                  {{ formErrors.usage }}
+                </p>
               </div>
             </div>
             <footer class="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">

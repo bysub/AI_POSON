@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
 import { useNetworkStore } from "@/stores/network";
+import { showWarningToast, showInfoToast } from "@/utils/AlertUtils";
 import { CardPayment, CashPayment } from "@/components";
 import type { Order } from "@/types";
 
@@ -40,7 +41,7 @@ function formatPrice(price: number): string {
 function getOptionsString(options?: Record<string, unknown>): string {
   if (!options) return "";
   return Object.values(options)
-    .map((opt: any) => opt.name)
+    .map((opt: Record<string, unknown>) => opt.name)
     .filter(Boolean)
     .join(", ");
 }
@@ -73,7 +74,7 @@ async function proceedPayment(): Promise<void> {
   // 카드/모바일 결제는 온라인 필수
   if (selectedMethod.value === "card" || selectedMethod.value === "mobile") {
     if (!networkStore.isOnline) {
-      alert(t("common.offlineMode"));
+      showWarningToast(t("common.offlineMode"));
       return;
     }
   }
@@ -107,7 +108,7 @@ async function proceedPayment(): Promise<void> {
   } else if (selectedMethod.value === "cash") {
     currentStep.value = "cash";
   } else if (selectedMethod.value === "scanner") {
-    alert("스캐너 결제는 준비 중입니다.");
+    showInfoToast("스캐너 결제는 준비 중입니다");
   }
 }
 

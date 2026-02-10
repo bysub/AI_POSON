@@ -151,6 +151,69 @@ function getStoredToken(): string | null {
   return localStorage.getItem("accessToken");
 }
 
+/**
+ * 토큰 갱신 상태 (중복 갱신 방지)
+ */
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
+/**
+ * 리프레시 토큰으로 액세스 토큰 갱신
+ */
+async function tryRefreshToken(): Promise<boolean> {
+  // 이미 갱신 중이면 기존 Promise 재사용
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken) return false;
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) return false;
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        localStorage.setItem("accessToken", data.data.accessToken);
+        if (data.data.refreshToken) {
+          localStorage.setItem("refreshToken", data.data.refreshToken);
+        }
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+/**
+ * 인증 실패 시 로그아웃 처리
+ */
+function handleAuthFailure(): void {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("admin");
+
+  // 현재 관리자 페이지에 있으면 로그인으로 리디렉트
+  if (window.location.hash.includes("/admin") && !window.location.hash.includes("/admin/login")) {
+    window.location.hash = "#/admin/login";
+  }
+}
+
 async function request<T>(
   method: string,
   url: string,
@@ -177,11 +240,9 @@ async function request<T>(
     }
 
     const token = getStoredToken();
-    console.log("[API] Token:", token ? "exists" : "missing", "isFormData:", isFormData);
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
-    console.log("[API] Headers:", headers);
 
     const response = await fetch(`${BASE_URL}${url}${queryString}`, {
       method,
@@ -191,14 +252,47 @@ async function request<T>(
     });
 
     clearTimeout(timeoutId);
-    const data = await response.json();
 
-    // 401 에러 시 토큰 삭제 (로그아웃 처리)
-    if (response.status === 401) {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("admin");
+    // 401 에러 시 토큰 갱신 시도 후 재요청
+    if (response.status === 401 && !url.includes("/auth/")) {
+      const refreshed = await tryRefreshToken();
+      if (refreshed) {
+        // 갱신 성공 → 새 토큰으로 재요청
+        const newToken = getStoredToken();
+        const retryHeaders: Record<string, string> = {};
+        if (!isFormData) retryHeaders["Content-Type"] = "application/json";
+        if (newToken) retryHeaders["Authorization"] = `Bearer ${newToken}`;
+
+        const retryController = new AbortController();
+        const retryTimeoutId = setTimeout(() => retryController.abort(), 30000);
+
+        const retryResponse = await fetch(`${BASE_URL}${url}${queryString}`, {
+          method,
+          headers: retryHeaders,
+          body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
+          signal: retryController.signal,
+        });
+
+        clearTimeout(retryTimeoutId);
+        const retryData = await retryResponse.json();
+
+        if (!retryResponse.ok) {
+          if (retryResponse.status === 401) handleAuthFailure();
+          const msg =
+            (retryData as { error?: { message?: string }; message?: string })?.error?.message ??
+            (retryData as { message?: string })?.message ??
+            `요청 실패 (${retryResponse.status})`;
+          throw new Error(msg);
+        }
+
+        return { data: retryData as T };
+      }
+
+      // 갱신 실패 → 로그아웃 처리
+      handleAuthFailure();
     }
+
+    const data = await response.json();
 
     if (!response.ok) {
       const msg =

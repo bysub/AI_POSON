@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
 
 interface OrderItem {
@@ -34,9 +34,13 @@ const isLoading = ref(false);
 const error = ref<string | null>(null);
 
 // 날짜 필터
-const today = new Date().toISOString().split("T")[0];
-const startDate = ref(today);
-const endDate = ref(today);
+// 날짜 범위 (기본: 이번 달)
+const now = new Date();
+const startDate = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`);
+const endDate = ref(
+  `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
+);
+const today = endDate.value;
 
 // 페이지네이션
 const pagination = ref({

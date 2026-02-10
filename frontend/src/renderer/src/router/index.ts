@@ -116,6 +116,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/admin/InventoryAdjustView.vue"),
         meta: { title: "재고조정", requiresAuth: true },
       },
+      {
+        path: "inventory/history",
+        name: "AdminInventoryHistory",
+        component: () => import("@/views/admin/StockMovementHistoryView.vue"),
+        meta: { title: "재고이동이력", requiresAuth: true },
+      },
 
       // 매출관리
       {

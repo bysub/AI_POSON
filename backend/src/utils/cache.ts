@@ -235,6 +235,7 @@ export const CACHE_KEYS = {
   PURCHASE_PRODUCTS: "purchase-products",
   PURCHASE_PRODUCT: (id: number) => `purchase-product:${id}`,
   PURCHASE_PRODUCTS_BY_SUPPLIER: (supplierId: number) => `purchase-products:supplier:${supplierId}`,
+  STOCK_MOVEMENTS: "stock-movements",
   BRANCHES_LARGE: "branches:large",
   BRANCHES_MEDIUM: (lCode: string) => `branches:medium:${lCode}`,
   BRANCHES_SMALL: (lCode: string, mCode: string) => `branches:small:${lCode}:${mCode}`,

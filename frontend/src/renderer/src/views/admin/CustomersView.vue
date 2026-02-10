@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
+import { showApiError, showConfirm } from "@/utils/AlertUtils";
 
 interface Member {
   id: number;
@@ -86,13 +87,13 @@ async function saveMember(): Promise<void> {
     showModal.value = false;
     await loadMembers();
   } catch (err: unknown) {
-    const axErr = err as { response?: { data?: { message?: string } } };
-    alert(axErr.response?.data?.message ?? "저장 실패");
+    showApiError(err, "저장에 실패했습니다");
   }
 }
 
 async function deleteMember(m: Member): Promise<void> {
-  if (!confirm(`"${m.name}" 고객을 삭제하시겠습니까?`)) return;
+  const { isConfirmed } = await showConfirm("삭제", "delete");
+  if (!isConfirmed) return;
   try {
     await apiClient.delete(`/api/v1/members/${m.id}`);
     await loadMembers();
