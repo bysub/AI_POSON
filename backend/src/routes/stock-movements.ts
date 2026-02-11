@@ -19,6 +19,7 @@ export async function createStockMovement(
     type: string;
     quantity: number;
     purchaseId?: number;
+    orderId?: string;
     reason?: string;
     memo?: string;
     createdBy?: string;
@@ -40,6 +41,7 @@ export async function createStockMovement(
       stockBefore,
       stockAfter,
       purchaseId: params.purchaseId ?? null,
+      orderId: params.orderId ?? null,
       reason: params.reason ?? null,
       memo: params.memo ?? null,
       createdBy: params.createdBy ?? null,
@@ -154,6 +156,9 @@ router.get("/", authenticate, async (req, res) => {
         },
         purchase: {
           select: { purchaseCode: true },
+        },
+        order: {
+          select: { orderNumber: true },
         },
       },
       orderBy: { createdAt: "desc" },

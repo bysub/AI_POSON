@@ -545,7 +545,9 @@ onMounted(async () => {
               >
                 -
               </button>
-              <span class="w-6 text-center font-medium">{{ item.quantity }}</span>
+              <span class="text-order-summany-quantity w-6 text-center font-medium">{{
+                item.quantity
+              }}</span>
               <button
                 class="flex h-6 w-6 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
                 @click="cartStore.updateQuantity(item.id, item.quantity + 1)"
@@ -558,10 +560,14 @@ onMounted(async () => {
               >
                 ✕
               </button>
-              <span class="ml-2 w-16 text-right text-xs text-gray-500">
+              <span
+                class="text-order-summany-amount ml-2 mr-2 w-20 text-right text-xs text-gray-500"
+              >
+                <!--
                 <span class="block text-[10px] text-gray-400">{{
                   t("cart.total").toUpperCase()
                 }}</span>
+                -->
                 {{ formatPrice(item.price * item.quantity) }}
               </span>
             </div>
@@ -668,5 +674,10 @@ onMounted(async () => {
 .slide-fade-leave-to {
   transform: translateX(100%);
   opacity: 0;
+}
+.text-order-summany-quantity,
+.text-order-summany-amount {
+  font-weight: 700;
+  font-size: 14px;
 }
 </style>

@@ -1,13 +1,102 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { Prisma, OrderStatus } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { logger } from "../utils/logger.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
+import { createStockMovement } from "./stock-movements.js";
+
+type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 
 const router = Router();
+
+// 재고 차감이 필요한 상태 (PAID 이후 상태)
+const STOCK_DEDUCTED_STATUSES: OrderStatus[] = ["PAID", "PREPARING", "COMPLETED"];
+
+/**
+ * 주문 결제완료(PAID) 시 연결된 매입상품 재고 차감
+ */
+async function deductStockForOrder(
+  tx: TransactionClient,
+  orderId: string,
+  orderNumber: string,
+): Promise<void> {
+  const items = await tx.orderItem.findMany({
+    where: { orderId },
+    include: {
+      product: {
+        select: { purchaseProductId: true },
+      },
+    },
+  });
+
+  for (const item of items) {
+    const ppId = item.product.purchaseProductId;
+    if (!ppId) continue;
+
+    // 재고이동 기록 (stockBefore/After 자동 계산)
+    await createStockMovement(tx, {
+      purchaseProductId: ppId,
+      type: "SALE_OUT",
+      quantity: -item.quantity,
+      orderId,
+      reason: "order_paid",
+      memo: `주문번호: ${orderNumber}`,
+    });
+
+    // 실제 재고 차감
+    await tx.purchaseProduct.update({
+      where: { id: ppId },
+      data: { stock: { decrement: item.quantity } },
+    });
+  }
+
+  logger.info({ orderId, orderNumber }, "Stock deducted for order");
+}
+
+/**
+ * 주문 취소 시 차감된 재고 복구
+ */
+async function restoreStockForOrder(
+  tx: TransactionClient,
+  orderId: string,
+  orderNumber: string,
+): Promise<void> {
+  const items = await tx.orderItem.findMany({
+    where: { orderId },
+    include: {
+      product: {
+        select: { purchaseProductId: true },
+      },
+    },
+  });
+
+  for (const item of items) {
+    const ppId = item.product.purchaseProductId;
+    if (!ppId) continue;
+
+    // 재고이동 기록 (복구)
+    await createStockMovement(tx, {
+      purchaseProductId: ppId,
+      type: "SALE_CANCEL",
+      quantity: item.quantity,
+      orderId,
+      reason: "order_cancelled",
+      memo: `주문번호: ${orderNumber} 취소`,
+    });
+
+    // 실제 재고 복구
+    await tx.purchaseProduct.update({
+      where: { id: ppId },
+      data: { stock: { increment: item.quantity } },
+    });
+  }
+
+  logger.info({ orderId, orderNumber }, "Stock restored for cancelled order");
+}
 
 // ========== 키오스크용 API ==========
 
@@ -143,22 +232,58 @@ router.patch("/:id/status", async (req, res, next) => {
   }
 
   try {
-    const order = await prisma.order.update({
-      where: { id },
-      data: {
-        status,
-        ...(status === "COMPLETED" && { completedAt: new Date() }),
-      },
+    const existing = await prisma.order.findUnique({ where: { id } });
+    if (!existing) {
+      return next(new AppError(404, "Order not found", "ORDER_NOT_FOUND"));
+    }
+
+    const prevStatus = existing.status as OrderStatus;
+    const newStatus = status as OrderStatus;
+
+    // 동일 상태면 재고 처리 없이 그대로 반환
+    if (prevStatus === newStatus) {
+      return res.json({ success: true, data: existing });
+    }
+
+    const order = await prisma.$transaction(async (tx) => {
+      // PAID로 전환: 재고 차감
+      if (newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
+        await deductStockForOrder(tx, id, existing.orderNumber);
+      }
+
+      // CANCELLED로 전환 (이전에 재고 차감된 상태였다면): 재고 복구
+      if (newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
+        await restoreStockForOrder(tx, id, existing.orderNumber);
+      }
+
+      return tx.order.update({
+        where: { id },
+        data: {
+          status: newStatus,
+          ...(newStatus === "COMPLETED" && { completedAt: new Date() }),
+          ...(newStatus === "CANCELLED" && { cancelledAt: new Date() }),
+        },
+      });
     });
 
-    logger.info({ orderId: id, status }, "Order status updated");
+    // 재고 변경 시 캐시 무효화
+    if (
+      (newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) ||
+      (newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus))
+    ) {
+      await cacheService.del(CACHE_KEYS.PURCHASE_PRODUCTS);
+      await cacheService.del(CACHE_KEYS.STOCK_MOVEMENTS);
+    }
+
+    logger.info({ orderId: id, prevStatus, newStatus }, "Order status updated");
 
     res.json({
       success: true,
       data: order,
     });
-  } catch {
-    return next(new AppError(404, "Order not found", "ORDER_NOT_FOUND"));
+  } catch (error) {
+    logger.error({ error, orderId: id }, "Failed to update order status");
+    return next(new AppError(500, "주문 상태 변경에 실패했습니다", "STATUS_UPDATE_FAILED"));
   }
 });
 
@@ -242,26 +367,57 @@ router.put(
       return next(new AppError(400, "Invalid status", "INVALID_STATUS"));
     }
 
-    const order = await prisma.order.update({
-      where: { id },
-      data: {
-        ...(kioskId !== undefined && { kioskId }),
-        ...(status !== undefined && { status }),
-        ...(memo !== undefined && { memo }),
-        ...(status === "COMPLETED" && { completedAt: new Date() }),
-      },
-      include: {
-        items: true,
-        payments: true,
-      },
-    });
+    try {
+      const prevStatus = existing.status as OrderStatus;
+      const newStatus = (status ?? existing.status) as OrderStatus;
 
-    logger.info({ orderId: id, updates: { kioskId, status, memo } }, "Order updated");
+      const order = await prisma.$transaction(async (tx) => {
+        // PAID로 전환: 재고 차감
+        if (status && newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
+          await deductStockForOrder(tx, id, existing.orderNumber);
+        }
 
-    res.json({
-      success: true,
-      data: order,
-    });
+        // CANCELLED로 전환 (이전에 재고 차감된 상태였다면): 재고 복구
+        if (status && newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
+          await restoreStockForOrder(tx, id, existing.orderNumber);
+        }
+
+        return tx.order.update({
+          where: { id },
+          data: {
+            ...(kioskId !== undefined && { kioskId }),
+            ...(status !== undefined && { status }),
+            ...(memo !== undefined && { memo }),
+            ...(newStatus === "COMPLETED" && { completedAt: new Date() }),
+            ...(newStatus === "CANCELLED" && { cancelledAt: new Date() }),
+          },
+          include: {
+            items: true,
+            payments: true,
+          },
+        });
+      });
+
+      // 재고 변경 시 캐시 무효화
+      if (
+        status &&
+        ((newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) ||
+          (newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus)))
+      ) {
+        await cacheService.del(CACHE_KEYS.PURCHASE_PRODUCTS);
+        await cacheService.del(CACHE_KEYS.STOCK_MOVEMENTS);
+      }
+
+      logger.info({ orderId: id, updates: { kioskId, status, memo } }, "Order updated");
+
+      res.json({
+        success: true,
+        data: order,
+      });
+    } catch (error) {
+      logger.error({ error, orderId: id }, "Failed to update order");
+      return next(new AppError(500, "주문 수정에 실패했습니다", "ORDER_UPDATE_FAILED"));
+    }
   },
 );
 
@@ -301,21 +457,41 @@ router.delete(
       );
     }
 
-    // 주문 취소 처리
-    await prisma.order.update({
-      where: { id },
-      data: {
-        status: "CANCELLED",
-        cancelledAt: new Date(),
-      },
-    });
+    try {
+      const prevStatus = existing.status as OrderStatus;
 
-    logger.info({ orderId: id }, "Order cancelled");
+      await prisma.$transaction(async (tx) => {
+        // 재고 차감된 상태(PAID, PREPARING)에서 취소 시 재고 복구
+        if (STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
+          await restoreStockForOrder(tx, id, existing.orderNumber);
+        }
 
-    res.json({
-      success: true,
-      message: "주문이 취소되었습니다",
-    });
+        // 주문 취소 처리
+        await tx.order.update({
+          where: { id },
+          data: {
+            status: "CANCELLED",
+            cancelledAt: new Date(),
+          },
+        });
+      });
+
+      // 재고 복구 시 캐시 무효화
+      if (STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
+        await cacheService.del(CACHE_KEYS.PURCHASE_PRODUCTS);
+        await cacheService.del(CACHE_KEYS.STOCK_MOVEMENTS);
+      }
+
+      logger.info({ orderId: id, prevStatus }, "Order cancelled");
+
+      res.json({
+        success: true,
+        message: "주문이 취소되었습니다",
+      });
+    } catch (error) {
+      logger.error({ error, orderId: id }, "Failed to cancel order");
+      return next(new AppError(500, "주문 취소에 실패했습니다", "ORDER_CANCEL_FAILED"));
+    }
   },
 );
 

@@ -139,8 +139,9 @@ model Order {
   createdAt   DateTime    @default(now()) @map("created_at")
   completedAt DateTime?   @map("completed_at")
   cancelledAt DateTime?   @map("cancelled_at")
-  items       OrderItem[]
-  payments    Payment[]
+  items          OrderItem[]
+  payments       Payment[]
+  stockMovements StockMovement[]
 
   @@index([orderNumber])
   @@index([createdAt])
@@ -344,22 +345,25 @@ model PurchaseItem {
 model StockMovement {
   id                Int      @id @default(autoincrement())
   purchaseProductId Int      @map("purchase_product_id")
-  type              String   @db.VarChar(20) // PURCHASE_IN, PURCHASE_CANCEL, ADJUSTMENT, SYNC
+  type              String   @db.VarChar(20) // PURCHASE_IN, PURCHASE_CANCEL, ADJUSTMENT, SYNC, SALE_OUT, SALE_CANCEL
   quantity          Int      // signed: +입고, -출고
   stockBefore       Int      @map("stock_before")
   stockAfter        Int      @map("stock_after")
   purchaseId        Int?     @map("purchase_id")
-  reason            String?  @db.VarChar(50) // inventory_check, damage, gift, etc
+  orderId           String?  @map("order_id")
+  reason            String?  @db.VarChar(50) // inventory_check, damage, gift, order_paid, order_cancelled
   memo              String?  @db.Text
   createdBy         String?  @map("created_by") @db.VarChar(100)
   createdAt         DateTime @default(now()) @map("created_at")
 
   purchaseProduct PurchaseProduct @relation(fields: [purchaseProductId], references: [id])
   purchase        Purchase?       @relation(fields: [purchaseId], references: [id])
+  order           Order?          @relation(fields: [orderId], references: [id])
 
   @@index([purchaseProductId])
   @@index([type])
   @@index([purchaseId])
+  @@index([orderId])
   @@index([createdAt])
   @@map("stock_movements")
 }

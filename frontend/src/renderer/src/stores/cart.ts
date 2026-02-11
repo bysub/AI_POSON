@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import type { CartItem, Product, Order } from "@/types";
 import { apiClient } from "@/services/api/client";
+import { useSettingsStore } from "./settings";
 
 export const useCartStore = defineStore("cart", () => {
   const items = ref<CartItem[]>([]);
@@ -83,9 +84,12 @@ export const useCartStore = defineStore("cart", () => {
         options: item.options ?? null,
       }));
 
+      const settingsStore = useSettingsStore();
+      const resolvedKioskId = (kioskId ?? settingsStore.deviceId) || "KIOSK-001";
+
       const response = await apiClient.post<{ success: boolean; data: Order }>("/api/v1/orders", {
         items: orderItems,
-        kioskId: kioskId ?? "KIOSK-001",
+        kioskId: resolvedKioskId,
       });
 
       if (response.data.success) {

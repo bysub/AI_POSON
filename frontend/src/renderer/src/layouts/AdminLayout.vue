@@ -131,20 +131,13 @@ const menuGroups = [
     label: "매입관리",
     icon: "cart-down",
     items: [
-      {
-        id: "purchase-register",
-        label: "매입등록",
-        path: "/admin/purchase/register",
-        icon: "plus-circle",
-      },
-      /*{ id: "sales-register", label: "수동출고", path: "/admin/sales/register", icon: "cash" },*/
-      {
-        id: "purchase-history",
-        label: "매입내역",
-        path: "/admin/purchase/history",
-        icon: "list",
-      },
       { id: "suppliers", label: "거래처 관리", path: "/admin/suppliers", icon: "truck" },
+      {
+        id: "branch-codes",
+        label: "분류등록관리",
+        path: "/admin/branch-codes",
+        icon: "category",
+      },
       {
         id: "purchase-products",
         label: "매입상품관리",
@@ -152,10 +145,16 @@ const menuGroups = [
         icon: "box",
       },
       {
-        id: "branch-codes",
-        label: "분류등록관리",
-        path: "/admin/branch-codes",
-        icon: "category",
+        id: "purchase-history",
+        label: "매입내역",
+        path: "/admin/purchase/history",
+        icon: "list",
+      },
+      {
+        id: "purchase-register",
+        label: "매입등록",
+        path: "/admin/purchase/register",
+        icon: "plus-circle",
       },
     ],
   },
