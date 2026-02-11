@@ -41,10 +41,19 @@ function formatPrice(price: number): string {
 }
 
 /**
+ * 상품 재고 확인 (매입상품 연결 시 해당 재고, 미연결 시 무제한)
+ */
+function isSoldOut(product: Product): boolean {
+  if (product.status === "SOLD_OUT") return true;
+  const stock = product.purchaseProduct?.stock ?? Infinity;
+  return stock <= 0;
+}
+
+/**
  * 상품 클릭 핸들러
  */
 function handleProductClick(product: Product): void {
-  if (product.stock <= 0) return;
+  if (isSoldOut(product)) return;
 
   // 옵션이 있는 상품은 옵션 모달 표시
   if (product.options && product.options.length > 0) {
@@ -52,13 +61,6 @@ function handleProductClick(product: Product): void {
   } else {
     emit("addToCart", product);
   }
-}
-
-/**
- * 품절 여부
- */
-function isSoldOut(product: Product): boolean {
-  return product.stock <= 0;
 }
 </script>
 

@@ -15,7 +15,9 @@ export const useProductsStore = defineStore("products", () => {
     if (!selectedCategoryId.value) {
       return products.value;
     }
-    return products.value.filter((p) => p.categoryId === selectedCategoryId.value);
+    return products.value.filter((p) =>
+      p.categories?.some((c) => c.id === selectedCategoryId.value),
+    );
   });
 
   // 활성 카테고리만
@@ -138,8 +140,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "불고기버거 세트",
         nameEn: "Bulgogi Burger Set",
         sellPrice: 8500,
-        categoryId: 2,
-        stock: 10,
+        categories: [{ id: 2, name: "세트 메뉴" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
       {
@@ -148,8 +151,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "치킨버거 세트",
         nameEn: "Chicken Burger Set",
         sellPrice: 7500,
-        categoryId: 2,
-        stock: 10,
+        categories: [{ id: 2, name: "세트 메뉴" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
       {
@@ -158,8 +162,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "불고기버거",
         nameEn: "Bulgogi Burger",
         sellPrice: 5500,
-        categoryId: 3,
-        stock: 10,
+        categories: [{ id: 3, name: "단품" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
       {
@@ -168,8 +173,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "치킨버거",
         nameEn: "Chicken Burger",
         sellPrice: 5000,
-        categoryId: 3,
-        stock: 8,
+        categories: [{ id: 3, name: "단품" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
       {
@@ -178,8 +184,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "감자튀김 (대)",
         nameEn: "French Fries (L)",
         sellPrice: 3000,
-        categoryId: 4,
-        stock: 20,
+        categories: [{ id: 4, name: "사이드" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
       {
@@ -188,8 +195,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "감자튀김 (중)",
         nameEn: "French Fries (M)",
         sellPrice: 2500,
-        categoryId: 4,
-        stock: 20,
+        categories: [{ id: 4, name: "사이드" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
       {
@@ -198,8 +206,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "콜라 (대)",
         nameEn: "Cola (L)",
         sellPrice: 2500,
-        categoryId: 5,
-        stock: 30,
+        categories: [{ id: 5, name: "음료" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
       {
@@ -208,8 +217,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "콜라 (중)",
         nameEn: "Cola (M)",
         sellPrice: 2000,
-        categoryId: 5,
-        stock: 30,
+        categories: [{ id: 5, name: "음료" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
       {
@@ -218,8 +228,9 @@ export const useProductsStore = defineStore("products", () => {
         name: "사이다 (대)",
         nameEn: "Sprite (L)",
         sellPrice: 2500,
-        categoryId: 5,
-        stock: 30,
+        categories: [{ id: 5, name: "음료" }],
+        isDiscount: false,
+        status: "SELLING",
         isActive: true,
       },
     ];

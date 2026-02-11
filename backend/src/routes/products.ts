@@ -11,7 +11,7 @@ const CACHE_TTL = 300;
 
 // 공통 include 패턴
 const productInclude = {
-  category: { select: { id: true, name: true } },
+  categories: { select: { id: true, name: true } },
   purchaseProduct: {
     select: { id: true, barcode: true, name: true, stock: true, safeStock: true },
   },
@@ -28,6 +28,10 @@ router.get("/", async (req, res) => {
   const { categoryId, search, admin } = req.query;
   const isAdminMode = admin === "true";
 
+  const categoryFilter = categoryId
+    ? { categories: { some: { id: parseInt(categoryId as string) } } }
+    : {};
+
   // 검색어가 있으면 캐싱하지 않음
   if (search) {
     const products = await prisma.product.findMany({
@@ -35,7 +39,7 @@ router.get("/", async (req, res) => {
         isActive: true,
         // 키오스크용: 판매중 상품만, 관리자용: 모든 상품
         ...(!isAdminMode && { status: "SELLING" }),
-        ...(categoryId && { categoryId: parseInt(categoryId as string) }),
+        ...categoryFilter,
         OR: [
           { name: { contains: search as string, mode: "insensitive" } },
           { barcode: { contains: search as string } },
@@ -56,7 +60,7 @@ router.get("/", async (req, res) => {
     const products = await prisma.product.findMany({
       where: {
         isActive: true,
-        ...(categoryId && { categoryId: parseInt(categoryId as string) }),
+        ...categoryFilter,
       },
       include: productInclude,
       orderBy: { name: "asc" },
@@ -80,7 +84,7 @@ router.get("/", async (req, res) => {
         where: {
           isActive: true,
           status: "SELLING", // 키오스크용: 판매중 상품만
-          ...(categoryId && { categoryId: parseInt(categoryId as string) }),
+          ...categoryFilter,
         },
         include: productInclude,
         orderBy: { name: "asc" },
@@ -169,17 +173,19 @@ router.post(
       isDiscount,
       discountPrice,
       status,
-      categoryId,
+      categoryIds,
       imageUrl,
+      kitchenCall,
+      isPopular,
       options,
     } = req.body;
 
     // 필수 필드 검증
-    if (!name || sellPrice === undefined || !categoryId) {
+    if (!name || sellPrice === undefined || !categoryIds?.length) {
       return next(
         new AppError(
           400,
-          "필수 필드가 누락되었습니다 (name, sellPrice, categoryId)",
+          "필수 필드가 누락되었습니다 (name, sellPrice, categoryIds)",
           "MISSING_FIELDS",
         ),
       );
@@ -198,9 +204,12 @@ router.post(
     }
 
     // 카테고리 존재 확인
-    const category = await prisma.category.findUnique({ where: { id: categoryId } });
-    if (!category) {
-      return next(new AppError(404, "카테고리를 찾을 수 없습니다", "CATEGORY_NOT_FOUND"));
+    const existingCategories = await prisma.category.findMany({
+      where: { id: { in: categoryIds as number[] } },
+      select: { id: true },
+    });
+    if (existingCategories.length !== (categoryIds as number[]).length) {
+      return next(new AppError(404, "일부 카테고리를 찾을 수 없습니다", "CATEGORY_NOT_FOUND"));
     }
 
     const product = await prisma.product.create({
@@ -217,8 +226,10 @@ router.post(
         discountPrice: isDiscount ? (discountPrice ?? null) : null,
         taxType: req.body.taxType ?? "TAXABLE",
         status: status ?? "SELLING",
-        categoryId,
+        categories: { connect: (categoryIds as number[]).map((id: number) => ({ id })) },
         imageUrl,
+        kitchenCall: kitchenCall ?? false,
+        isPopular: isPopular ?? false,
         isActive: true,
         options: options?.length
           ? {
@@ -242,7 +253,7 @@ router.post(
     });
 
     // 캐시 무효화
-    await invalidateProductCache(categoryId);
+    await invalidateProductCache(categoryIds as number[]);
 
     res.status(201).json({
       success: true,
@@ -280,8 +291,10 @@ router.patch(
       isDiscount,
       discountPrice,
       status,
-      categoryId,
+      categoryIds,
       imageUrl,
+      kitchenCall,
+      isPopular,
       isActive,
     } = req.body;
 
@@ -294,12 +307,25 @@ router.patch(
     }
 
     // 카테고리 변경 시 존재 확인
-    if (categoryId && categoryId !== existing.categoryId) {
-      const category = await prisma.category.findUnique({ where: { id: categoryId } });
-      if (!category) {
-        return next(new AppError(404, "카테고리를 찾을 수 없습니다", "CATEGORY_NOT_FOUND"));
+    if (categoryIds !== undefined) {
+      if (!Array.isArray(categoryIds) || categoryIds.length === 0) {
+        return next(new AppError(400, "카테고리를 1개 이상 선택해야 합니다", "MISSING_CATEGORIES"));
+      }
+      const existingCategories = await prisma.category.findMany({
+        where: { id: { in: categoryIds as number[] } },
+        select: { id: true },
+      });
+      if (existingCategories.length !== (categoryIds as number[]).length) {
+        return next(new AppError(404, "일부 카테고리를 찾을 수 없습니다", "CATEGORY_NOT_FOUND"));
       }
     }
+
+    // 기존 카테고리 조회 (캐시 무효화용)
+    const existingWithCategories = await prisma.product.findUnique({
+      where: { id },
+      include: { categories: { select: { id: true } } },
+    });
+    const oldCategoryIds = existingWithCategories?.categories.map((c) => c.id) ?? [];
 
     const product = await prisma.product.update({
       where: { id },
@@ -316,18 +342,20 @@ router.patch(
         ...(discountPrice !== undefined && { discountPrice: isDiscount ? discountPrice : null }),
         ...(req.body.taxType !== undefined && { taxType: req.body.taxType }),
         ...(status !== undefined && { status }),
-        ...(categoryId !== undefined && { categoryId }),
+        ...(categoryIds !== undefined && {
+          categories: { set: (categoryIds as number[]).map((cid: number) => ({ id: cid })) },
+        }),
         ...(imageUrl !== undefined && { imageUrl }),
+        ...(kitchenCall !== undefined && { kitchenCall }),
+        ...(isPopular !== undefined && { isPopular }),
         ...(isActive !== undefined && { isActive }),
       },
       include: productInclude,
     });
 
-    // 캐시 무효화
-    await invalidateProductCache(existing.categoryId);
-    if (categoryId && categoryId !== existing.categoryId) {
-      await invalidateProductCache(categoryId);
-    }
+    // 캐시 무효화 (기존 + 새 카테고리 모두)
+    const allCategoryIds = [...new Set([...oldCategoryIds, ...((categoryIds as number[]) ?? [])])];
+    await invalidateProductCache(allCategoryIds);
 
     res.json({
       success: true,
@@ -344,7 +372,10 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
     return next(new AppError(400, "Invalid product ID", "INVALID_ID"));
   }
 
-  const existing = await prisma.product.findUnique({ where: { id } });
+  const existing = await prisma.product.findUnique({
+    where: { id },
+    include: { categories: { select: { id: true } } },
+  });
   if (!existing) {
     return next(new AppError(404, "Product not found", "PRODUCT_NOT_FOUND"));
   }
@@ -356,7 +387,7 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
   });
 
   // 캐시 무효화
-  await invalidateProductCache(existing.categoryId);
+  await invalidateProductCache(existing.categories.map((c) => c.id));
 
   res.json({
     success: true,
@@ -400,7 +431,11 @@ router.post(
     });
 
     // 캐시 무효화
-    await invalidateProductCache(product.categoryId);
+    const productWithCats = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { categories: { select: { id: true } } },
+    });
+    await invalidateProductCache(productWithCats?.categories.map((c) => c.id) ?? []);
 
     res.status(201).json({
       success: true,
@@ -444,7 +479,11 @@ router.patch(
     });
 
     // 캐시 무효화
-    await invalidateProductCache(option.product.categoryId);
+    const optionProductWithCats = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { categories: { select: { id: true } } },
+    });
+    await invalidateProductCache(optionProductWithCats?.categories.map((c) => c.id) ?? []);
 
     res.json({
       success: true,
@@ -478,7 +517,11 @@ router.delete(
     await prisma.productOption.delete({ where: { id: optionId } });
 
     // 캐시 무효화
-    await invalidateProductCache(option.product.categoryId);
+    const optionProductWithCats = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { categories: { select: { id: true } } },
+    });
+    await invalidateProductCache(optionProductWithCats?.categories.map((c) => c.id) ?? []);
 
     res.json({
       success: true,
@@ -514,7 +557,10 @@ router.patch(
       );
     }
 
-    const product = await prisma.product.findUnique({ where: { id } });
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: { categories: { select: { id: true } } },
+    });
     if (!product) {
       return next(new AppError(404, "Product not found", "PRODUCT_NOT_FOUND"));
     }
@@ -526,7 +572,7 @@ router.patch(
     });
 
     // 캐시 무효화
-    await invalidateProductCache(product.categoryId);
+    await invalidateProductCache(product.categories.map((c) => c.id));
 
     res.json({
       success: true,
@@ -538,10 +584,12 @@ router.patch(
 // ========== 캐시 관리 ==========
 
 // 캐시 무효화 헬퍼
-async function invalidateProductCache(categoryId?: number | null): Promise<void> {
+async function invalidateProductCache(categoryIds?: number[] | null): Promise<void> {
   await cacheService.del(CACHE_KEYS.PRODUCTS);
-  if (categoryId) {
-    await cacheService.del(CACHE_KEYS.PRODUCTS_BY_CATEGORY(categoryId));
+  if (categoryIds) {
+    for (const id of categoryIds) {
+      await cacheService.del(CACHE_KEYS.PRODUCTS_BY_CATEGORY(id));
+    }
   }
 }
 

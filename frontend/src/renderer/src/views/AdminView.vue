@@ -29,7 +29,7 @@ const productForm = ref({
   sellPrice: 0,
   costPrice: 0,
   stock: 0,
-  categoryId: 0,
+  categoryIds: [] as number[],
   imageUrl: "",
   description: "",
 });
@@ -80,9 +80,8 @@ function formatPrice(price: number): string {
 /**
  * 카테고리 이름 가져오기
  */
-function getCategoryName(categoryId: number): string {
-  const category = categories.value.find((c) => c.id === categoryId);
-  return category?.name ?? "-";
+function getCategoryNames(product: Product): string {
+  return product.categories?.map((c) => c.name).join(", ") ?? "-";
 }
 
 // ========== 상품 관리 ==========
@@ -99,7 +98,7 @@ function openAddProductForm(): void {
     sellPrice: 0,
     costPrice: 0,
     stock: 0,
-    categoryId: categories.value[0]?.id ?? 0,
+    categoryIds: [],
     imageUrl: "",
     description: "",
   };
@@ -117,8 +116,8 @@ function openEditProductForm(product: Product): void {
     nameEn: product.nameEn ?? "",
     sellPrice: product.sellPrice,
     costPrice: 0,
-    stock: product.stock,
-    categoryId: product.categoryId,
+    stock: 0,
+    categoryIds: product.categories?.map((c) => c.id) ?? [],
     imageUrl: product.imageUrl ?? "",
     description: product.description ?? "",
   };
@@ -129,7 +128,11 @@ function openEditProductForm(product: Product): void {
  * 상품 저장
  */
 async function saveProduct(): Promise<void> {
-  if (!productForm.value.barcode || !productForm.value.name || !productForm.value.categoryId) {
+  if (
+    !productForm.value.barcode ||
+    !productForm.value.name ||
+    productForm.value.categoryIds.length === 0
+  ) {
     showWarningToast("바코드, 상품명, 카테고리는 필수입니다");
     return;
   }
@@ -405,7 +408,7 @@ onMounted(() => {
                   </div>
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-600">
-                  {{ getCategoryName(product.categoryId) }}
+                  {{ getCategoryNames(product) }}
                 </td>
                 <td class="px-4 py-3 text-right text-sm font-medium text-gray-800">
                   {{ formatPrice(product.sellPrice) }}
@@ -560,14 +563,21 @@ onMounted(() => {
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-600">카테고리 *</label>
-              <select
-                v-model="productForm.categoryId"
-                class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none"
-              >
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                  {{ cat.name }}
-                </option>
-              </select>
+              <div class="max-h-28 overflow-y-auto rounded-lg border border-gray-200 bg-white p-2">
+                <label
+                  v-for="cat in categories"
+                  :key="cat.id"
+                  class="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-gray-50"
+                >
+                  <input
+                    v-model="productForm.categoryIds"
+                    type="checkbox"
+                    :value="cat.id"
+                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span class="text-sm text-gray-700">{{ cat.name }}</span>
+                </label>
+              </div>
             </div>
           </div>
 

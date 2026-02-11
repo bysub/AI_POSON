@@ -70,7 +70,7 @@ router.post(
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
   async (req, res, next) => {
-    const { name, nameEn, nameJa, nameZh, imageUrl, sortOrder } = req.body;
+    const { name, nameEn, nameJa, nameZh, imageUrl, isDiscount, isPopular, sortOrder } = req.body;
 
     if (!name) {
       return next(new AppError(400, "카테고리명은 필수입니다", "MISSING_NAME"));
@@ -83,6 +83,8 @@ router.post(
         nameJa,
         nameZh,
         imageUrl,
+        isDiscount: isDiscount ?? false,
+        isPopular: isPopular ?? false,
         sortOrder: sortOrder ?? 0,
         isActive: true,
       },
@@ -115,7 +117,8 @@ router.patch(
       return next(new AppError(404, "Category not found", "CATEGORY_NOT_FOUND"));
     }
 
-    const { name, nameEn, nameJa, nameZh, imageUrl, sortOrder, isActive } = req.body;
+    const { name, nameEn, nameJa, nameZh, imageUrl, isDiscount, isPopular, sortOrder, isActive } =
+      req.body;
 
     const category = await prisma.category.update({
       where: { id },
@@ -125,6 +128,8 @@ router.patch(
         ...(nameJa !== undefined && { nameJa }),
         ...(nameZh !== undefined && { nameZh }),
         ...(imageUrl !== undefined && { imageUrl }),
+        ...(isDiscount !== undefined && { isDiscount }),
+        ...(isPopular !== undefined && { isPopular }),
         ...(sortOrder !== undefined && { sortOrder }),
         ...(isActive !== undefined && { isActive }),
       },

@@ -4,8 +4,20 @@ import { authenticate, authorize } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-// 카테고리별 설정 조회
-router.get("/:category", authenticate, async (req, res) => {
+// 전체 설정 조회 (인증 불필요 - 키오스크 공용 화면에서 사용)
+router.get("/", async (_req, res) => {
+  const settings = await prisma.systemSetting.findMany();
+
+  const data: Record<string, string> = {};
+  for (const s of settings) {
+    data[s.key] = s.value;
+  }
+
+  res.json({ success: true, data });
+});
+
+// 카테고리별 설정 조회 (인증 불필요 - 읽기 전용)
+router.get("/:category", async (req, res) => {
   const { category } = req.params;
 
   const settings = await prisma.systemSetting.findMany({

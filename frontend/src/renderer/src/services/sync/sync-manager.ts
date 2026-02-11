@@ -328,7 +328,8 @@ export class SyncManager {
    * 카테고리별 상품 조회
    */
   async getProductsByCategory(categoryId: number): Promise<Product[]> {
-    return db.products.where("categoryId").equals(categoryId).toArray();
+    const allProducts = await db.products.toArray();
+    return allProducts.filter((p) => p.categories?.some((c) => c.id === categoryId));
   }
 
   /**

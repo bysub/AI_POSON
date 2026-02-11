@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
+import { showSuccessToast, showErrorToast } from "@/utils/AlertUtils";
 
 // ─── 탭 ───
 const activeTab = ref("sale");
@@ -16,7 +17,6 @@ const tabs = [
 // ─── 상태 ───
 const isLoading = ref(false);
 const isSaving = ref(false);
-const saveMessage = ref("");
 
 type SettingsRecord = Record<string, string>;
 
@@ -53,6 +53,10 @@ const saleConfig = ref({
   engEnabled: "0",
   scancop: "0",
   delay: "1",
+  // 주방/테이블
+  kitchenCallEnabled: "0",
+  tableSelectEnabled: "0",
+  tableCount: "0",
 });
 
 // ─── 결제 정책 (ASIS: [Other] 카드/결제 + [Card] 공통 + [SuSu]) ───
@@ -230,16 +234,14 @@ async function saveCurrentTab(): Promise<void> {
   const cat = categoryMap[activeTab.value];
   if (!cat) return;
   isSaving.value = true;
-  saveMessage.value = "";
   try {
     await apiClient.put(
       `/api/v1/settings/${cat.apiCategory.toLowerCase()}`,
       buildPayload(cat.prefix, cat.ref.value as unknown as SettingsRecord),
     );
-    saveMessage.value = "저장되었습니다.";
-    setTimeout(() => (saveMessage.value = ""), 2000);
+    showSuccessToast("저장되었습니다");
   } catch (err) {
-    saveMessage.value = `저장 실패: ${err instanceof Error ? err.message : "오류 발생"}`;
+    showErrorToast(`저장 실패: ${err instanceof Error ? err.message : "오류 발생"}`);
   } finally {
     isSaving.value = false;
   }
@@ -351,13 +353,6 @@ onMounted(() => {
         <p class="mt-0.5 text-sm text-slate-500">전 기기에서 공유하는 매장 공통 설정입니다</p>
       </div>
       <div class="flex items-center gap-3">
-        <span
-          v-if="saveMessage"
-          class="text-sm font-medium"
-          :class="saveMessage.includes('실패') ? 'text-red-600' : 'text-emerald-600'"
-        >
-          {{ saveMessage }}
-        </span>
         <button
           class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           :disabled="isSaving || isLoading"
@@ -479,6 +474,56 @@ onMounted(() => {
               min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
+          </div>
+        </div>
+
+        <!-- 주방/테이블 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">주방 / 테이블</h4>
+        <div class="mb-6 grid gap-3 md:grid-cols-2">
+          <div class="flex items-center justify-between rounded-xl bg-slate-50 p-3">
+            <div>
+              <p class="text-sm font-medium text-slate-800">주방 호출</p>
+              <p class="text-xs text-slate-500">주문 완료 시 주방으로 호출 전송</p>
+            </div>
+            <button
+              class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
+              :class="saleConfig.kitchenCallEnabled === '1' ? 'bg-indigo-600' : 'bg-slate-300'"
+              @click="toggleValue(saleConfig as SettingsRecord, 'kitchenCallEnabled')"
+            >
+              <span
+                class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                :class="saleConfig.kitchenCallEnabled === '1' ? 'translate-x-4' : ''"
+              />
+            </button>
+          </div>
+          <div class="flex items-center justify-between rounded-xl bg-slate-50 p-3">
+            <div>
+              <p class="text-sm font-medium text-slate-800">테이블 선택</p>
+              <p class="text-xs text-slate-500">주문 시 테이블 번호 선택 화면 표시</p>
+            </div>
+            <button
+              class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
+              :class="saleConfig.tableSelectEnabled === '1' ? 'bg-indigo-600' : 'bg-slate-300'"
+              @click="toggleValue(saleConfig as SettingsRecord, 'tableSelectEnabled')"
+            >
+              <span
+                class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                :class="saleConfig.tableSelectEnabled === '1' ? 'translate-x-4' : ''"
+              />
+            </button>
+          </div>
+        </div>
+        <div v-if="saleConfig.tableSelectEnabled === '1'" class="mb-6 grid gap-5 md:grid-cols-3">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">테이블 갯수</label>
+            <input
+              v-model="saleConfig.tableCount"
+              type="number"
+              min="0"
+              max="999"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+            <p class="mt-1 text-xs text-slate-400">매장에 배치된 테이블 수 (0: 미사용)</p>
           </div>
         </div>
 

@@ -50,8 +50,8 @@ export class LocalDatabase extends Dexie {
   constructor() {
     super("KioskDB");
 
-    this.version(1).stores({
-      products: "id, categoryId, barcode, name, syncedAt",
+    this.version(2).stores({
+      products: "id, barcode, name, syncedAt",
       categories: "id, name, sortOrder, syncedAt",
       orders: "id, status, syncStatus, localCreatedAt",
       pendingSync: "++id, type, action, createdAt",

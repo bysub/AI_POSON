@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
-import { showApiError, showConfirm } from "@/utils/AlertUtils";
+import { showSuccessToast, showErrorToast, showApiError, showConfirm } from "@/utils/AlertUtils";
 
 // ─── 타입 ───
 type DeviceType = "POS" | "KIOSK" | "KITCHEN";
@@ -29,7 +29,6 @@ const newDevice = ref({ id: "", name: "", type: "POS" as DeviceType });
 const activeTab = ref("terminal");
 const isLoading = ref(false);
 const isSaving = ref(false);
-const saveMessage = ref("");
 
 // ─── 선택된 기기 ───
 const selectedDevice = computed(() => devices.value.find((d) => d.id === selectedDeviceId.value));
@@ -400,16 +399,14 @@ async function saveCurrentTab(): Promise<void> {
   const cat = categoryMap[activeTab.value];
   if (!cat) return;
   isSaving.value = true;
-  saveMessage.value = "";
   try {
     await apiClient.put(
       `/api/v1/devices/${selectedDeviceId.value}/settings/${cat.apiCategory.toLowerCase()}`,
       buildPayload(cat.prefix, cat.ref.value as unknown as SettingsRecord),
     );
-    saveMessage.value = "저장되었습니다.";
-    setTimeout(() => (saveMessage.value = ""), 2000);
+    showSuccessToast("저장되었습니다");
   } catch (err) {
-    saveMessage.value = `저장 실패: ${err instanceof Error ? err.message : "오류 발생"}`;
+    showErrorToast(`저장 실패: ${err instanceof Error ? err.message : "오류 발생"}`);
   } finally {
     isSaving.value = false;
   }
@@ -461,13 +458,6 @@ onMounted(async () => {
         <p class="mt-0.5 text-sm text-slate-500">등록된 기기별로 개별 설정을 관리합니다</p>
       </div>
       <div class="flex items-center gap-3">
-        <span
-          v-if="saveMessage"
-          class="text-sm font-medium"
-          :class="saveMessage.includes('실패') ? 'text-red-600' : 'text-emerald-600'"
-        >
-          {{ saveMessage }}
-        </span>
         <button
           v-if="selectedDevice"
           class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"

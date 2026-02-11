@@ -14,13 +14,14 @@ export interface Product {
   isDiscount: boolean;
   discountPrice?: number;
   taxType?: TaxType;
-  categoryId: number;
   imageUrl?: string;
+  kitchenCall?: boolean;
+  isPopular?: boolean;
   description?: string;
   status: ProductStatus;
   isActive: boolean;
   options?: ProductOption[];
-  category?: { id: number; name: string };
+  categories?: { id: number; name: string }[];
   purchaseProduct?: { id: number; barcode: string; name: string; stock: number; safeStock: number };
 }
 
@@ -69,6 +70,8 @@ export interface Category {
   nameJa?: string;
   nameZh?: string;
   imageUrl?: string;
+  isDiscount: boolean;
+  isPopular: boolean;
   sortOrder: number;
   isActive: boolean;
 }

@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "context7": {
-      "command": "npx",
+      "command": "cmd",
       "args": [
+        "/c",
+        "npx",
         "-y",
         "@upstash/context7-mcp",
         "--api-key",
@@ -10,12 +12,14 @@
       ]
     },
     "playwright": {
-      "command": "npx",
-      "args": ["-y", "@executeautomation/playwright-mcp-server"]
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@executeautomation/playwright-mcp-server"]
     },
     "supabase": {
-      "command": "npx",
+      "command": "cmd",
       "args": [
+        "/c",
+        "npx",
         "-y",
         "@supabase/mcp-server-supabase@latest",
         "--read-only",
@@ -26,15 +30,15 @@
       }
     },
     "postgresql": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-postgres"],
       "env": {
         "POSTGRES_CONNECTION_STRING": "postgresql://postgres:Ghkddhtjq1*@db.rgzclwxkamsghwpkkowt.supabase.co:5432/postgres"
       }
     },
     "mysql": {
-      "command": "uvx",
-      "args": ["mcp-server-mysql"],
+      "command": "cmd",
+      "args": ["/c", "uvx", "mcp-server-mysql"],
       "env": {
         "MYSQL_CONNECTION_STRING": "mysql://user:password@localhost:3306/dbname"
       }

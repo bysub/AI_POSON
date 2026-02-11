@@ -14,9 +14,11 @@ model Category {
   nameEn    String?   @map("name_en") @db.VarChar(100)
   nameJa    String?   @map("name_ja") @db.VarChar(100)
   nameZh    String?   @map("name_zh") @db.VarChar(100)
-  imageUrl  String?   @map("image_url") @db.VarChar(500)
-  sortOrder Int       @default(0) @map("sort_order")
-  isActive  Boolean   @default(true) @map("is_active")
+  imageUrl   String?   @map("image_url") @db.VarChar(500)
+  isDiscount Boolean   @default(false) @map("is_discount")
+  isPopular  Boolean   @default(false) @map("is_popular")
+  sortOrder  Int       @default(0) @map("sort_order")
+  isActive   Boolean   @default(true) @map("is_active")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   products  Product[]
@@ -55,17 +57,17 @@ model Product {
   taxType            TaxType          @default(TAXABLE) @map("tax_type")
   status             ProductStatus    @default(SELLING)
   imageUrl           String?          @map("image_url") @db.VarChar(500)
-  categoryId         Int              @map("category_id")
+  kitchenCall        Boolean          @default(false) @map("kitchen_call")
+  isPopular          Boolean          @default(false) @map("is_popular")
   isActive           Boolean          @default(true) @map("is_active")
   createdAt          DateTime         @default(now()) @map("created_at")
   updatedAt          DateTime         @updatedAt @map("updated_at")
-  category           Category         @relation(fields: [categoryId], references: [id])
+  categories         Category[]
   purchaseProduct    PurchaseProduct? @relation(fields: [purchaseProductId], references: [id])
   orderItems         OrderItem[]
   options            ProductOption[]
 
   @@index([barcode])
-  @@index([categoryId])
   @@index([status])
   @@index([purchaseProductId])
   @@map("products")

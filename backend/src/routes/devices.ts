@@ -12,8 +12,8 @@ router.get("/", authenticate, async (_req, res) => {
   res.json({ success: true, data: devices });
 });
 
-// ─── 기기 단건 조회 ───
-router.get("/:id", authenticate, async (req, res) => {
+// ─── 기기 단건 조회 (인증 불필요 - 키오스크 자기 기기 조회) ───
+router.get("/:id", async (req, res) => {
   const device = await prisma.device.findUnique({
     where: { id: req.params.id },
   });
@@ -71,8 +71,24 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
   res.json({ success: true, message: "삭제되었습니다" });
 });
 
-// ─── 기기별 카테고리 설정 조회 ───
-router.get("/:id/settings/:category", authenticate, async (req, res) => {
+// ─── 기기별 전체 설정 조회 (인증 불필요 - 키오스크 자기 설정 조회) ───
+router.get("/:id/settings", async (req, res) => {
+  const { id } = req.params;
+
+  const settings = await prisma.deviceSetting.findMany({
+    where: { deviceId: id },
+  });
+
+  const data: Record<string, string> = {};
+  for (const s of settings) {
+    data[s.key] = s.value;
+  }
+
+  res.json({ success: true, data });
+});
+
+// ─── 기기별 카테고리 설정 조회 (인증 불필요 - 읽기 전용) ───
+router.get("/:id/settings/:category", async (req, res) => {
   const { id, category } = req.params;
 
   const settings = await prisma.deviceSetting.findMany({

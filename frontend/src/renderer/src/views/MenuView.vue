@@ -109,10 +109,21 @@ function handleCategorySelect(categoryId: number | null): void {
 }
 
 /**
+ * 상품 재고 확인 (매입상품 연결 시 해당 재고, 미연결 시 무제한)
+ */
+function getStock(product: Product): number {
+  return product.purchaseProduct?.stock ?? Infinity;
+}
+
+function isSoldOut(product: Product): boolean {
+  return product.status === "SOLD_OUT" || getStock(product) <= 0;
+}
+
+/**
  * 장바구니에 추가
  */
 function handleAddToCart(product: Product): void {
-  if (product.stock <= 0) return;
+  if (isSoldOut(product)) return;
 
   if (product.options && product.options.length > 0) {
     selectedProduct.value = product;
@@ -433,7 +444,8 @@ onMounted(async () => {
             v-for="product in productsStore.filteredProducts"
             :key="product.id"
             class="group relative flex flex-col overflow-hidden rounded-2xl bg-rose-50 shadow-sm transition-all"
-            :class="product.stock <= 0 ? 'opacity-60' : 'cursor-pointer hover:shadow-lg'"
+            :class="isSoldOut(product) ? 'opacity-60' : 'cursor-pointer hover:shadow-lg'"
+            @click="handleAddToCart(product)"
           >
             <!-- Sale Badge -->
             <div
@@ -460,7 +472,7 @@ onMounted(async () => {
 
               <!-- Sold Out Overlay -->
               <div
-                v-if="product.stock <= 0"
+                v-if="isSoldOut(product)"
                 class="absolute inset-0 flex items-center justify-center bg-black/50"
               >
                 <span class="rounded bg-red-600 px-3 py-1 text-sm font-bold text-white">
@@ -481,7 +493,7 @@ onMounted(async () => {
 
             <!-- Add Button -->
             <button
-              v-if="product.stock > 0"
+              v-if="!isSoldOut(product)"
               class="flex items-center justify-center gap-1 bg-red-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-600 active:bg-red-700"
               @click.stop="handleAddToCart(product)"
             >

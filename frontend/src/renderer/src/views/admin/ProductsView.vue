@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import type { Product, Category, PurchaseProduct, ProductStatus } from "@/types";
 import { apiClient } from "@/services/api/client";
+import { useSettingsStore } from "@/stores/settings";
 import {
   showSuccessToast,
   showErrorToast,
@@ -9,6 +10,9 @@ import {
   showConfirm,
   showApiError,
 } from "@/utils/AlertUtils";
+
+const settingsStore = useSettingsStore();
+const kitchenCallEnabled = computed(() => settingsStore.get("sale.kitchenCallEnabled") === "1");
 
 // 상품 상태 라벨 및 스타일
 const statusConfig: Record<ProductStatus, { label: string; bg: string; text: string }> = {
@@ -37,8 +41,9 @@ const productForm = ref({
   isDiscount: false,
   discountPrice: 0,
   status: "SELLING" as ProductStatus,
-  categoryId: 0,
+  categoryIds: [] as number[],
   imageUrl: "",
+  kitchenCall: false,
   description: "",
 });
 
@@ -265,10 +270,6 @@ function formatPrice(price: number): string {
   return new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW" }).format(price);
 }
 
-function getCategoryName(categoryId: number): string {
-  return categories.value.find((c) => c.id === categoryId)?.name ?? "-";
-}
-
 function openAddForm(): void {
   editingProduct.value = null;
   productForm.value = {
@@ -282,8 +283,9 @@ function openAddForm(): void {
     isDiscount: false,
     discountPrice: 0,
     status: "SELLING",
-    categoryId: categories.value[0]?.id ?? 0,
+    categoryIds: [],
     imageUrl: "",
+    kitchenCall: false,
     description: "",
   };
   selectedPP.value = null;
@@ -307,8 +309,9 @@ function openEditForm(product: Product): void {
     isDiscount: product.isDiscount ?? false,
     discountPrice: product.discountPrice ?? 0,
     status: product.status ?? "SELLING",
-    categoryId: product.categoryId,
+    categoryIds: product.categories?.map((c) => c.id) ?? [],
     imageUrl: product.imageUrl ?? "",
+    kitchenCall: product.kitchenCall ?? false,
     description: product.description ?? "",
   };
   // 연결된 매입상품 설정
@@ -384,8 +387,8 @@ async function saveOptions(productId: number): Promise<void> {
 }
 
 async function saveProduct(): Promise<void> {
-  if (!productForm.value.name || !productForm.value.categoryId) {
-    showWarningToast("상품명, 카테고리는 필수입니다");
+  if (!productForm.value.name || productForm.value.categoryIds.length === 0) {
+    showWarningToast("상품명, 카테고리(1개 이상)는 필수입니다");
     return;
   }
 
@@ -456,6 +459,7 @@ async function deleteProduct(product: Product): Promise<void> {
 }
 
 onMounted(() => {
+  settingsStore.initialize();
   loadData();
 });
 </script>
@@ -581,6 +585,12 @@ onMounted(() => {
                       옵션 {{ product.options.length }}
                     </span>
                     <span
+                      v-if="kitchenCallEnabled && product.kitchenCall"
+                      class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700"
+                    >
+                      주방
+                    </span>
+                    <span
                       v-if="product.isDiscount"
                       class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700"
                     >
@@ -594,11 +604,16 @@ onMounted(() => {
               </div>
             </td>
             <td class="px-6 py-4">
-              <span
-                class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-sm text-slate-700"
-              >
-                {{ getCategoryName(product.categoryId) }}
-              </span>
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="cat in product.categories"
+                  :key="cat.id"
+                  class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-sm text-slate-700"
+                >
+                  {{ cat.name }}
+                </span>
+                <span v-if="!product.categories?.length" class="text-sm text-slate-400">-</span>
+              </div>
             </td>
             <td class="px-6 py-4 text-right">
               <div>
@@ -846,28 +861,39 @@ onMounted(() => {
               </div>
 
               <div class="grid grid-cols-2 gap-4">
-                <!-- 바코드 (매입상품 연결 시 readonly) -->
+                <!-- 바코드 (편집 불가 - 매입상품 연결로만 설정) -->
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">바코드</label>
                   <input
                     v-model="productForm.barcode"
                     type="text"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                    :class="selectedPP ? 'bg-slate-50 text-slate-500' : ''"
-                    :readonly="!!selectedPP"
-                    placeholder="상품 바코드"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-500 transition-all"
+                    readonly
+                    placeholder="매입상품 연결 시 자동 설정"
                   />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">카테고리 *</label>
-                  <select
-                    v-model="productForm.categoryId"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  <div
+                    class="max-h-32 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2"
                   >
-                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                      {{ cat.name }}
-                    </option>
-                  </select>
+                    <label
+                      v-for="cat in categories"
+                      :key="cat.id"
+                      class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50"
+                    >
+                      <input
+                        v-model="productForm.categoryIds"
+                        type="checkbox"
+                        :value="cat.id"
+                        class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span class="text-sm text-slate-700">{{ cat.name }}</span>
+                    </label>
+                  </div>
+                  <p v-if="productForm.categoryIds.length === 0" class="mt-1 text-xs text-red-500">
+                    카테고리를 1개 이상 선택해주세요
+                  </p>
                 </div>
               </div>
 
@@ -977,6 +1003,25 @@ onMounted(() => {
                     할인
                   </p>
                 </div>
+              </div>
+
+              <!-- 주방 호출 설정 (환경설정에서 주방호출 활성화 시에만 표시) -->
+              <div
+                v-if="kitchenCallEnabled"
+                class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"
+              >
+                <div>
+                  <label class="text-sm font-medium text-slate-700">주방 호출</label>
+                  <p class="text-xs text-slate-400">
+                    주문 시 주방 디스플레이에 호출 알림을 전송합니다
+                  </p>
+                </div>
+                <label class="relative inline-flex cursor-pointer items-center">
+                  <input v-model="productForm.kitchenCall" type="checkbox" class="peer sr-only" />
+                  <div
+                    class="peer h-6 w-11 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-indigo-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-2 peer-focus:ring-indigo-500/20"
+                  />
+                </label>
               </div>
 
               <!-- 상품 이미지 -->
