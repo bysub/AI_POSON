@@ -449,8 +449,8 @@ onMounted(async () => {
           >
             <!-- Sale Badge -->
             <div
-              v-if="product.id % 3 === 1"
-              class="absolute left-2 top-2 z-10 rounded bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white"
+              v-if="product.isDiscount && product.discountPrice"
+              class="icon-sale-badge absolute left-2 top-2 z-10 rounded bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white"
             >
               Sale
             </div>
@@ -486,7 +486,17 @@ onMounted(async () => {
               <h3 class="mb-1 line-clamp-1 text-sm font-medium text-gray-900">
                 {{ getLocalizedName(product) }}
               </h3>
-              <p class="text-base font-bold text-red-500">
+              <!-- 할인 상품: 원가 취소선 + 할인가 표시 -->
+              <template v-if="product.isDiscount && product.discountPrice">
+                <p class="text-xs text-gray-400 line-through">
+                  {{ formatPrice(product.sellPrice) }}
+                </p>
+                <p class="text-base font-bold text-red-500">
+                  {{ formatPrice(product.discountPrice) }}
+                </p>
+              </template>
+              <!-- 일반 상품: 판매가 표시 -->
+              <p v-else class="text-base font-bold text-red-500">
                 {{ formatPrice(product.sellPrice) }}
               </p>
             </div>
@@ -679,5 +689,8 @@ onMounted(async () => {
 .text-order-summany-amount {
   font-weight: 700;
   font-size: 14px;
+}
+.icon-sale-badge {
+  font-size: 16px;
 }
 </style>

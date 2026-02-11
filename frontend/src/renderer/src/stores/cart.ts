@@ -27,11 +27,13 @@ export const useCartStore = defineStore("cart", () => {
     if (existingItem) {
       existingItem.quantity += quantity;
     } else {
+      const effectivePrice =
+        product.isDiscount && product.discountPrice ? product.discountPrice : product.sellPrice;
       items.value.push({
         id: crypto.randomUUID(),
         productId: product.id,
         name: product.name,
-        price: product.sellPrice,
+        price: effectivePrice,
         quantity,
         options,
         imageUrl: product.imageUrl,
