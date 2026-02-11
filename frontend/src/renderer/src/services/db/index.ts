@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import type { Product, Category, Order, CartItem } from "../../types";
+import type { Product, Category, Order } from "../../types";
 
 /**
  * 로컬 데이터베이스 스키마

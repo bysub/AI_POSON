@@ -82,9 +82,9 @@ export class VanTerminal implements IPaymentTerminal {
       console.log(`[Terminal] Payment request: ${data.amount}원`);
 
       // 결제 요청 전문 생성
-      const request = this.buildPaymentRequest(data);
+      const _request = this.buildPaymentRequest(data);
 
-      // TODO: 실제 시리얼 통신으로 교체
+      // TODO: 실제 시리얼 통신으로 교체 (_request를 시리얼 통신에 사용 예정)
       const response = await this.simulatePayment(data);
 
       return this.parsePaymentResponse(response);

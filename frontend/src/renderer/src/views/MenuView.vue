@@ -196,7 +196,7 @@ function cancelOrder(): void {
 function getOptionsString(options?: Record<string, unknown>): string {
   if (!options) return "";
   return Object.values(options)
-    .map((opt: any) => opt.name)
+    .map((opt: Record<string, unknown>) => opt.name)
     .filter(Boolean)
     .join(" + ");
 }

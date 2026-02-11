@@ -250,22 +250,6 @@ enum AdminRole {
   STAFF
 }
 
-// 키오스크 설정
-model Kiosk {
-  id           String   @id @default(uuid())
-  kioskCode    String   @unique @map("kiosk_code") @db.VarChar(20)
-  name         String   @db.VarChar(100)
-  location     String?  @db.VarChar(200)
-  vanProvider  String?  @map("van_provider") @db.VarChar(20)
-  printerPort  String?  @map("printer_port") @db.VarChar(50)
-  scannerPort  String?  @map("scanner_port") @db.VarChar(50)
-  isActive     Boolean  @default(true) @map("is_active")
-  lastOnlineAt DateTime? @map("last_online_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  @@map("kiosks")
-}
 
 // 거래처 구분
 enum SupplierType {

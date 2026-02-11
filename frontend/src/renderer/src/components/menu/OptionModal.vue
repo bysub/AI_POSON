@@ -13,7 +13,7 @@ const emit = defineEmits<{
   confirm: [product: Product, quantity: number, selectedOptions: Record<string, ProductOption>];
 }>();
 
-const { t } = useI18n();
+const { t: _t } = useI18n();
 
 const quantity = ref(1);
 const selectedOptions = ref<Record<string, ProductOption>>({});

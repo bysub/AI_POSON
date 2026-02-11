@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 import type { Product } from "@/types";
 import type { SupportedLocale } from "@/stores/locale";
 
-const props = defineProps<{
+defineProps<{
   products: Product[];
   isLoading?: boolean;
 }>();
