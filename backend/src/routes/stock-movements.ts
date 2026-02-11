@@ -49,6 +49,27 @@ export async function createStockMovement(
   });
 }
 
+// 조정번호 생성 (ADJ-YYYYMMDD-NNNN)
+async function generateAdjustmentCode(): Promise<string> {
+  const today = new Date();
+  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
+  const prefix = `ADJ-${dateStr}-`;
+
+  const lastMovement = await prisma.stockMovement.findFirst({
+    where: { adjustmentCode: { startsWith: prefix } },
+    orderBy: { adjustmentCode: "desc" },
+    select: { adjustmentCode: true },
+  });
+
+  let seq = 1;
+  if (lastMovement?.adjustmentCode) {
+    const lastSeq = parseInt(lastMovement.adjustmentCode.slice(prefix.length), 10);
+    if (!isNaN(lastSeq)) seq = lastSeq + 1;
+  }
+
+  return `${prefix}${String(seq).padStart(4, "0")}`;
+}
+
 // 재고 일괄 조정 (트랜잭션)
 router.post(
   "/adjust",
@@ -67,6 +88,8 @@ router.post(
     const username = (req as unknown as { user: { username: string } }).user?.username ?? null;
 
     try {
+      const adjustmentCode = await generateAdjustmentCode();
+
       const results = await prisma.$transaction(async (tx) => {
         const movements = [];
         for (const item of items as { productId: number; adjustQty: number }[]) {
@@ -95,6 +118,7 @@ router.post(
               quantity: item.adjustQty,
               stockBefore,
               stockAfter,
+              adjustmentCode,
               reason: reason as string,
               memo: (memo as string) || null,
               createdBy: username,
@@ -111,7 +135,7 @@ router.post(
       res.json({
         success: true,
         data: results,
-        message: `${results.length}개 상품의 재고가 조정되었습니다`,
+        message: `${results.length}개 상품의 재고가 조정되었습니다 (${adjustmentCode})`,
       });
     } catch (err) {
       if ((err as { code?: string }).code === "P2025") {
@@ -123,6 +147,37 @@ router.post(
     }
   },
 );
+
+// 조정번호로 조정 이력 조회
+router.get("/adjustment/:code", authenticate, async (req, res, next) => {
+  const { code } = req.params;
+
+  const movements = await prisma.stockMovement.findMany({
+    where: { adjustmentCode: code },
+    include: {
+      purchaseProduct: {
+        select: { id: true, barcode: true, name: true },
+      },
+    },
+    orderBy: { id: "asc" },
+  });
+
+  if (movements.length === 0) {
+    return next(new AppError(404, "해당 조정 이력을 찾을 수 없습니다", "ADJUSTMENT_NOT_FOUND"));
+  }
+
+  res.json({
+    success: true,
+    data: {
+      adjustmentCode: code,
+      reason: movements[0].reason,
+      memo: movements[0].memo,
+      createdBy: movements[0].createdBy,
+      createdAt: movements[0].createdAt,
+      items: movements,
+    },
+  });
+});
 
 // 이력 목록 (필터: productId, type, startDate, endDate + 페이지네이션)
 router.get("/", authenticate, async (req, res) => {

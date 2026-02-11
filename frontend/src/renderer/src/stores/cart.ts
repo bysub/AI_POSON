@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { CartItem, Product, Order } from "@/types";
+import type { CartItem, Product, Order, OrderType } from "@/types";
 import { apiClient } from "@/services/api/client";
 import { useSettingsStore } from "./settings";
 
@@ -68,7 +68,12 @@ export const useCartStore = defineStore("cart", () => {
   /**
    * 주문 생성 (서버 전송)
    */
-  async function submitOrder(kioskId?: string): Promise<Order | null> {
+  async function submitOrder(params?: {
+    kioskId?: string;
+    orderType?: OrderType;
+    tableNo?: number;
+    memberId?: number;
+  }): Promise<Order | null> {
     if (items.value.length === 0) {
       orderError.value = "장바구니가 비어 있습니다";
       return null;
@@ -87,11 +92,14 @@ export const useCartStore = defineStore("cart", () => {
       }));
 
       const settingsStore = useSettingsStore();
-      const resolvedKioskId = (kioskId ?? settingsStore.deviceId) || "KIOSK-001";
+      const resolvedKioskId = (params?.kioskId ?? settingsStore.deviceId) || "KIOSK-001";
 
       const response = await apiClient.post<{ success: boolean; data: Order }>("/api/v1/orders", {
         items: orderItems,
         kioskId: resolvedKioskId,
+        orderType: params?.orderType ?? null,
+        tableNo: params?.tableNo ?? null,
+        memberId: params?.memberId ?? null,
       });
 
       if (response.data.success) {

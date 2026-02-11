@@ -102,7 +102,7 @@ async function restoreStockForOrder(
 
 // Create order (키오스크에서 주문 생성)
 router.post("/", async (req, res, next) => {
-  const { items, kioskId } = req.body;
+  const { items, kioskId, orderType, tableNo, memberId } = req.body;
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     return next(new AppError(400, "Order items are required", "INVALID_ORDER_ITEMS"));
@@ -159,6 +159,9 @@ router.post("/", async (req, res, next) => {
         id: uuidv4(),
         orderNumber,
         kioskId,
+        orderType: orderType ?? null,
+        tableNo: tableNo ? parseInt(tableNo, 10) : null,
+        memberId: memberId ? parseInt(memberId, 10) : null,
         totalAmount,
         status: "PENDING",
         items: {
@@ -198,6 +201,110 @@ router.post("/", async (req, res, next) => {
     return next(new AppError(500, "Failed to create order", "ORDER_CREATE_FAILED"));
   }
 });
+
+// Get order statistics (관리자 대시보드용) - /:id 보다 먼저 정의해야 함
+router.get(
+  "/stats/summary",
+  authenticate,
+  authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
+  async (req, res) => {
+    const { startDate, endDate } = req.query;
+
+    const dateFilter = {
+      ...((startDate || endDate) && {
+        createdAt: {
+          ...(startDate && { gte: new Date(startDate as string) }),
+          ...(endDate && { lte: new Date(endDate as string) }),
+        },
+      }),
+    };
+
+    const [totalOrders, completedOrders, cancelledOrders, totalRevenue, statusCounts] =
+      await Promise.all([
+        prisma.order.count({ where: dateFilter }),
+        prisma.order.count({ where: { ...dateFilter, status: "COMPLETED" } }),
+        prisma.order.count({ where: { ...dateFilter, status: "CANCELLED" } }),
+        prisma.order.aggregate({
+          where: { ...dateFilter, status: { in: ["PAID", "PREPARING", "COMPLETED"] } },
+          _sum: { totalAmount: true },
+        }),
+        prisma.order.groupBy({
+          by: ["status"],
+          where: dateFilter,
+          _count: true,
+        }),
+      ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalOrders,
+        completedOrders,
+        cancelledOrders,
+        pendingOrders: totalOrders - completedOrders - cancelledOrders,
+        totalRevenue: totalRevenue._sum.totalAmount ?? 0,
+        statusBreakdown: statusCounts.reduce(
+          (acc, item) => ({ ...acc, [item.status]: item._count }),
+          {},
+        ),
+      },
+    });
+  },
+);
+
+// Get daily sales report (관리자) - /:id 보다 먼저 정의해야 함
+router.get(
+  "/stats/daily",
+  authenticate,
+  authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
+  async (req, res) => {
+    const { days = "7" } = req.query;
+    const daysNum = Math.min(parseInt(days as string), 90);
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysNum);
+    startDate.setHours(0, 0, 0, 0);
+
+    const orders = await prisma.order.findMany({
+      where: {
+        createdAt: { gte: startDate },
+        status: { in: ["PAID", "PREPARING", "COMPLETED"] },
+      },
+      select: {
+        createdAt: true,
+        totalAmount: true,
+      },
+    });
+
+    // 일별 집계
+    const dailyMap = new Map<string, { count: number; revenue: number }>();
+
+    for (let i = 0; i < daysNum; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split("T")[0];
+      dailyMap.set(dateKey, { count: 0, revenue: 0 });
+    }
+
+    for (const order of orders) {
+      const dateKey = order.createdAt.toISOString().split("T")[0];
+      const current = dailyMap.get(dateKey);
+      if (current) {
+        current.count++;
+        current.revenue += Number(order.totalAmount);
+      }
+    }
+
+    const dailyStats = Array.from(dailyMap.entries())
+      .map(([date, stats]) => ({ date, ...stats }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json({
+      success: true,
+      data: dailyStats,
+    });
+  },
+);
 
 // Get order by ID
 router.get("/:id", async (req, res, next) => {
@@ -492,110 +599,6 @@ router.delete(
       logger.error({ error, orderId: id }, "Failed to cancel order");
       return next(new AppError(500, "주문 취소에 실패했습니다", "ORDER_CANCEL_FAILED"));
     }
-  },
-);
-
-// Get order statistics (관리자 대시보드용)
-router.get(
-  "/stats/summary",
-  authenticate,
-  authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res) => {
-    const { startDate, endDate } = req.query;
-
-    const dateFilter = {
-      ...((startDate || endDate) && {
-        createdAt: {
-          ...(startDate && { gte: new Date(startDate as string) }),
-          ...(endDate && { lte: new Date(endDate as string) }),
-        },
-      }),
-    };
-
-    const [totalOrders, completedOrders, cancelledOrders, totalRevenue, statusCounts] =
-      await Promise.all([
-        prisma.order.count({ where: dateFilter }),
-        prisma.order.count({ where: { ...dateFilter, status: "COMPLETED" } }),
-        prisma.order.count({ where: { ...dateFilter, status: "CANCELLED" } }),
-        prisma.order.aggregate({
-          where: { ...dateFilter, status: "COMPLETED" },
-          _sum: { totalAmount: true },
-        }),
-        prisma.order.groupBy({
-          by: ["status"],
-          where: dateFilter,
-          _count: true,
-        }),
-      ]);
-
-    res.json({
-      success: true,
-      data: {
-        totalOrders,
-        completedOrders,
-        cancelledOrders,
-        pendingOrders: totalOrders - completedOrders - cancelledOrders,
-        totalRevenue: totalRevenue._sum.totalAmount ?? 0,
-        statusBreakdown: statusCounts.reduce(
-          (acc, item) => ({ ...acc, [item.status]: item._count }),
-          {},
-        ),
-      },
-    });
-  },
-);
-
-// Get daily sales report (관리자)
-router.get(
-  "/stats/daily",
-  authenticate,
-  authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res) => {
-    const { days = "7" } = req.query;
-    const daysNum = Math.min(parseInt(days as string), 90);
-
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - daysNum);
-    startDate.setHours(0, 0, 0, 0);
-
-    const orders = await prisma.order.findMany({
-      where: {
-        createdAt: { gte: startDate },
-        status: "COMPLETED",
-      },
-      select: {
-        createdAt: true,
-        totalAmount: true,
-      },
-    });
-
-    // 일별 집계
-    const dailyMap = new Map<string, { count: number; revenue: number }>();
-
-    for (let i = 0; i < daysNum; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateKey = date.toISOString().split("T")[0];
-      dailyMap.set(dateKey, { count: 0, revenue: 0 });
-    }
-
-    for (const order of orders) {
-      const dateKey = order.createdAt.toISOString().split("T")[0];
-      const current = dailyMap.get(dateKey);
-      if (current) {
-        current.count++;
-        current.revenue += Number(order.totalAmount);
-      }
-    }
-
-    const dailyStats = Array.from(dailyMap.entries())
-      .map(([date, stats]) => ({ date, ...stats }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    res.json({
-      success: true,
-      data: dailyStats,
-    });
   },
 );
 

@@ -85,7 +85,7 @@ function handleLogoTap() {
       <h1
         class="mt-6 text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
       >
-        {{ t("welcome.brandName", "POSON Kiosk") }}
+        {{ settingsStore.get("biz.name") || t("welcome.brandName", "POSON Kiosk") }}
       </h1>
       <p
         class="text-sm font-semibold uppercase tracking-widest text-cream opacity-90 drop-shadow-md"

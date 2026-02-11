@@ -133,12 +133,16 @@ model Order {
   id          String      @id @default(uuid())
   orderNumber String      @unique @map("order_number") @db.VarChar(20)
   kioskId     String?     @map("kiosk_id") @db.VarChar(50)
+  orderType   String?     @map("order_type") @db.VarChar(10) // DINE_IN, TAKEOUT
+  tableNo     Int?        @map("table_no")
+  memberId    Int?        @map("member_id")
   totalAmount Decimal     @map("total_amount") @db.Decimal(18, 2)
   status      OrderStatus @default(PENDING)
   memo        String?     @db.Text
   createdAt   DateTime    @default(now()) @map("created_at")
   completedAt DateTime?   @map("completed_at")
   cancelledAt DateTime?   @map("cancelled_at")
+  member         Member?         @relation(fields: [memberId], references: [id])
   items          OrderItem[]
   payments       Payment[]
   stockMovements StockMovement[]
@@ -146,6 +150,7 @@ model Order {
   @@index([orderNumber])
   @@index([createdAt])
   @@index([status])
+  @@index([memberId])
   @@map("orders")
 }
 
@@ -218,6 +223,7 @@ model Member {
   isActive  Boolean     @default(true) @map("is_active")
   createdAt DateTime    @default(now()) @map("created_at")
   updatedAt DateTime    @updatedAt @map("updated_at")
+  orders    Order[]
 
   @@index([phone])
   @@map("members")
@@ -351,6 +357,7 @@ model StockMovement {
   stockAfter        Int      @map("stock_after")
   purchaseId        Int?     @map("purchase_id")
   orderId           String?  @map("order_id")
+  adjustmentCode    String?  @map("adjustment_code") @db.VarChar(20) // ADJ-YYYYMMDD-NNNN
   reason            String?  @db.VarChar(50) // inventory_check, damage, gift, order_paid, order_cancelled
   memo              String?  @db.Text
   createdBy         String?  @map("created_by") @db.VarChar(100)
@@ -364,6 +371,7 @@ model StockMovement {
   @@index([type])
   @@index([purchaseId])
   @@index([orderId])
+  @@index([adjustmentCode])
   @@index([createdAt])
   @@map("stock_movements")
 }

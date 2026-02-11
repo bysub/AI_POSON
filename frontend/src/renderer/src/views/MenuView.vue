@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
 import { useProductsStore } from "@/stores/products";
+import { useSettingsStore } from "@/stores/settings";
 import { OptionModal } from "@/components";
 import type { Product, ProductOption, Category } from "@/types";
 import type { SupportedLocale } from "@/stores/locale";
@@ -12,6 +13,7 @@ const router = useRouter();
 const { locale, t } = useI18n();
 const cartStore = useCartStore();
 const productsStore = useProductsStore();
+const settingsStore = useSettingsStore();
 
 // 옵션 모달 상태
 const showOptionModal = ref(false);
@@ -189,7 +191,7 @@ function showAddedToast(productName: string): void {
  */
 function goToPayment(): void {
   if (!cartStore.isEmpty) {
-    router.push("/payment");
+    router.push("/order-confirm");
   }
 }
 
@@ -255,7 +257,9 @@ onMounted(async () => {
         </svg>
       </button>
 
-      <h1 class="text-xl font-bold text-gray-900">POSON Kiosk</h1>
+      <h1 class="text-xl font-bold text-gray-900">
+        {{ settingsStore.get("biz.name") || "POSON Kiosk" }}
+      </h1>
 
       <div class="w-10" />
     </header>

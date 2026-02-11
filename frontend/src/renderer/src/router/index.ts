@@ -21,6 +21,18 @@ const routes: RouteRecordRaw[] = [
         meta: { title: "메뉴 선택" },
       },
       {
+        path: "order-confirm",
+        name: "OrderConfirm",
+        component: () => import("@/views/kiosk/OrderConfirmView.vue"),
+        meta: { title: "주문 확인" },
+      },
+      {
+        path: "point-select",
+        name: "PointSelect",
+        component: () => import("@/views/kiosk/PointSelectView.vue"),
+        meta: { title: "포인트 선택" },
+      },
+      {
         path: "payment",
         name: "Payment",
         component: () => import("@/views/PaymentView.vue"),

@@ -88,10 +88,15 @@ export interface CartItem {
 }
 
 // Order types
+export type OrderType = "DINE_IN" | "TAKEOUT";
+
 export interface Order {
   id: string;
   orderNumber: string;
   kioskId?: string;
+  orderType?: OrderType;
+  tableNo?: number;
+  memberId?: number;
   items: OrderItem[];
   totalAmount: number;
   paymentType?: PaymentType;
@@ -222,7 +227,13 @@ export interface SBranch {
 }
 
 // StockMovement types
-export type StockMovementType = "PURCHASE_IN" | "PURCHASE_CANCEL" | "ADJUSTMENT" | "SYNC";
+export type StockMovementType =
+  | "PURCHASE_IN"
+  | "PURCHASE_CANCEL"
+  | "ADJUSTMENT"
+  | "SYNC"
+  | "SALE_OUT"
+  | "SALE_CANCEL";
 
 export interface StockMovement {
   id: number;
@@ -232,12 +243,15 @@ export interface StockMovement {
   stockBefore: number;
   stockAfter: number;
   purchaseId?: number;
+  orderId?: string;
+  adjustmentCode?: string;
   reason?: string;
   memo?: string;
   createdBy?: string;
   createdAt: string;
   purchaseProduct?: { id: number; barcode: string; name: string };
   purchase?: { purchaseCode: string };
+  order?: { orderNumber: string };
 }
 
 // Payment types

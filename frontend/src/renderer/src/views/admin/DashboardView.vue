@@ -20,13 +20,23 @@ const isLoading = ref(true);
 async function loadStats(): Promise<void> {
   isLoading.value = true;
   try {
-    const [productsRes, categoriesRes] = await Promise.all([
+    const today = new Date().toISOString().split("T")[0];
+
+    const [productsRes, categoriesRes, orderStatsRes] = await Promise.all([
       apiClient.get<{ success: boolean; data: unknown[] }>("/api/v1/products"),
       apiClient.get<{ success: boolean; data: unknown[] }>("/api/v1/categories"),
+      apiClient.get<{
+        success: boolean;
+        data: { totalOrders: number; completedOrders: number; totalRevenue: number };
+      }>(`/api/v1/orders/stats/summary?startDate=${today}&endDate=${today}T23:59:59.999Z`),
     ]);
 
     stats.value.totalProducts = productsRes.data.success ? productsRes.data.data.length : 0;
     stats.value.totalCategories = categoriesRes.data.success ? categoriesRes.data.data.length : 0;
+    if (orderStatsRes.data.success) {
+      stats.value.todayOrders = orderStatsRes.data.data.totalOrders;
+      stats.value.todayRevenue = orderStatsRes.data.data.totalRevenue;
+    }
   } catch (err) {
     console.error("Failed to load stats:", err);
   } finally {
@@ -76,9 +86,7 @@ onMounted(() => {
             </svg>
           </div>
         </div>
-        <p class="mt-3 text-xs text-slate-500">
-          <span class="text-green-500">+2</span> 이번 주 등록
-        </p>
+        <p class="mt-3 text-xs text-slate-500">등록된 판매 상품</p>
       </div>
 
       <!-- Total Categories -->
@@ -142,9 +150,7 @@ onMounted(() => {
             </svg>
           </div>
         </div>
-        <p class="mt-3 text-xs text-slate-500">
-          전일 대비 <span class="text-green-500">+12%</span>
-        </p>
+        <p class="mt-3 text-xs text-slate-500">오늘 전체 주문 수</p>
       </div>
 
       <!-- Today Revenue -->
@@ -176,7 +182,7 @@ onMounted(() => {
             </svg>
           </div>
         </div>
-        <p class="mt-3 text-xs text-slate-500">전일 대비 <span class="text-green-500">+8%</span></p>
+        <p class="mt-3 text-xs text-slate-500">완료된 주문 매출 합계</p>
       </div>
     </div>
 

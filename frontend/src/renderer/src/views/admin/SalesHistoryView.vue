@@ -7,6 +7,15 @@ interface OrderItem {
   name: string;
   price: number;
   quantity: number;
+  product?: { id: number; name: string; barcode?: string };
+}
+
+interface Payment {
+  id: string;
+  method: string;
+  amount: number;
+  status: string;
+  createdAt: string;
 }
 
 interface Order {
@@ -15,7 +24,15 @@ interface Order {
   totalAmount: number;
   status: string;
   createdAt: string;
+  completedAt?: string;
+  cancelledAt?: string;
+  kioskId?: string;
+  orderType?: string;
+  tableNo?: number;
+  memberId?: number;
+  memo?: string;
   items?: OrderItem[];
+  payments?: Payment[];
 }
 
 interface OrdersResponse {
@@ -32,6 +49,9 @@ interface OrdersResponse {
 const orders = ref<Order[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
+
+// 주문 상세 모달
+const selectedOrder = ref<Order | null>(null);
 
 // 날짜 필터
 // 날짜 범위 (기본: 이번 달)
@@ -138,6 +158,45 @@ function getStatusStyle(status: string): string {
     PENDING: "bg-slate-100 text-slate-700",
   };
   return styles[status] ?? "bg-slate-100 text-slate-700";
+}
+
+// 주문유형 라벨
+function getOrderTypeLabel(type?: string): string {
+  if (!type) return "-";
+  const labels: Record<string, string> = { DINE_IN: "매장", TAKEOUT: "포장" };
+  return labels[type] ?? type;
+}
+
+// 결제수단 라벨
+function getPaymentMethodLabel(method: string): string {
+  const labels: Record<string, string> = {
+    CARD: "카드",
+    CASH: "현금",
+    TRANSFER: "계좌이체",
+    MIXED: "복합결제",
+  };
+  return labels[method] ?? method;
+}
+
+// 결제상태 라벨
+function getPaymentStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    APPROVED: "승인",
+    CANCELLED: "취소",
+    PENDING: "대기",
+    FAILED: "실패",
+  };
+  return labels[status] ?? status;
+}
+
+// 주문 상세 열기
+function openDetail(order: Order): void {
+  selectedOrder.value = order;
+}
+
+// 주문 상세 닫기
+function closeDetail(): void {
+  selectedOrder.value = null;
 }
 
 // 페이지 변경
@@ -312,6 +371,12 @@ onMounted(() => loadData());
               주문번호
             </th>
             <th class="px-6 py-4 text-left text-xs font-semibold uppercase text-slate-500">일시</th>
+            <th class="px-6 py-4 text-center text-xs font-semibold uppercase text-slate-500">
+              유형
+            </th>
+            <th class="px-6 py-4 text-center text-xs font-semibold uppercase text-slate-500">
+              상품수
+            </th>
             <th class="px-6 py-4 text-right text-xs font-semibold uppercase text-slate-500">
               금액
             </th>
@@ -321,12 +386,28 @@ onMounted(() => loadData());
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr v-for="order in orders" :key="order.id" class="hover:bg-slate-50">
-            <td class="px-6 py-4 font-medium text-slate-800">
-              {{ order.orderNumber }}
+          <tr
+            v-for="order in orders"
+            :key="order.id"
+            class="cursor-pointer hover:bg-slate-50"
+            @click="openDetail(order)"
+          >
+            <td class="px-6 py-4">
+              <button
+                class="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                @click.stop="openDetail(order)"
+              >
+                {{ order.orderNumber }}
+              </button>
             </td>
             <td class="px-6 py-4 text-slate-600">
               {{ formatDate(order.createdAt) }}
+            </td>
+            <td class="px-6 py-4 text-center text-sm text-slate-600">
+              {{ getOrderTypeLabel(order.orderType) }}
+            </td>
+            <td class="px-6 py-4 text-center text-sm text-slate-600">
+              {{ order.items?.length ?? 0 }}건
             </td>
             <td class="px-6 py-4 text-right font-semibold text-slate-800">
               {{ formatPrice(order.totalAmount) }}
@@ -364,5 +445,179 @@ onMounted(() => loadData());
         다음
       </button>
     </div>
+
+    <!-- Order Detail Modal -->
+    <Teleport to="body">
+      <div
+        v-if="selectedOrder"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        @click.self="closeDetail"
+      >
+        <div class="mx-4 w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+            <div>
+              <h3 class="text-lg font-bold text-slate-800">주문 상세</h3>
+              <p class="text-sm text-slate-500">
+                {{ selectedOrder.orderNumber }}
+              </p>
+            </div>
+            <button
+              class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              @click="closeDetail"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="max-h-[70vh] overflow-y-auto px-6 py-4">
+            <!-- 주문 정보 -->
+            <div class="mb-4 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-4">
+              <div>
+                <span class="text-xs text-slate-500">주문일시</span>
+                <p class="text-sm font-medium text-slate-800">
+                  {{ formatDate(selectedOrder.createdAt) }}
+                </p>
+              </div>
+              <div>
+                <span class="text-xs text-slate-500">상태</span>
+                <p>
+                  <span
+                    class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    :class="getStatusStyle(selectedOrder.status)"
+                  >
+                    {{ getStatusLabel(selectedOrder.status) }}
+                  </span>
+                </p>
+              </div>
+              <div>
+                <span class="text-xs text-slate-500">주문유형</span>
+                <p class="text-sm font-medium text-slate-800">
+                  {{ getOrderTypeLabel(selectedOrder.orderType) }}
+                  <span v-if="selectedOrder.tableNo" class="ml-1 text-xs text-slate-500"
+                    >(테이블 {{ selectedOrder.tableNo }}번)</span
+                  >
+                </p>
+              </div>
+              <div>
+                <span class="text-xs text-slate-500">기기ID</span>
+                <p class="text-sm font-medium text-slate-800">
+                  {{ selectedOrder.kioskId ?? "-" }}
+                </p>
+              </div>
+              <div v-if="selectedOrder.completedAt">
+                <span class="text-xs text-slate-500">완료일시</span>
+                <p class="text-sm font-medium text-slate-800">
+                  {{ formatDate(selectedOrder.completedAt) }}
+                </p>
+              </div>
+              <div v-if="selectedOrder.cancelledAt">
+                <span class="text-xs text-slate-500">취소일시</span>
+                <p class="text-sm font-medium text-red-600">
+                  {{ formatDate(selectedOrder.cancelledAt) }}
+                </p>
+              </div>
+            </div>
+
+            <!-- 주문 상품 목록 -->
+            <h4 class="mb-2 text-sm font-bold text-slate-700">주문 상품</h4>
+            <table class="mb-4 w-full text-sm">
+              <thead>
+                <tr class="border-b border-slate-200 text-xs text-slate-500">
+                  <th class="pb-2 text-left">상품명</th>
+                  <th class="pb-2 text-right">단가</th>
+                  <th class="pb-2 text-center">수량</th>
+                  <th class="pb-2 text-right">소계</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="item in selectedOrder.items" :key="item.id">
+                  <td class="py-2 text-slate-800">
+                    {{ item.name }}
+                    <span v-if="item.product?.barcode" class="ml-1 text-xs text-slate-400"
+                      >({{ item.product.barcode }})</span
+                    >
+                  </td>
+                  <td class="py-2 text-right text-slate-600">
+                    {{ formatPrice(item.price) }}
+                  </td>
+                  <td class="py-2 text-center text-slate-600">
+                    {{ item.quantity }}
+                  </td>
+                  <td class="py-2 text-right font-medium text-slate-800">
+                    {{ formatPrice(item.price * item.quantity) }}
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="border-t-2 border-slate-300">
+                  <td colspan="3" class="py-2 text-right font-bold text-slate-700">합계</td>
+                  <td class="py-2 text-right text-base font-bold text-indigo-600">
+                    {{ formatPrice(selectedOrder.totalAmount) }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <!-- 결제 정보 -->
+            <div v-if="selectedOrder.payments && selectedOrder.payments.length > 0">
+              <h4 class="mb-2 text-sm font-bold text-slate-700">결제 정보</h4>
+              <div class="space-y-2">
+                <div
+                  v-for="payment in selectedOrder.payments"
+                  :key="payment.id"
+                  class="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2"
+                >
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-slate-800">
+                      {{ getPaymentMethodLabel(payment.method) }}
+                    </span>
+                    <span
+                      class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                      :class="
+                        payment.status === 'APPROVED'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      "
+                    >
+                      {{ getPaymentStatusLabel(payment.status) }}
+                    </span>
+                  </div>
+                  <span class="text-sm font-semibold text-slate-800">
+                    {{ formatPrice(payment.amount) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 메모 -->
+            <div v-if="selectedOrder.memo" class="mt-4">
+              <h4 class="mb-1 text-sm font-bold text-slate-700">메모</h4>
+              <p class="rounded-lg bg-amber-50 px-4 py-2 text-sm text-slate-700">
+                {{ selectedOrder.memo }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="border-t border-slate-200 px-6 py-4">
+            <button
+              class="w-full rounded-xl bg-slate-100 px-4 py-2.5 font-medium text-slate-700 transition-colors hover:bg-slate-200"
+              @click="closeDetail"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

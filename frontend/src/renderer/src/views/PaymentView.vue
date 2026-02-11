@@ -1,17 +1,27 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
 import { useNetworkStore } from "@/stores/network";
 import { showWarningToast, showInfoToast } from "@/utils/AlertUtils";
 import { CardPayment, CashPayment } from "@/components";
-import type { Order } from "@/types";
+import type { Order, OrderType } from "@/types";
 
 const router = useRouter();
+const route = useRoute();
 const { t } = useI18n();
 const cartStore = useCartStore();
 const networkStore = useNetworkStore();
+
+// 이전 화면에서 전달받은 주문 메타데이터
+const orderType = computed(() => (route.query.orderType as OrderType) ?? undefined);
+const tableNo = computed(() =>
+  route.query.tableNo ? parseInt(route.query.tableNo as string, 10) : undefined,
+);
+const memberId = computed(() =>
+  route.query.memberId ? parseInt(route.query.memberId as string, 10) : undefined,
+);
 
 type PaymentStep = "select" | "card" | "cash" | "processing";
 type PaymentMethod = "card" | "mobile" | "scanner" | "cash";
@@ -85,7 +95,11 @@ async function proceedPayment(): Promise<void> {
     orderError.value = null;
 
     try {
-      const order = await cartStore.submitOrder();
+      const order = await cartStore.submitOrder({
+        orderType: orderType.value,
+        tableNo: tableNo.value,
+        memberId: memberId.value,
+      });
       if (order) {
         currentOrder.value = order;
       } else {
@@ -117,7 +131,7 @@ async function proceedPayment(): Promise<void> {
  */
 function goBack(): void {
   if (currentStep.value === "select") {
-    router.push("/menu");
+    router.back();
   } else {
     currentStep.value = "select";
   }

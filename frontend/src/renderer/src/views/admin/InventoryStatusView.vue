@@ -3,13 +3,6 @@ import { ref, computed, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { apiClient } from "@/services/api/client";
 
-interface Supplier {
-  id: number;
-  code: string;
-  name: string;
-  type: string;
-}
-
 interface PurchaseProduct {
   id: number;
   barcode: string;
@@ -18,8 +11,6 @@ interface PurchaseProduct {
   costPrice: string;
   stock: number;
   safeStock: number;
-  supplierId: number | null;
-  supplier: Supplier | null;
   status: string;
 }
 
@@ -48,10 +39,7 @@ const filtered = computed(() => {
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
     list = list.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.barcode.toLowerCase().includes(q) ||
-        (p.supplier?.name ?? "").toLowerCase().includes(q),
+      (p) => p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q),
     );
   }
 
@@ -146,7 +134,7 @@ onMounted(() => loadData());
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="상품명, 바코드, 거래처로 검색..."
+          placeholder="상품명, 바코드로 검색..."
           class="w-full rounded-xl border border-slate-200 py-2.5 pl-12 pr-4 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         />
       </div>
@@ -197,9 +185,6 @@ onMounted(() => loadData());
         <thead>
           <tr class="border-b border-slate-100 bg-slate-50">
             <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-slate-500">상품</th>
-            <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-slate-500">
-              거래처
-            </th>
             <th class="px-5 py-3 text-right text-xs font-semibold uppercase text-slate-500">
               원가
             </th>
@@ -229,9 +214,6 @@ onMounted(() => loadData());
               <p class="text-xs text-slate-500">
                 {{ product.barcode }}
               </p>
-            </td>
-            <td class="px-5 py-3 text-sm text-slate-600">
-              {{ product.supplier?.name ?? "-" }}
             </td>
             <td class="px-5 py-3 text-right text-sm text-slate-600">
               {{ formatNumber(parseFloat(product.costPrice || "0")) }}
