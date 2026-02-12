@@ -2,8 +2,10 @@
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
 import { getImageSrc } from "@/utils/image";
+import { getLocalizedName } from "@/utils/i18n";
+import type { CartItem } from "@/types";
 
-const { t } = useI18n();
+const { locale, t } = useI18n();
 const cartStore = useCartStore();
 
 defineProps<{
@@ -41,6 +43,10 @@ function decrementQuantity(itemId: string, currentQuantity: number): void {
  */
 function removeItem(itemId: string): void {
   cartStore.removeItem(itemId);
+}
+
+function itemName(item: CartItem): string {
+  return getLocalizedName(item, locale.value);
 }
 </script>
 
@@ -88,14 +94,14 @@ function removeItem(itemId: string): void {
             <img
               v-if="item.imageUrl"
               :src="getImageSrc(item.imageUrl)"
-              :alt="item.name"
+              :alt="itemName(item)"
               class="h-full w-full object-cover"
             />
             <div
               v-else
               class="flex h-full w-full items-center justify-center text-2xl text-gray-400"
             >
-              {{ item.name.charAt(0) }}
+              {{ itemName(item).charAt(0) }}
             </div>
           </div>
 
@@ -103,7 +109,7 @@ function removeItem(itemId: string): void {
           <div class="flex flex-1 flex-col justify-between">
             <div>
               <h3 class="text-kiosk-base font-medium text-gray-900">
-                {{ item.name }}
+                {{ itemName(item) }}
               </h3>
               <p class="text-kiosk-sm text-gray-500">{{ formatPrice(item.price) }}원</p>
             </div>

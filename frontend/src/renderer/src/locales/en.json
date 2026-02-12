@@ -29,6 +29,7 @@
     "title": "Menu",
     "category": "Category",
     "soldOut": "Sold Out",
+    "preparing": "Preparing",
     "addToCart": "Add"
   },
   "cart": {

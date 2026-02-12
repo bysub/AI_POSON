@@ -29,6 +29,7 @@
     "title": "菜单",
     "category": "分类",
     "soldOut": "售罄",
+    "preparing": "准备中",
     "addToCart": "添加"
   },
   "cart": {

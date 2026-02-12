@@ -7,9 +7,10 @@ import { useSettingsStore } from "@/stores/settings";
 import NumberPad from "@/components/kiosk/NumberPad.vue";
 import { showWarningToast } from "@/utils/AlertUtils";
 import { getImageSrc } from "@/utils/image";
+import { getLocalizedName } from "@/utils/i18n";
 
 const router = useRouter();
-const { t } = useI18n();
+const { locale, t } = useI18n();
 const cartStore = useCartStore();
 const settingsStore = useSettingsStore();
 
@@ -162,7 +163,7 @@ if (!tableSelectEnabled.value) {
                       :src="getImageSrc(item.imageUrl)"
                       class="h-8 w-8 rounded object-cover"
                     />
-                    <span>{{ item.name }}</span>
+                    <span>{{ getLocalizedName(item, locale) }}</span>
                   </div>
                 </td>
                 <td class="py-3 text-center text-sm text-gray-600">

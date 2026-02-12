@@ -8,10 +8,11 @@ import { showWarningToast, showInfoToast } from "@/utils/AlertUtils";
 import { CardPayment, CashPayment } from "@/components";
 import type { Order, OrderType } from "@/types";
 import { getImageSrc } from "@/utils/image";
+import { getLocalizedName } from "@/utils/i18n";
 
 const router = useRouter();
 const route = useRoute();
-const { t } = useI18n();
+const { locale, t } = useI18n();
 const cartStore = useCartStore();
 const networkStore = useNetworkStore();
 
@@ -251,19 +252,19 @@ onMounted(() => {
                     <img
                       v-if="item.imageUrl"
                       :src="getImageSrc(item.imageUrl)"
-                      :alt="item.name"
+                      :alt="getLocalizedName(item, locale)"
                       class="h-full w-full object-cover"
                     />
                     <div
                       v-else
                       class="flex h-full w-full items-center justify-center text-xl text-orange-300"
                     >
-                      {{ item.name.charAt(0) }}
+                      {{ getLocalizedName(item, locale).charAt(0) }}
                     </div>
                   </div>
                   <div>
                     <h3 class="text-base font-bold leading-tight text-gray-800">
-                      {{ item.name }}
+                      {{ getLocalizedName(item, locale) }}
                       <span v-if="item.quantity > 1" class="text-orange-500">
                         x{{ item.quantity }}
                       </span>

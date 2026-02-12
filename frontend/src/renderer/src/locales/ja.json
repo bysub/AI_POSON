@@ -29,6 +29,7 @@
     "title": "メニュー",
     "category": "カテゴリー",
     "soldOut": "売り切れ",
+    "preparing": "準備中",
     "addToCart": "追加"
   },
   "cart": {

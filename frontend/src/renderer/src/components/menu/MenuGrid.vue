@@ -42,10 +42,10 @@ function formatPrice(price: number): string {
 }
 
 /**
- * 상품 재고 확인 (매입상품 연결 시 해당 재고, 미연결 시 무제한)
+ * 판매 불가 상태 확인 (품절, 판매대기, 재고 0)
  */
-function isSoldOut(product: Product): boolean {
-  if (product.status === "SOLD_OUT") return true;
+function isUnavailable(product: Product): boolean {
+  if (product.status === "SOLD_OUT" || product.status === "PENDING") return true;
   const stock = product.purchaseProduct?.stock ?? Infinity;
   return stock <= 0;
 }
@@ -54,7 +54,7 @@ function isSoldOut(product: Product): boolean {
  * 상품 클릭 핸들러
  */
 function handleProductClick(product: Product): void {
-  if (isSoldOut(product)) return;
+  if (isUnavailable(product)) return;
 
   // 옵션이 있는 상품은 옵션 모달 표시
   if (product.options && product.options.length > 0) {
@@ -89,7 +89,7 @@ function handleProductClick(product: Product): void {
         :key="product.id"
         class="group relative overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-200"
         :class="[
-          isSoldOut(product)
+          isUnavailable(product)
             ? 'cursor-not-allowed opacity-60'
             : 'cursor-pointer hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]',
         ]"
@@ -110,19 +110,22 @@ function handleProductClick(product: Product): void {
             <span class="text-4xl text-gray-400">{{ getProductName(product).charAt(0) }}</span>
           </div>
 
-          <!-- Sold Out Overlay -->
+          <!-- Unavailable Overlay (품절/준비중) -->
           <div
-            v-if="isSoldOut(product)"
+            v-if="isUnavailable(product)"
             class="absolute inset-0 flex items-center justify-center bg-black/50"
           >
-            <span class="rounded-lg bg-red-600 px-4 py-2 text-kiosk-lg font-bold text-white">
-              {{ t("menu.soldOut") }}
+            <span
+              class="span-unavailable-overlay w-full rounded-lg px-4 py-2 text-kiosk-lg font-bold text-white"
+              :class="product.status === 'PENDING' ? 'bg-orange-500' : 'bg-gray-600'"
+            >
+              {{ product.status === "PENDING" ? t("menu.preparing") : t("menu.soldOut") }}
             </span>
           </div>
 
           <!-- Options Badge -->
           <div
-            v-if="product.options && product.options.length > 0 && !isSoldOut(product)"
+            v-if="product.options && product.options.length > 0 && !isUnavailable(product)"
             class="absolute right-2 top-2 rounded-full bg-primary-600 px-2 py-1 text-xs font-medium text-white"
           >
             옵션
@@ -143,7 +146,7 @@ function handleProductClick(product: Product): void {
 
         <!-- Quick Add Button (visible on hover, desktop only) -->
         <div
-          v-if="!isSoldOut(product)"
+          v-if="!isUnavailable(product)"
           class="absolute bottom-0 left-0 right-0 translate-y-full bg-primary-600 py-3 text-center text-white transition-transform duration-200 group-hover:translate-y-0"
         >
           <span class="text-kiosk-base font-medium">{{ t("menu.addToCart") }}</span>
@@ -152,3 +155,10 @@ function handleProductClick(product: Product): void {
     </div>
   </main>
 </template>
+<style lang="css">
+.span-unavailable-overlay {
+  font-size: 24px;
+  text-align: center;
+  padding: 0.5em;
+}
+</style>

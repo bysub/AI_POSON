@@ -9,6 +9,7 @@ import { OptionModal } from "@/components";
 import type { Product, ProductOption, Category } from "@/types";
 import type { SupportedLocale } from "@/stores/locale";
 import { getImageSrc } from "@/utils/image";
+import { getLocalizedName as getLocalizedItemName } from "@/utils/i18n";
 
 const router = useRouter();
 const { locale, t } = useI18n();
@@ -107,22 +108,23 @@ function getStock(product: Product): number {
   return product.purchaseProduct?.stock ?? Infinity;
 }
 
-function isSoldOut(product: Product): boolean {
-  return product.status === "SOLD_OUT" || getStock(product) <= 0;
+function isUnavailable(product: Product): boolean {
+  if (product.status === "SOLD_OUT" || product.status === "PENDING") return true;
+  return getStock(product) <= 0;
 }
 
 /**
  * 장바구니에 추가
  */
 function handleAddToCart(product: Product): void {
-  if (isSoldOut(product)) return;
+  if (isUnavailable(product)) return;
 
   if (product.options && product.options.length > 0) {
     selectedProduct.value = product;
     showOptionModal.value = true;
   } else {
     cartStore.addItem(product);
-    showAddedToast(product.name);
+    showAddedToast(getLocalizedName(product));
   }
 }
 
@@ -157,7 +159,7 @@ function handleOptionConfirm(
   const optionNames = Object.values(selectedOptions)
     .map((o) => o.name)
     .join(" + ");
-  showAddedToast(`${product.name}${optionNames ? " + " + optionNames : ""}`);
+  showAddedToast(`${getLocalizedName(product)}${optionNames ? " + " + optionNames : ""}`);
 
   showOptionModal.value = false;
   selectedProduct.value = null;
@@ -439,7 +441,7 @@ onMounted(async () => {
             v-for="product in productsStore.filteredProducts"
             :key="product.id"
             class="group relative flex flex-col overflow-hidden rounded-2xl bg-rose-50 shadow-sm transition-all"
-            :class="isSoldOut(product) ? 'opacity-60' : 'cursor-pointer hover:shadow-lg'"
+            :class="isUnavailable(product) ? 'opacity-60' : 'cursor-pointer hover:shadow-lg'"
             @click="handleAddToCart(product)"
           >
             <!-- Sale Badge -->
@@ -465,13 +467,16 @@ onMounted(async () => {
                 {{ getLocalizedName(product).charAt(0) }}
               </div>
 
-              <!-- Sold Out Overlay -->
+              <!-- Unavailable Overlay (품절/준비중) -->
               <div
-                v-if="isSoldOut(product)"
+                v-if="isUnavailable(product)"
                 class="absolute inset-0 flex items-center justify-center bg-black/50"
               >
-                <span class="rounded bg-red-600 px-3 py-1 text-sm font-bold text-white">
-                  {{ t("menu.soldOut") }}
+                <span
+                  class="span-unavailable-overlay w-full rounded px-3 py-1 text-sm font-bold text-white"
+                  :class="product.status === 'PENDING' ? 'bg-orange-500' : 'bg-gray-600'"
+                >
+                  {{ product.status === "PENDING" ? t("menu.preparing") : t("menu.soldOut") }}
                 </span>
               </div>
             </div>
@@ -498,7 +503,7 @@ onMounted(async () => {
 
             <!-- Add Button -->
             <button
-              v-if="!isSoldOut(product)"
+              v-if="!isUnavailable(product)"
               class="flex items-center justify-center gap-1 bg-red-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-600 active:bg-red-700"
               @click.stop="handleAddToCart(product)"
             >
@@ -536,7 +541,7 @@ onMounted(async () => {
             class="flex items-center justify-between border-b border-gray-100 pb-2 text-sm"
           >
             <div class="flex-1">
-              <span class="text-gray-800">{{ item.name }}</span>
+              <span class="text-gray-800">{{ getLocalizedItemName(item, locale) }}</span>
               <span v-if="item.options" class="text-xs text-gray-500">
                 {{ getOptionsString(item.options) ? " + " + getOptionsString(item.options) : "" }}
               </span>
@@ -687,5 +692,10 @@ onMounted(async () => {
 }
 .icon-sale-badge {
   font-size: 16px;
+}
+.span-unavailable-overlay {
+  font-size: 24px;
+  text-align: center;
+  padding: 0.5em;
 }
 </style>

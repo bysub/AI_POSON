@@ -3,9 +3,10 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
 import { getImageSrc } from "@/utils/image";
+import { getLocalizedName } from "@/utils/i18n";
 
 const router = useRouter();
-const { t } = useI18n();
+const { locale, t } = useI18n();
 const cartStore = useCartStore();
 
 function formatPrice(price: number) {
@@ -44,14 +45,14 @@ function formatPrice(price: number) {
             <img
               v-if="item.imageUrl"
               :src="getImageSrc(item.imageUrl)"
-              :alt="item.name"
+              :alt="getLocalizedName(item, locale)"
               class="h-full w-full rounded-lg object-cover"
             />
           </div>
 
           <div class="flex-1">
             <h3 class="text-kiosk-base font-medium">
-              {{ item.name }}
+              {{ getLocalizedName(item, locale) }}
             </h3>
             <p class="text-kiosk-lg font-bold text-primary-600">
               {{ formatPrice(item.price * item.quantity) }}원

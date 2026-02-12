@@ -29,6 +29,7 @@
     "title": "메뉴 선택",
     "category": "카테고리",
     "soldOut": "품절",
+    "preparing": "준비중",
     "addToCart": "담기"
   },
   "cart": {

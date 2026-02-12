@@ -72,7 +72,7 @@ router.get("/", async (req, res) => {
     });
   }
 
-  // 카테고리별 캐싱 (키오스크용 - 판매중 상품만)
+  // 카테고리별 캐싱 (키오스크용 - HIDDEN 제외, 품절/판매대기는 포함)
   const cacheKey = categoryId
     ? CACHE_KEYS.PRODUCTS_BY_CATEGORY(parseInt(categoryId as string))
     : CACHE_KEYS.PRODUCTS;
@@ -83,7 +83,7 @@ router.get("/", async (req, res) => {
       return prisma.product.findMany({
         where: {
           isActive: true,
-          status: "SELLING", // 키오스크용: 판매중 상품만
+          status: { in: ["SELLING", "SOLD_OUT", "PENDING"] },
           ...categoryFilter,
         },
         include: productInclude,

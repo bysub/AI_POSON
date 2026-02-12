@@ -81,6 +81,9 @@ export interface CartItem {
   id: string;
   productId: number;
   name: string;
+  nameEn?: string;
+  nameJa?: string;
+  nameZh?: string;
   price: number;
   quantity: number;
   options?: Record<string, unknown>;
