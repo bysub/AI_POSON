@@ -506,12 +506,56 @@ onMounted(() => {
         class="flex-none border-t border-orange-50 bg-white/80 px-6 pb-8 pt-5 backdrop-blur-md"
       >
         <div class="mx-auto max-w-md">
+          <!-- 에러 메시지 -->
+          <div
+            v-if="orderError"
+            class="mb-3 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+          >
+            <svg
+              class="h-5 w-5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+            <span class="flex-1">{{ orderError }}</span>
+            <button class="font-bold text-red-400 hover:text-red-600" @click="orderError = null">
+              ✕
+            </button>
+          </div>
           <button
             class="flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-red-500 shadow-xl shadow-red-500/30 transition-all hover:bg-red-600 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
-            :disabled="!selectedMethod"
+            :disabled="!selectedMethod || orderCreating"
             @click="proceedPayment"
           >
-            <span class="text-xl font-extrabold uppercase tracking-tight text-white">
+            <!-- 로딩 스피너 -->
+            <svg
+              v-if="orderCreating"
+              class="h-6 w-6 animate-spin text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            <span v-else class="text-xl font-extrabold uppercase tracking-tight text-white">
               {{ t("payment.payNow") }}
             </span>
             <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

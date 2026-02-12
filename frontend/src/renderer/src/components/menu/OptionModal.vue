@@ -52,10 +52,18 @@ const optionsTotalPrice = computed(() => {
   );
 });
 
+// 할인 적용된 실제 판매가
+const effectivePrice = computed(() => {
+  if (!props.product) return 0;
+  return props.product.isDiscount && props.product.discountPrice
+    ? Number(props.product.discountPrice)
+    : Number(props.product.sellPrice);
+});
+
 // 최종 가격 (상품 + 옵션) * 수량
 const totalPrice = computed(() => {
   if (!props.product) return 0;
-  return (Number(props.product.sellPrice) + optionsTotalPrice.value) * quantity.value;
+  return (effectivePrice.value + optionsTotalPrice.value) * quantity.value;
 });
 
 // 필수 옵션이 모두 선택되었는지
@@ -152,7 +160,15 @@ function handleBackdropClick(): void {
             <h2 class="text-kiosk-xl font-bold text-gray-900">
               {{ product.name }}
             </h2>
-            <p class="mt-1 text-kiosk-lg text-primary-600">
+            <template v-if="product.isDiscount && product.discountPrice">
+              <p class="text-sm text-gray-400 line-through">
+                {{ formatPrice(product.sellPrice) }}원
+              </p>
+              <p class="mt-1 text-kiosk-lg text-red-500">
+                {{ formatPrice(product.discountPrice) }}원
+              </p>
+            </template>
+            <p v-else class="mt-1 text-kiosk-lg text-primary-600">
               {{ formatPrice(product.sellPrice) }}원
             </p>
           </header>

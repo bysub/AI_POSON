@@ -135,56 +135,56 @@ router.post("/", async (req, res, next) => {
       }
     }
 
-    // Generate order number (format: YYMMDD-NNNN)
-    const today = new Date();
-    const datePrefix = today.toISOString().slice(2, 10).replace(/-/g, "");
-    const orderCount = await prisma.order.count({
-      where: {
-        createdAt: {
-          gte: new Date(today.setHours(0, 0, 0, 0)),
-        },
-      },
-    });
-    const orderNumber = `${datePrefix}-${String(orderCount + 1).padStart(4, "0")}`;
-
     // Calculate total
     const totalAmount = items.reduce(
       (sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity,
       0,
     );
 
-    // 주문 생성
-    const order = await prisma.order.create({
-      data: {
-        id: uuidv4(),
-        orderNumber,
-        kioskId,
-        orderType: orderType ?? null,
-        tableNo: tableNo ? parseInt(tableNo, 10) : null,
-        memberId: memberId ? parseInt(memberId, 10) : null,
-        totalAmount,
-        status: "PENDING",
-        items: {
-          create: items.map(
-            (item: {
-              productId: number;
-              name: string;
-              price: number;
-              quantity: number;
-              options?: Prisma.InputJsonValue;
-            }) => ({
-              product: { connect: { id: item.productId } },
-              name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-              options: item.options ?? Prisma.JsonNull,
-            }),
-          ),
+    // 주문 생성 (트랜잭션 내에서 주문번호 생성 → race condition 방지)
+    const order = await prisma.$transaction(async (tx) => {
+      // Generate order number (format: YYMMDD-NNNN)
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const datePrefix = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+
+      const orderCount = await tx.order.count({
+        where: { createdAt: { gte: startOfDay } },
+      });
+      const orderNumber = `${datePrefix}-${String(orderCount + 1).padStart(4, "0")}`;
+
+      return tx.order.create({
+        data: {
+          id: uuidv4(),
+          orderNumber,
+          kioskId: kioskId ?? null,
+          orderType: orderType ?? null,
+          tableNo: tableNo != null ? parseInt(String(tableNo), 10) : null,
+          memberId: memberId != null ? parseInt(String(memberId), 10) : null,
+          totalAmount,
+          status: "PENDING",
+          items: {
+            create: items.map(
+              (item: {
+                productId: number;
+                name: string;
+                price: number;
+                quantity: number;
+                options?: Prisma.InputJsonValue;
+              }) => ({
+                product: { connect: { id: item.productId } },
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                options: item.options ?? Prisma.JsonNull,
+              }),
+            ),
+          },
         },
-      },
-      include: {
-        items: true,
-      },
+        include: {
+          items: true,
+        },
+      });
     });
 
     // 캐시 무효화
@@ -197,8 +197,9 @@ router.post("/", async (req, res, next) => {
       data: order,
     });
   } catch (error) {
-    logger.error({ error }, "Failed to create order");
-    return next(new AppError(500, "Failed to create order", "ORDER_CREATE_FAILED"));
+    const errMsg = error instanceof Error ? error.message : String(error);
+    logger.error({ error, errMsg }, "Failed to create order");
+    return next(new AppError(500, `Failed to create order: ${errMsg}`, "ORDER_CREATE_FAILED"));
   }
 });
 

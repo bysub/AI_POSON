@@ -151,6 +151,7 @@ function handleOptionConfirm(
   const productWithOptions = {
     ...product,
     sellPrice: Number(product.sellPrice) + optionsPrice,
+    discountPrice: product.discountPrice ? Number(product.discountPrice) + optionsPrice : undefined,
   };
 
   const optionsData = Object.entries(selectedOptions).reduce(
