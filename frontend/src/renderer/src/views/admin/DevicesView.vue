@@ -51,6 +51,8 @@ const tabsByDevice = computed(() => {
       { id: "van", label: "VAN 결제" },
       { id: "posPrint", label: "인쇄/출력" },
       { id: "posSale", label: "판매설정" },
+      { id: "posSettle", label: "정산/마감" },
+      { id: "posReceipt", label: "영수증" },
     ];
   }
   if (type === "KIOSK") {
@@ -277,6 +279,52 @@ const posSaleConfig = ref({
   creditMemoUse: "0",
 });
 
+const posSettleConfig = ref({
+  // 담당자 정산서
+  staffBottleSales: "0",
+  staffTaxExempt: "0",
+  staffDiscount: "0",
+  staffCancel: "0",
+  staffCreditCard: "1",
+  staffCashReceipt: "0",
+  staffPrize: "0",
+  staffCardByIssuer: "0",
+  staffOutstanding: "1",
+  staffDeliveryDeposit: "1",
+  staffEtcDiscount: "0",
+  staffDeliveryCount: "1",
+  staffSettleReport: "0",
+  // 마감 정산서
+  closeBottleSales: "1",
+  closeTaxExempt: "1",
+  closeDiscount: "0",
+  closeCancel: "0",
+  closeCreditCard: "1",
+  closeCashReceipt: "0",
+  closePrize: "0",
+  closeCardByIssuer: "0",
+  closeDeliveryCount: "0",
+  closeSettleReport: "1",
+  // 영수증 메시지
+  receiptTopMsg: "",
+  receiptBottomMsg1: "",
+  receiptBottomMsg2: "",
+  receiptBottomMsg3: "",
+});
+
+const posReceiptConfig = ref({
+  receiptOffDelivery: "0",
+  receiptOffCredit: "1",
+  receiptOffPoint: "1",
+  receiptOffGift: "1",
+  receiptOffEcoupon: "0",
+  receiptOffQrms: "1",
+  receiptOffCardOnce: "0",
+  receiptOffCardInstall: "1",
+  receiptOffCashReceipt: "0",
+  receiptOffReturn: "1",
+});
+
 const kitchenConfig = ref({
   kitchenPrint: "4",
   kitchenPrintPort: "7",
@@ -341,6 +389,16 @@ const categoryMap: Record<
     ref: posSaleConfig as ReturnType<typeof ref<SettingsRecord>>,
     prefix: "posSale",
     apiCategory: "POS_SALE",
+  },
+  posSettle: {
+    ref: posSettleConfig as ReturnType<typeof ref<SettingsRecord>>,
+    prefix: "posSettle",
+    apiCategory: "POS_SETTLE",
+  },
+  posReceipt: {
+    ref: posReceiptConfig as ReturnType<typeof ref<SettingsRecord>>,
+    prefix: "posReceipt",
+    apiCategory: "POS_RECEIPT",
   },
   kitchenMsg: {
     ref: kitchenConfig as ReturnType<typeof ref<SettingsRecord>>,
@@ -646,6 +704,76 @@ const posPrintToggles: ToggleItem[] = [
 const posSaleToggles: ToggleItem[] = [
   { key: "bcPartner", title: "BC 파트너스", desc: "BC 파트너스 가맹점 여부" },
   { key: "creditMemoUse", title: "외상결제 메모", desc: "판매>외상결제시 메모 기능 사용" },
+];
+
+const staffSettleToggles: ToggleItem[] = [
+  { key: "staffBottleSales", title: "공병 매출", desc: "담당자 정산서에 공병 매출 포함" },
+  { key: "staffTaxExempt", title: "과/면세 내역", desc: "담당자 정산서에 과/면세 내역 포함" },
+  { key: "staffDiscount", title: "할인 내역", desc: "담당자 정산서에 할인 내역 포함" },
+  { key: "staffCancel", title: "취소 내역", desc: "담당자 정산서에 취소 내역 포함" },
+  { key: "staffCreditCard", title: "신용카드 내역", desc: "담당자 정산서에 신용카드 내역 포함" },
+  {
+    key: "staffCashReceipt",
+    title: "현금영수증 내역",
+    desc: "담당자 정산서에 현금영수증 내역 포함",
+  },
+  { key: "staffPrize", title: "경품지급 내역", desc: "담당자 정산서에 경품지급 내역 포함" },
+  {
+    key: "staffCardByIssuer",
+    title: "매입사별 카드매출",
+    desc: "담당자 정산서에 매입사별 카드매출 포함",
+  },
+  { key: "staffOutstanding", title: "외상 입금 내역", desc: "담당자 정산서에 외상 입금 내역 포함" },
+  {
+    key: "staffDeliveryDeposit",
+    title: "전배달 입금 내역",
+    desc: "담당자 정산서에 전배달 입금 내역 포함",
+  },
+  { key: "staffEtcDiscount", title: "기타 할인 내역", desc: "담당자 정산서에 기타 할인 내역 포함" },
+  { key: "staffDeliveryCount", title: "배달건수 출력", desc: "담당자 정산서에 배달건수 출력" },
+  { key: "staffSettleReport", title: "정산서 출력", desc: "담당자 정산서 출력" },
+];
+
+const closeSettleToggles: ToggleItem[] = [
+  { key: "closeBottleSales", title: "공병 매출", desc: "마감 정산서에 공병 매출 포함" },
+  { key: "closeTaxExempt", title: "과/면세 내역", desc: "마감 정산서에 과/면세 내역 포함" },
+  { key: "closeDiscount", title: "할인 내역", desc: "마감 정산서에 할인 내역 포함" },
+  { key: "closeCancel", title: "취소 내역", desc: "마감 정산서에 취소 내역 포함" },
+  { key: "closeCreditCard", title: "신용카드 내역", desc: "마감 정산서에 신용카드 내역 포함" },
+  { key: "closeCashReceipt", title: "현금영수증 내역", desc: "마감 정산서에 현금영수증 내역 포함" },
+  { key: "closePrize", title: "경품지급 내역", desc: "마감 정산서에 경품지급 내역 포함" },
+  {
+    key: "closeCardByIssuer",
+    title: "매입사별 카드매출",
+    desc: "마감 정산서에 매입사별 카드매출 포함",
+  },
+  { key: "closeDeliveryCount", title: "배달건수 출력", desc: "마감 정산서에 배달건수 출력" },
+  { key: "closeSettleReport", title: "정산서 출력", desc: "마감 정산서 출력" },
+];
+
+const posReceiptToggles: ToggleItem[] = [
+  { key: "receiptOffDelivery", title: "배달시 출력 안함", desc: "배달(내방/전화)시 출력 안함" },
+  { key: "receiptOffCredit", title: "외상시 출력 안함", desc: "외상시 출력 안함" },
+  { key: "receiptOffPoint", title: "포인트 사용 출력 안함", desc: "포인트 사용 출력 안함" },
+  { key: "receiptOffGift", title: "상품권 사용 출력 안함", desc: "상품권 사용 출력 안함" },
+  { key: "receiptOffEcoupon", title: "e쿠폰 사용 출력 안함", desc: "e쿠폰 사용 출력 안함" },
+  { key: "receiptOffQrms", title: "QRMS 사용 출력 안함", desc: "QRMS 사용시 출력 안함" },
+  {
+    key: "receiptOffCardOnce",
+    title: "카드 일시불 출력 안함",
+    desc: "카드 일시불/OFF 결제시 출력 안함",
+  },
+  {
+    key: "receiptOffCardInstall",
+    title: "카드 할부 출력 안함",
+    desc: "카드 할부 결제시 출력 안함",
+  },
+  {
+    key: "receiptOffCashReceipt",
+    title: "현금영수증 출력 안함",
+    desc: "현금영수증 결제시 출력 안함",
+  },
+  { key: "receiptOffReturn", title: "전표반품 출력 안함", desc: "전표반품시 출력 안함" },
 ];
 
 const currentTabLabel = computed(
@@ -1399,6 +1527,181 @@ onMounted(async () => {
                       class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
                       :class="
                         (posSaleConfig as SettingsRecord)[item.key] === '1' ? 'translate-x-4' : ''
+                      "
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ═══ POS: 정산/마감 ═══ -->
+            <div
+              v-show="activeTab === 'posSettle'"
+              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+              <h3 class="mb-4 text-base font-semibold text-slate-800">정산/마감 설정</h3>
+
+              <!-- 담당자 정산서 -->
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">담당자 정산서</h4>
+              <div class="mb-6 grid gap-3 md:grid-cols-2">
+                <div
+                  v-for="item in staffSettleToggles"
+                  :key="item.key"
+                  class="flex items-center justify-between rounded-xl bg-slate-50 p-3"
+                >
+                  <div>
+                    <p class="text-sm font-medium text-slate-800">
+                      {{ item.title }}
+                    </p>
+                    <p class="text-xs text-slate-500">
+                      {{ item.desc }}
+                    </p>
+                  </div>
+                  <button
+                    class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
+                    :class="
+                      (posSettleConfig as SettingsRecord)[item.key] === '1'
+                        ? 'bg-indigo-600'
+                        : 'bg-slate-300'
+                    "
+                    @click="toggleValue(posSettleConfig as SettingsRecord, item.key)"
+                  >
+                    <span
+                      class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                      :class="
+                        (posSettleConfig as SettingsRecord)[item.key] === '1' ? 'translate-x-4' : ''
+                      "
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <!-- 마감 정산서 -->
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">마감 정산서</h4>
+              <div class="mb-6 grid gap-3 md:grid-cols-2">
+                <div
+                  v-for="item in closeSettleToggles"
+                  :key="item.key"
+                  class="flex items-center justify-between rounded-xl bg-slate-50 p-3"
+                >
+                  <div>
+                    <p class="text-sm font-medium text-slate-800">
+                      {{ item.title }}
+                    </p>
+                    <p class="text-xs text-slate-500">
+                      {{ item.desc }}
+                    </p>
+                  </div>
+                  <button
+                    class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
+                    :class="
+                      (posSettleConfig as SettingsRecord)[item.key] === '1'
+                        ? 'bg-indigo-600'
+                        : 'bg-slate-300'
+                    "
+                    @click="toggleValue(posSettleConfig as SettingsRecord, item.key)"
+                  >
+                    <span
+                      class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                      :class="
+                        (posSettleConfig as SettingsRecord)[item.key] === '1' ? 'translate-x-4' : ''
+                      "
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <!-- 영수증 상/하단 메시지 -->
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">영수증 상/하단 메시지</h4>
+              <div class="grid gap-5 md:grid-cols-2">
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">상단 메시지</label>
+                  <input
+                    v-model="posSettleConfig.receiptTopMsg"
+                    type="text"
+                    placeholder="영수증 상단에 표시할 메시지"
+                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                    >하단 메시지 1</label
+                  >
+                  <input
+                    v-model="posSettleConfig.receiptBottomMsg1"
+                    type="text"
+                    placeholder="영수증 하단 메시지 1줄"
+                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                    >하단 메시지 2</label
+                  >
+                  <input
+                    v-model="posSettleConfig.receiptBottomMsg2"
+                    type="text"
+                    placeholder="영수증 하단 메시지 2줄"
+                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
+                    >하단 메시지 3</label
+                  >
+                  <input
+                    v-model="posSettleConfig.receiptBottomMsg3"
+                    type="text"
+                    placeholder="영수증 하단 메시지 3줄"
+                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- ═══ POS: 영수증 ═══ -->
+            <div
+              v-show="activeTab === 'posReceipt'"
+              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+              <h3 class="mb-4 text-base font-semibold text-slate-800">영수증 설정</h3>
+
+              <!-- 영수증 OFF시 출력 설정 -->
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">
+                판매 &gt; 영수증 OFF시 출력 설정
+              </h4>
+              <p class="mb-4 text-xs text-slate-400">
+                체크된 결제 방식은 영수증 OFF 상태에서도 영수증이 출력됩니다
+              </p>
+              <div class="grid gap-3 md:grid-cols-2">
+                <div
+                  v-for="item in posReceiptToggles"
+                  :key="item.key"
+                  class="flex items-center justify-between rounded-xl bg-slate-50 p-3"
+                >
+                  <div>
+                    <p class="text-sm font-medium text-slate-800">
+                      {{ item.title }}
+                    </p>
+                    <p class="text-xs text-slate-500">
+                      {{ item.desc }}
+                    </p>
+                  </div>
+                  <button
+                    class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
+                    :class="
+                      (posReceiptConfig as SettingsRecord)[item.key] === '1'
+                        ? 'bg-indigo-600'
+                        : 'bg-slate-300'
+                    "
+                    @click="toggleValue(posReceiptConfig as SettingsRecord, item.key)"
+                  >
+                    <span
+                      class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                      :class="
+                        (posReceiptConfig as SettingsRecord)[item.key] === '1'
+                          ? 'translate-x-4'
+                          : ''
                       "
                     />
                   </button>
