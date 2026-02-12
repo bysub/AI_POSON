@@ -246,7 +246,7 @@ onMounted(() => loadData());
             </td>
             <td class="px-5 py-3 text-center">
               <RouterLink
-                :to="`/admin/inventory/history?productId=${product.id}`"
+                :to="`/admin/inventory/history?productId=${product.id}&productName=${encodeURIComponent(product.name)}`"
                 class="text-xs font-medium text-indigo-600 hover:text-indigo-800"
               >
                 이력보기

@@ -11,6 +11,7 @@ const isLoading = ref(false);
 
 // 필터
 const filterProductId = ref<number | "">("");
+const filterProductName = ref("");
 const filterType = ref<StockMovementType | "">("");
 
 // 날짜 범위 (기본: 이번 달)
@@ -85,7 +86,7 @@ interface PurchaseItem {
   id: number;
   quantity: number;
   unitPrice: string;
-  totalPrice: string;
+  amount: string;
   purchaseProduct: {
     id: number;
     barcode: string;
@@ -273,10 +274,13 @@ function formatQty(qty: number): string {
   return qty > 0 ? `+${qty}` : String(qty);
 }
 
-// URL 쿼리 파라미터에서 productId 읽기
+// URL 쿼리 파라미터에서 productId, productName 읽기
 onMounted(() => {
   if (route.query.productId) {
     filterProductId.value = parseInt(route.query.productId as string, 10);
+  }
+  if (route.query.productName) {
+    filterProductName.value = decodeURIComponent(route.query.productName as string);
   }
   loadData();
 });
@@ -382,23 +386,27 @@ const stats = computed(() => {
         </div>
 
         <!-- 상품ID (숨겨진 필터 - URL에서 자동 설정) -->
-        <div v-if="filterProductId" class="flex items-center gap-2">
-          <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">
-            상품 #{{ filterProductId }}
-          </span>
-          <button
-            class="text-xs text-slate-400 hover:text-red-500"
-            @click="
-              filterProductId = '';
-              applyFilter();
-            "
+        <div v-if="filterProductId" class="filter-item-area flex items-center gap-2">
+          <label class="mb-1 block text-xs font-medium text-slate-500">필터상품</label>
+          <span
+            class="span-stock-movement-item rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700"
           >
-            해제
-          </button>
+            {{ filterProductName || `상품 #${filterProductId}` }}
+            <button
+              class="text-xs text-slate-400 hover:text-red-500"
+              @click="
+                filterProductId = '';
+                filterProductName = '';
+                applyFilter();
+              "
+            >
+              X
+            </button>
+          </span>
         </div>
 
         <button
-          class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+          class="btn-Search rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
           @click="applyFilter"
         >
           조회
@@ -791,7 +799,7 @@ const stats = computed(() => {
                       {{ item.quantity }}
                     </td>
                     <td class="py-2 text-right font-medium text-slate-800">
-                      {{ formatPrice(item.totalPrice) }}
+                      {{ formatPrice(item.amount) }}
                     </td>
                   </tr>
                 </tbody>
@@ -980,3 +988,20 @@ const stats = computed(() => {
     </Teleport>
   </div>
 </template>
+<style lang="css" scoped>
+.btn-Search {
+  margin-left: auto;
+}
+.filter-item-area {
+  flex-direction: column;
+  align-items: self-start;
+}
+.span-stock-movement-item {
+  font-size: 16px;
+  line-height: 28px;
+}
+.span-stock-movement-item button {
+  color: #000;
+  font-size: 18px;
+}
+</style>
