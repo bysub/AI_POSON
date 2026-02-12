@@ -6,6 +6,7 @@ import { useCartStore } from "@/stores/cart";
 import { useSettingsStore } from "@/stores/settings";
 import NumberPad from "@/components/kiosk/NumberPad.vue";
 import { showWarningToast } from "@/utils/AlertUtils";
+import { getImageSrc } from "@/utils/image";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -27,13 +28,6 @@ const tableNo = ref<number | null>(null);
 // 가격 포맷
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("ko-KR").format(price);
-}
-
-// 이미지 URL 변환
-function getImageSrc(imageUrl: string | undefined): string {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("/uploads/")) return `http://localhost:3000${imageUrl}`;
-  return imageUrl;
 }
 
 // 매장/포장 선택

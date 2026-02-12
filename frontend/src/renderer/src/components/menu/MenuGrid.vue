@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import type { Product } from "@/types";
 import type { SupportedLocale } from "@/stores/locale";
+import { getImageSrc } from "@/utils/image";
 
 defineProps<{
   products: Product[];
@@ -98,7 +99,7 @@ function handleProductClick(product: Product): void {
         <div class="relative aspect-square bg-gray-200">
           <img
             v-if="product.imageUrl"
-            :src="product.imageUrl"
+            :src="getImageSrc(product.imageUrl)"
             :alt="getProductName(product)"
             class="h-full w-full object-cover"
           />

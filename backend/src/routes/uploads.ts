@@ -137,53 +137,58 @@ router.post(
  * DELETE /api/v1/uploads/:filename
  * 업로드된 파일 삭제
  */
-router.delete("/:filename", (req: Request, res: Response) => {
-  try {
-    const { filename } = req.params;
-    const filePath = path.join(uploadDir, filename);
+router.delete(
+  "/:filename",
+  authenticate,
+  authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
+  (req: Request, res: Response) => {
+    try {
+      const { filename } = req.params;
+      const filePath = path.join(uploadDir, filename);
 
-    // 경로 조작 방지
-    const resolvedPath = path.resolve(filePath);
-    if (!resolvedPath.startsWith(uploadDir)) {
-      res.status(400).json({
+      // 경로 조작 방지
+      const resolvedPath = path.resolve(filePath);
+      if (!resolvedPath.startsWith(uploadDir)) {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: "INVALID_PATH",
+            message: "잘못된 파일 경로입니다",
+          },
+        });
+        return;
+      }
+
+      if (!fs.existsSync(filePath)) {
+        res.status(404).json({
+          success: false,
+          error: {
+            code: "FILE_NOT_FOUND",
+            message: "파일을 찾을 수 없습니다",
+          },
+        });
+        return;
+      }
+
+      fs.unlinkSync(filePath);
+
+      logger.info({ filename }, "File deleted");
+
+      res.json({
+        success: true,
+        data: { deleted: filename },
+      });
+    } catch (error) {
+      logger.error({ error }, "Delete failed");
+      res.status(500).json({
         success: false,
         error: {
-          code: "INVALID_PATH",
-          message: "잘못된 파일 경로입니다",
+          code: "DELETE_FAILED",
+          message: "파일 삭제에 실패했습니다",
         },
       });
-      return;
     }
-
-    if (!fs.existsSync(filePath)) {
-      res.status(404).json({
-        success: false,
-        error: {
-          code: "FILE_NOT_FOUND",
-          message: "파일을 찾을 수 없습니다",
-        },
-      });
-      return;
-    }
-
-    fs.unlinkSync(filePath);
-
-    logger.info({ filename }, "File deleted");
-
-    res.json({
-      success: true,
-      data: { deleted: filename },
-    });
-  } catch (error) {
-    logger.error({ error }, "Delete failed");
-    res.status(500).json({
-      success: false,
-      error: {
-        code: "DELETE_FAILED",
-        message: "파일 삭제에 실패했습니다",
-      },
-    });
-  }
-});
+  },
+);
 
 export { router as uploadsRouter };

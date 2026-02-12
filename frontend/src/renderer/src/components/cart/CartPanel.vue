@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
+import { getImageSrc } from "@/utils/image";
 
 const { t } = useI18n();
 const cartStore = useCartStore();
@@ -86,7 +87,7 @@ function removeItem(itemId: string): void {
           <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200">
             <img
               v-if="item.imageUrl"
-              :src="item.imageUrl"
+              :src="getImageSrc(item.imageUrl)"
               :alt="item.name"
               class="h-full w-full object-cover"
             />

@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import type { Category } from "@/types";
 import { apiClient } from "@/services/api/client";
 import { showWarningToast, showApiError, showConfirm } from "@/utils/AlertUtils";
+import { getImageSrc } from "@/utils/image";
 
 const categories = ref<Category[]>([]);
 const isLoading = ref(false);
@@ -172,9 +173,7 @@ function openEditForm(category: Category): void {
 
   // 기존 이미지가 있으면 미리보기 설정
   if (!isPreset && category.imageUrl) {
-    uploadPreview.value = category.imageUrl.startsWith("/uploads/")
-      ? `http://localhost:3000${category.imageUrl}`
-      : category.imageUrl;
+    uploadPreview.value = getImageSrc(category.imageUrl);
   } else {
     uploadPreview.value = null;
   }
@@ -540,11 +539,7 @@ onMounted(() => {
           <!-- Custom Image -->
           <div v-else class="h-14 w-14 overflow-hidden rounded-xl bg-slate-100">
             <img
-              :src="
-                category.imageUrl?.startsWith('/uploads/')
-                  ? `http://localhost:3000${category.imageUrl}`
-                  : category.imageUrl
-              "
+              :src="getImageSrc(category.imageUrl)"
               :alt="category.name"
               class="h-full w-full object-cover"
               @error="
@@ -989,12 +984,7 @@ onMounted(() => {
                   <div v-else class="relative">
                     <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
                       <img
-                        :src="
-                          uploadPreview ||
-                          (categoryForm.imageUrl.startsWith('/uploads/')
-                            ? `http://localhost:3000${categoryForm.imageUrl}`
-                            : categoryForm.imageUrl)
-                        "
+                        :src="uploadPreview || getImageSrc(categoryForm.imageUrl)"
                         alt="Preview"
                         class="h-40 w-full object-contain"
                         @error="

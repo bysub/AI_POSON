@@ -2,6 +2,7 @@
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
+import { getImageSrc } from "@/utils/image";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -42,7 +43,7 @@ function formatPrice(price: number) {
           <div class="h-20 w-20 flex-shrink-0 rounded-lg bg-gray-200">
             <img
               v-if="item.imageUrl"
-              :src="item.imageUrl"
+              :src="getImageSrc(item.imageUrl)"
               :alt="item.name"
               class="h-full w-full rounded-lg object-cover"
             />

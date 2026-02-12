@@ -8,6 +8,7 @@ import { useSettingsStore } from "@/stores/settings";
 import { OptionModal } from "@/components";
 import type { Product, ProductOption, Category } from "@/types";
 import type { SupportedLocale } from "@/stores/locale";
+import { getImageSrc } from "@/utils/image";
 
 const router = useRouter();
 const { locale, t } = useI18n();
@@ -57,17 +58,6 @@ function getIconFromUrl(imageUrl: string | undefined): string {
  */
 function isPresetIcon(imageUrl: string | undefined): boolean {
   return !imageUrl || imageUrl.startsWith("icon:");
-}
-
-/**
- * 실제 이미지 URL 반환
- */
-function getImageSrc(imageUrl: string | undefined): string {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("/uploads/")) {
-    return `http://localhost:3000${imageUrl}`;
-  }
-  return imageUrl;
 }
 
 function getIconColors(iconId: string): { bg: string; text: string } {

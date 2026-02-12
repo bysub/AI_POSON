@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Category } from "@/types";
 import type { SupportedLocale } from "@/stores/locale";
+import { getImageSrc } from "@/utils/image";
 
 const props = defineProps<{
   categories: Category[];
@@ -49,17 +50,6 @@ function getIconFromUrl(imageUrl: string | undefined): string {
  */
 function isPresetIcon(imageUrl: string | undefined): boolean {
   return !imageUrl || imageUrl.startsWith("icon:");
-}
-
-/**
- * 실제 이미지 URL 반환 (업로드된 이미지용)
- */
-function getImageSrc(imageUrl: string | undefined): string {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("/uploads/")) {
-    return `http://localhost:3000${imageUrl}`;
-  }
-  return imageUrl;
 }
 
 // 아이콘 색상 맵

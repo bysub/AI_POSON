@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+
 export const useNetworkStore = defineStore("network", () => {
   const isOnline = ref(navigator.onLine);
   const lastOnlineAt = ref<Date | null>(null);
@@ -14,6 +16,9 @@ export const useNetworkStore = defineStore("network", () => {
   function startMonitoring() {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
+
+    // 즉시 첫 번째 체크 실행
+    checkConnection();
 
     // Periodic check (every 30 seconds)
     checkInterval.value = setInterval(checkConnection, 30000);
@@ -41,7 +46,7 @@ export const useNetworkStore = defineStore("network", () => {
   async function checkConnection(): Promise<boolean> {
     try {
       // Ping the backend health endpoint
-      const response = await fetch("/api/health", {
+      const response = await fetch(`${API_BASE_URL}/api/health`, {
         method: "HEAD",
         cache: "no-store",
       });

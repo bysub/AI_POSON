@@ -7,6 +7,7 @@ import { useNetworkStore } from "@/stores/network";
 import { showWarningToast, showInfoToast } from "@/utils/AlertUtils";
 import { CardPayment, CashPayment } from "@/components";
 import type { Order, OrderType } from "@/types";
+import { getImageSrc } from "@/utils/image";
 
 const router = useRouter();
 const route = useRoute();
@@ -54,18 +55,6 @@ function getOptionsString(options?: Record<string, unknown>): string {
     .map((opt: Record<string, unknown>) => opt.name)
     .filter(Boolean)
     .join(", ");
-}
-
-/**
- * 이미지 URL 변환 (/uploads/... -> 전체 URL)
- */
-function getImageSrc(imageUrl: string | undefined): string {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("/uploads/")) {
-    const baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
-    return `${baseUrl}${imageUrl}`;
-  }
-  return imageUrl;
 }
 
 /**
