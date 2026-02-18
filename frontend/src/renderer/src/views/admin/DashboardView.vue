@@ -235,7 +235,7 @@ onMounted(() => {
         </RouterLink>
 
         <RouterLink
-          to="/admin/orders"
+          to="/admin/sales/history"
           class="flex flex-col items-center gap-2 rounded-xl border border-slate-200 p-4 transition-all hover:border-emerald-300 hover:bg-emerald-50"
         >
           <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
@@ -253,7 +253,7 @@ onMounted(() => {
               />
             </svg>
           </div>
-          <span class="text-sm font-medium text-slate-700">주문 내역</span>
+          <span class="text-sm font-medium text-slate-700">매출 내역</span>
         </RouterLink>
 
         <RouterLink
