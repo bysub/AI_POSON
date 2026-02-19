@@ -93,12 +93,12 @@ async function proceedPayment(): Promise<void> {
       if (order) {
         currentOrder.value = order;
       } else {
-        orderError.value = cartStore.orderError ?? "주문 생성에 실패했습니다";
+        orderError.value = cartStore.orderError ?? t("payment.orderCreateFailed");
         orderCreating.value = false;
         return;
       }
     } catch (error) {
-      orderError.value = error instanceof Error ? error.message : "주문 생성에 실패했습니다";
+      orderError.value = error instanceof Error ? error.message : t("payment.orderCreateFailed");
       orderCreating.value = false;
       return;
     }
@@ -112,7 +112,7 @@ async function proceedPayment(): Promise<void> {
   } else if (selectedMethod.value === "cash") {
     currentStep.value = "cash";
   } else if (selectedMethod.value === "scanner") {
-    showInfoToast("스캐너 결제는 준비 중입니다");
+    showInfoToast(t("payment.scannerNotReady"));
   }
 }
 

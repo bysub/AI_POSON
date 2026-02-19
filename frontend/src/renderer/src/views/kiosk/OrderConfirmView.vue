@@ -49,7 +49,7 @@ function handleTableConfirm(value: string) {
     tableNo.value = num;
     showTableInput.value = false;
   } else {
-    showWarningToast("해당 테이블은 없습니다.");
+    showWarningToast(t("orderConfirm.tableNotFound"));
   }
 }
 
@@ -104,7 +104,9 @@ if (!tableSelectEnabled.value) {
   >
     <!-- Header -->
     <header class="px-6 pb-2 pt-6 text-center">
-      <h1 class="text-2xl font-extrabold text-white">구매내역을 확인해주세요.</h1>
+      <h1 class="text-2xl font-extrabold text-white">
+        {{ t("orderConfirm.headerTitle") }}
+      </h1>
     </header>
 
     <!-- Main Content -->
@@ -112,11 +114,15 @@ if (!tableSelectEnabled.value) {
       <!-- 테이블 입력 모드 -->
       <template v-if="showTableInput">
         <div class="flex flex-1 flex-col items-center justify-center px-6">
-          <h2 class="mb-2 text-2xl font-bold text-gray-800">주문번호 발송</h2>
-          <p class="mb-8 text-base text-gray-500">테이블번호를 입력해주세요 (1~{{ tableCount }})</p>
+          <h2 class="mb-2 text-2xl font-bold text-gray-800">
+            {{ t("orderConfirm.tableInputTitle") }}
+          </h2>
+          <p class="mb-8 text-base text-gray-500">
+            {{ t("orderConfirm.tableInputDesc", { max: tableCount }) }}
+          </p>
           <NumberPad
             :max-length="3"
-            placeholder="테이블번호"
+            :placeholder="t('orderConfirm.tableInputPlaceholder')"
             @confirm="handleTableConfirm"
             @cancel="showTableInput = false"
           />
@@ -124,7 +130,7 @@ if (!tableSelectEnabled.value) {
             class="mt-4 rounded-xl bg-gray-400 px-8 py-3 text-base font-bold text-white transition-colors hover:bg-gray-500"
             @click="showTableInput = false"
           >
-            닫기
+            {{ t("common.close") }}
           </button>
         </div>
       </template>
@@ -132,8 +138,12 @@ if (!tableSelectEnabled.value) {
       <!-- 구매내역 확인 모드 -->
       <template v-else>
         <div class="px-6 pt-6 text-center">
-          <h2 class="text-xl font-bold text-gray-800">구매내역 확인</h2>
-          <p class="mt-1 text-sm text-gray-500">아직 카드를 꽂지 마세요!</p>
+          <h2 class="text-xl font-bold text-gray-800">
+            {{ t("orderConfirm.title") }}
+          </h2>
+          <p class="mt-1 text-sm text-gray-500">
+            {{ t("orderConfirm.doNotInsertCard") }}
+          </p>
         </div>
 
         <!-- Order Items Table -->
@@ -141,10 +151,18 @@ if (!tableSelectEnabled.value) {
           <table class="w-full">
             <thead>
               <tr class="border-b-2 border-red-400 text-left text-sm text-red-500">
-                <th class="pb-2 font-bold">순번</th>
-                <th class="pb-2 font-bold">상품명</th>
-                <th class="pb-2 text-center font-bold">수량</th>
-                <th class="pb-2 text-right font-bold">가격</th>
+                <th class="pb-2 font-bold">
+                  {{ t("orderConfirm.colNo") }}
+                </th>
+                <th class="pb-2 font-bold">
+                  {{ t("orderConfirm.colProduct") }}
+                </th>
+                <th class="pb-2 text-center font-bold">
+                  {{ t("orderConfirm.colQty") }}
+                </th>
+                <th class="pb-2 text-right font-bold">
+                  {{ t("orderConfirm.colPrice") }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -170,7 +188,7 @@ if (!tableSelectEnabled.value) {
                   {{ item.quantity }}
                 </td>
                 <td class="py-3 text-right text-sm font-medium text-gray-800">
-                  {{ formatPrice(item.price * item.quantity) }}원
+                  {{ formatPrice(item.price * item.quantity) }}{{ t("orderConfirm.currency") }}
                 </td>
               </tr>
             </tbody>
@@ -181,13 +199,17 @@ if (!tableSelectEnabled.value) {
         <div class="border-t-2 border-red-400 px-6 py-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <span class="text-base font-bold text-red-500">합계</span>
-              <span class="text-base text-gray-600">{{ cartStore.totalItems }}건</span>
+              <span class="text-base font-bold text-red-500">{{ t("orderConfirm.summary") }}</span>
+              <span class="text-base text-gray-600">{{
+                t("orderConfirm.itemCount", { count: cartStore.totalItems })
+              }}</span>
             </div>
             <div>
-              <span class="text-base font-bold text-red-500">총 금액</span>
+              <span class="text-base font-bold text-red-500">{{
+                t("orderConfirm.totalAmount")
+              }}</span>
               <span class="ml-2 text-xl font-extrabold text-gray-800">
-                {{ formatPrice(cartStore.totalAmount) }}원
+                {{ formatPrice(cartStore.totalAmount) }}{{ t("orderConfirm.currency") }}
               </span>
             </div>
           </div>
@@ -213,7 +235,7 @@ if (!tableSelectEnabled.value) {
                 class="h-2.5 w-2.5 rounded-full bg-red-500"
               />
             </span>
-            매장
+            {{ t("orderConfirm.dineIn") }}
           </button>
           <button
             class="flex items-center gap-2 rounded-full border-2 px-8 py-3 text-lg font-bold transition-all"
@@ -233,14 +255,14 @@ if (!tableSelectEnabled.value) {
                 class="h-2.5 w-2.5 rounded-full bg-red-500"
               />
             </span>
-            포장
+            {{ t("orderConfirm.takeout") }}
           </button>
         </div>
 
         <!-- 테이블번호 표시 (매장 선택 + 테이블 입력 완료 시) -->
         <div v-if="selectedOrderType === 'DINE_IN' && tableNo" class="px-6 pb-2 text-center">
           <span class="rounded-full bg-amber-100 px-4 py-1 text-sm font-bold text-amber-700">
-            테이블 {{ tableNo }}번
+            {{ t("orderConfirm.table", { no: tableNo }) }}
           </span>
         </div>
       </template>
@@ -259,7 +281,7 @@ if (!tableSelectEnabled.value) {
         class="flex-1 rounded-xl bg-gray-100 py-4 text-lg font-bold text-gray-600 transition-colors hover:bg-gray-200"
         @click="goBack"
       >
-        돌아가기
+        {{ t("orderConfirm.goBack") }}
       </button>
     </footer>
   </div>

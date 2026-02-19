@@ -8,7 +8,8 @@
     "confirm": "Confirm",
     "back": "Back",
     "next": "Next",
-    "close": "Close"
+    "close": "Close",
+    "currency": "KRW"
   },
   "welcome": {
     "title": "Welcome",
@@ -30,7 +31,9 @@
     "category": "Category",
     "soldOut": "Sold Out",
     "preparing": "Preparing",
-    "addToCart": "Add"
+    "addToCart": "Add",
+    "empty": "No products available",
+    "options": "Options"
   },
   "cart": {
     "title": "Cart",
@@ -42,7 +45,8 @@
     "totalAmount": "Total Amount",
     "items": "items",
     "proceedToPayment": "Proceed to Payment",
-    "added": "Added"
+    "added": "Added",
+    "delete": "Delete"
   },
   "payment": {
     "title": "Payment",
@@ -67,7 +71,30 @@
     "tax": "Tax",
     "payNow": "Pay Now",
     "secureCheckout": "Secure Checkout · Encrypted Payment",
-    "offline": "Offline"
+    "offline": "Offline",
+    "orderCreateFailed": "Failed to create order",
+    "scannerNotReady": "Scanner payment is coming soon"
+  },
+  "orderConfirm": {
+    "headerTitle": "Please check your order.",
+    "title": "Order Confirmation",
+    "doNotInsertCard": "Do not insert your card yet!",
+    "colNo": "No.",
+    "colProduct": "Product",
+    "colQty": "Qty",
+    "colPrice": "Price",
+    "summary": "Total",
+    "itemCount": "{count} items",
+    "totalAmount": "Total Amount",
+    "dineIn": "Dine In",
+    "takeout": "Takeout",
+    "table": "Table {no}",
+    "tableInputTitle": "Table Number",
+    "tableInputDesc": "Please enter table number (1~{max})",
+    "tableInputPlaceholder": "Table No.",
+    "tableNotFound": "Table not found.",
+    "goBack": "Go Back",
+    "currency": "KRW"
   },
   "complete": {
     "title": "Order Complete",
@@ -79,5 +106,71 @@
     "returnToHome": "Return to Home",
     "autoReset": "This screen will automatically reset in {seconds} seconds",
     "approvalNumber": "Approval Number"
+  },
+  "point": {
+    "purchaseInProgress": "Purchase in progress",
+    "askPointUsage": "Would you like to earn/use points?",
+    "noEarn": "No Points",
+    "directPayment": "(Direct Payment)",
+    "earnPoints": "Earn Points",
+    "memberPayment": "(Member Payment)",
+    "memberRegister": "Register",
+    "enterPhone": "Enter your phone number",
+    "pressConfirm": "and press confirm.",
+    "newMemberGuide": "New members: enter phone number and press confirm",
+    "registerTitle": "Member Registration",
+    "phoneRequired": "Phone Number (Required)",
+    "nameOptional": "Name (Optional)",
+    "namePlaceholder": "Enter name",
+    "registerGuide": "Enter your info and press complete",
+    "directPayBtn": "Direct Payment",
+    "completeBtn": "Complete",
+    "notRegistered": "Number not registered. Please register first.",
+    "lookupFailed": "Member lookup failed.",
+    "enterPhoneFirst": "Please enter your phone number.",
+    "registerFailed": "Registration failed.",
+    "defaultMemberName": "Member"
+  },
+  "cardPayment": {
+    "amount": "Payment Amount",
+    "timeRemaining": "Time remaining: {seconds}s",
+    "testSimulation": "[Test] Simulate Card Insert",
+    "pleaseWait": "Please wait...",
+    "completed": "Payment completed",
+    "timeout": "Payment timed out.",
+    "timeoutShort": "Payment Timeout",
+    "declined": "Card declined. Please try another card."
+  },
+  "cashPayment": {
+    "amount": "Payment Amount",
+    "received": "Received",
+    "exactAmount": "Exact Amount",
+    "reset": "Reset",
+    "cashReceipt": "Cash Receipt",
+    "phonePlaceholder": "Enter phone number"
+  },
+  "numberPad": {
+    "clear": "Clear",
+    "confirm": "Confirm"
+  },
+  "option": {
+    "requiredSelect": "Required",
+    "required": "Required",
+    "additionalSelect": "Additional",
+    "free": "Free",
+    "addToCartAmount": "Add {price}"
+  },
+  "keyboard": {
+    "confirm": "Done",
+    "modeKorean": "Korean",
+    "modeEnglish": "English",
+    "toggleKo": "Kr/En",
+    "toggleEn": "Ko/En",
+    "space": "Space"
+  },
+  "idle": {
+    "warningTitle": "Are you still there?",
+    "warningMessage": "Returning to start in {seconds} seconds",
+    "continueButton": "Continue"
   }
 }

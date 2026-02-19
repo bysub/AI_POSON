@@ -8,7 +8,8 @@
     "confirm": "確認",
     "back": "戻る",
     "next": "次へ",
-    "close": "閉じる"
+    "close": "閉じる",
+    "currency": "円"
   },
   "welcome": {
     "title": "ようこそ",
@@ -30,7 +31,9 @@
     "category": "カテゴリー",
     "soldOut": "売り切れ",
     "preparing": "準備中",
-    "addToCart": "追加"
+    "addToCart": "追加",
+    "empty": "商品がありません",
+    "options": "オプション"
   },
   "cart": {
     "title": "カート",
@@ -42,7 +45,8 @@
     "totalAmount": "合計金額",
     "items": "点",
     "proceedToPayment": "お支払いへ",
-    "added": "追加しました"
+    "added": "追加しました",
+    "delete": "削除"
   },
   "payment": {
     "title": "お支払い",
@@ -67,7 +71,30 @@
     "tax": "消費税",
     "payNow": "支払う",
     "secureCheckout": "安全な決済 · 暗号化された取引",
-    "offline": "オフライン"
+    "offline": "オフライン",
+    "orderCreateFailed": "注文の作成に失敗しました",
+    "scannerNotReady": "スキャナー決済は準備中です"
+  },
+  "orderConfirm": {
+    "headerTitle": "ご注文内容をご確認ください。",
+    "title": "注文内容確認",
+    "doNotInsertCard": "まだカードを入れないでください！",
+    "colNo": "番号",
+    "colProduct": "商品名",
+    "colQty": "数量",
+    "colPrice": "価格",
+    "summary": "合計",
+    "itemCount": "{count}件",
+    "totalAmount": "合計金額",
+    "dineIn": "店内",
+    "takeout": "持ち帰り",
+    "table": "テーブル {no}番",
+    "tableInputTitle": "テーブル番号入力",
+    "tableInputDesc": "テーブル番号を入力してください (1~{max})",
+    "tableInputPlaceholder": "テーブル番号",
+    "tableNotFound": "該当テーブルはありません。",
+    "goBack": "戻る",
+    "currency": "円"
   },
   "complete": {
     "title": "注文完了",
@@ -79,5 +106,71 @@
     "returnToHome": "最初に戻る",
     "autoReset": "秒後に自動的にリセットされます",
     "approvalNumber": "承認番号"
+  },
+  "point": {
+    "purchaseInProgress": "購入中",
+    "askPointUsage": "ポイントを貯める・使用しますか？",
+    "noEarn": "ポイント不要",
+    "directPayment": "(直接支払い)",
+    "earnPoints": "ポイント積立",
+    "memberPayment": "(会員決済)",
+    "memberRegister": "会員登録",
+    "enterPhone": "電話番号を入力して",
+    "pressConfirm": "確認ボタンを押してください。",
+    "newMemberGuide": "新規会員は電話番号入力後、確認ボタンを押してください",
+    "registerTitle": "会員登録",
+    "phoneRequired": "携帯番号（必須）",
+    "nameOptional": "会員名（任意）",
+    "namePlaceholder": "名前入力",
+    "registerGuide": "会員情報入力後、完了ボタンを押してください",
+    "directPayBtn": "直接支払い",
+    "completeBtn": "入力完了",
+    "notRegistered": "登録されていない番号です。会員登録後ご利用ください。",
+    "lookupFailed": "会員照会に失敗しました。",
+    "enterPhoneFirst": "電話番号を入力してください。",
+    "registerFailed": "会員登録に失敗しました。",
+    "defaultMemberName": "会員"
+  },
+  "cardPayment": {
+    "amount": "決済金額",
+    "timeRemaining": "残り時間: {seconds}秒",
+    "testSimulation": "[テスト] カード挿入シミュレーション",
+    "pleaseWait": "しばらくお待ちください...",
+    "completed": "決済が完了しました",
+    "timeout": "決済時間が超過しました。",
+    "timeoutShort": "決済タイムアウト",
+    "declined": "カードが拒否されました。他のカードをご使用ください。"
+  },
+  "cashPayment": {
+    "amount": "決済金額",
+    "received": "受取金額",
+    "exactAmount": "丁度の金額",
+    "reset": "リセット",
+    "cashReceipt": "現金領収書発行",
+    "phonePlaceholder": "携帯番号入力"
+  },
+  "numberPad": {
+    "clear": "消去",
+    "confirm": "確認"
+  },
+  "option": {
+    "requiredSelect": "必須選択",
+    "required": "必須",
+    "additionalSelect": "追加選択",
+    "free": "無料",
+    "addToCartAmount": "{price}円 追加"
+  },
+  "keyboard": {
+    "confirm": "確認",
+    "modeKorean": "韓国語",
+    "modeEnglish": "English",
+    "toggleKo": "韓/英",
+    "toggleEn": "Ko/En",
+    "space": "スペース"
+  },
+  "idle": {
+    "warningTitle": "ご利用中ですか？",
+    "warningMessage": "{seconds}秒後に最初の画面に戻ります",
+    "continueButton": "続ける"
   }
 }

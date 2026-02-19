@@ -79,7 +79,9 @@ function handleProductClick(product: Product): void {
 
     <!-- Empty State -->
     <div v-else-if="products.length === 0" class="flex h-full items-center justify-center">
-      <p class="text-kiosk-lg text-gray-500">상품이 없습니다</p>
+      <p class="text-kiosk-lg text-gray-500">
+        {{ t("menu.empty") }}
+      </p>
     </div>
 
     <!-- Product Grid -->
@@ -128,7 +130,7 @@ function handleProductClick(product: Product): void {
             v-if="product.options && product.options.length > 0 && !isUnavailable(product)"
             class="absolute right-2 top-2 rounded-full bg-primary-600 px-2 py-1 text-xs font-medium text-white"
           >
-            옵션
+            {{ t("menu.options") }}
           </div>
         </div>
 
@@ -140,7 +142,7 @@ function handleProductClick(product: Product): void {
 
           <p class="text-kiosk-lg font-bold text-primary-600">
             {{ formatPrice(product.sellPrice) }}
-            <span class="text-kiosk-sm font-normal">원</span>
+            <span class="text-kiosk-sm font-normal">{{ t("common.currency") }}</span>
           </p>
         </div>
 

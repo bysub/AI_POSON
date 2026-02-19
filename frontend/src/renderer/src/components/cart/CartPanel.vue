@@ -111,7 +111,9 @@ function itemName(item: CartItem): string {
               <h3 class="text-kiosk-base font-medium text-gray-900">
                 {{ itemName(item) }}
               </h3>
-              <p class="text-kiosk-sm text-gray-500">{{ formatPrice(item.price) }}원</p>
+              <p class="text-kiosk-sm text-gray-500">
+                {{ formatPrice(item.price) }}{{ t("common.currency") }}
+              </p>
             </div>
 
             <!-- Quantity Controls -->
@@ -139,7 +141,7 @@ function itemName(item: CartItem): string {
                 class="text-kiosk-sm text-red-500 hover:text-red-600"
                 @click="removeItem(item.id)"
               >
-                삭제
+                {{ t("cart.delete") }}
               </button>
             </div>
           </div>
@@ -147,7 +149,7 @@ function itemName(item: CartItem): string {
           <!-- Item Total -->
           <div class="flex flex-col items-end justify-center">
             <span class="text-kiosk-lg font-bold text-primary-600">
-              {{ formatPrice(item.price * item.quantity) }}원
+              {{ formatPrice(item.price * item.quantity) }}{{ t("common.currency") }}
             </span>
           </div>
         </li>
@@ -161,7 +163,7 @@ function itemName(item: CartItem): string {
         <span class="text-kiosk-lg text-gray-600">{{ t("cart.total") }}</span>
         <span class="text-kiosk-2xl font-bold text-primary-600">
           {{ formatPrice(cartStore.totalAmount) }}
-          <span class="text-kiosk-lg font-normal">원</span>
+          <span class="text-kiosk-lg font-normal">{{ t("common.currency") }}</span>
         </span>
       </div>
 

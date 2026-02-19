@@ -13,7 +13,7 @@ const emit = defineEmits<{
   confirm: [product: Product, quantity: number, selectedOptions: Record<string, ProductOption>];
 }>();
 
-const { t: _t } = useI18n();
+const { t } = useI18n();
 
 const quantity = ref(1);
 const selectedOptions = ref<Record<string, ProductOption>>({});
@@ -100,7 +100,6 @@ function decrementQuantity(): void {
  */
 function toggleOption(option: ProductOption): void {
   if (selectedOptions.value[option.name]?.id === option.id) {
-    // 이미 선택된 옵션이면 해제 (필수 옵션이 아닌 경우에만)
     if (!option.isRequired) {
       delete selectedOptions.value[option.name];
     }
@@ -162,14 +161,14 @@ function handleBackdropClick(): void {
             </h2>
             <template v-if="product.isDiscount && product.discountPrice">
               <p class="text-sm text-gray-400 line-through">
-                {{ formatPrice(product.sellPrice) }}원
+                {{ formatPrice(product.sellPrice) }}{{ t("common.currency") }}
               </p>
               <p class="mt-1 text-kiosk-lg text-red-500">
-                {{ formatPrice(product.discountPrice) }}원
+                {{ formatPrice(product.discountPrice) }}{{ t("common.currency") }}
               </p>
             </template>
             <p v-else class="mt-1 text-kiosk-lg text-primary-600">
-              {{ formatPrice(product.sellPrice) }}원
+              {{ formatPrice(product.sellPrice) }}{{ t("common.currency") }}
             </p>
           </header>
 
@@ -178,8 +177,10 @@ function handleBackdropClick(): void {
             <!-- Required Options -->
             <div v-if="requiredOptions.length > 0" class="mb-6">
               <h3 class="mb-3 flex items-center gap-2 text-kiosk-base font-bold text-gray-900">
-                필수 선택
-                <span class="rounded bg-red-100 px-2 py-0.5 text-xs text-red-600">필수</span>
+                {{ t("option.requiredSelect") }}
+                <span class="rounded bg-red-100 px-2 py-0.5 text-xs text-red-600">{{
+                  t("option.required")
+                }}</span>
               </h3>
               <div class="space-y-2">
                 <button
@@ -195,7 +196,11 @@ function handleBackdropClick(): void {
                 >
                   <span class="text-kiosk-base font-medium">{{ option.name }}</span>
                   <span class="text-kiosk-base text-gray-600">
-                    {{ option.price > 0 ? `+${formatPrice(option.price)}원` : "무료" }}
+                    {{
+                      option.price > 0
+                        ? `+${formatPrice(option.price)}${t("common.currency")}`
+                        : t("option.free")
+                    }}
                   </span>
                 </button>
               </div>
@@ -203,7 +208,9 @@ function handleBackdropClick(): void {
 
             <!-- Optional Options -->
             <div v-if="optionalOptions.length > 0">
-              <h3 class="mb-3 text-kiosk-base font-bold text-gray-900">추가 선택</h3>
+              <h3 class="mb-3 text-kiosk-base font-bold text-gray-900">
+                {{ t("option.additionalSelect") }}
+              </h3>
               <div class="space-y-2">
                 <button
                   v-for="option in optionalOptions"
@@ -218,7 +225,11 @@ function handleBackdropClick(): void {
                 >
                   <span class="text-kiosk-base font-medium">{{ option.name }}</span>
                   <span class="text-kiosk-base text-gray-600">
-                    {{ option.price > 0 ? `+${formatPrice(option.price)}원` : "무료" }}
+                    {{
+                      option.price > 0
+                        ? `+${formatPrice(option.price)}${t("common.currency")}`
+                        : t("option.free")
+                    }}
                   </span>
                 </button>
               </div>
@@ -251,7 +262,7 @@ function handleBackdropClick(): void {
               :disabled="!allRequiredSelected"
               @click="handleConfirm"
             >
-              {{ formatPrice(totalPrice) }}원 담기
+              {{ t("option.addToCartAmount", { price: formatPrice(totalPrice) }) }}
             </button>
           </footer>
         </div>

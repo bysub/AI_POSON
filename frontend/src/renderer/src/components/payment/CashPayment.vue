@@ -102,13 +102,19 @@ function cancel(): void {
     <div class="bg-white p-6 shadow-sm">
       <div class="grid grid-cols-3 gap-4 text-center">
         <div>
-          <p class="text-kiosk-sm text-gray-500">결제 금액</p>
-          <p class="text-kiosk-xl font-bold text-gray-900">{{ formatPrice(amount) }}원</p>
+          <p class="text-kiosk-sm text-gray-500">
+            {{ t("cashPayment.amount") }}
+          </p>
+          <p class="text-kiosk-xl font-bold text-gray-900">
+            {{ formatPrice(amount) }}{{ t("common.currency") }}
+          </p>
         </div>
         <div>
-          <p class="text-kiosk-sm text-gray-500">받은 금액</p>
+          <p class="text-kiosk-sm text-gray-500">
+            {{ t("cashPayment.received") }}
+          </p>
           <p class="text-kiosk-xl font-bold text-primary-600">
-            {{ formatPrice(receivedAmount) }}원
+            {{ formatPrice(receivedAmount) }}{{ t("common.currency") }}
           </p>
         </div>
         <div>
@@ -119,7 +125,7 @@ function cancel(): void {
             class="text-kiosk-xl font-bold"
             :class="changeAmount > 0 ? 'text-green-600' : 'text-gray-400'"
           >
-            {{ formatPrice(changeAmount) }}원
+            {{ formatPrice(changeAmount) }}{{ t("common.currency") }}
           </p>
         </div>
       </div>
@@ -140,13 +146,13 @@ function cancel(): void {
           class="rounded-lg bg-primary-100 px-4 py-2 text-kiosk-base font-medium text-primary-700 transition-colors hover:bg-primary-200"
           @click="setExactAmount"
         >
-          정확한 금액
+          {{ t("cashPayment.exactAmount") }}
         </button>
         <button
           class="rounded-lg bg-red-100 px-4 py-2 text-kiosk-base font-medium text-red-700 transition-colors hover:bg-red-200"
           @click="resetAmount"
         >
-          초기화
+          {{ t("cashPayment.reset") }}
         </button>
       </div>
     </div>
@@ -198,14 +204,14 @@ function cancel(): void {
           type="checkbox"
           class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
         />
-        <span class="text-kiosk-base text-gray-700">현금영수증 발급</span>
+        <span class="text-kiosk-base text-gray-700">{{ t("cashPayment.cashReceipt") }}</span>
       </label>
 
       <div v-if="showCashReceipt" class="mt-3">
         <input
           v-model="cashReceiptPhone"
           type="tel"
-          placeholder="휴대폰 번호 입력"
+          :placeholder="t('cashPayment.phonePlaceholder')"
           class="w-full rounded-lg border border-gray-300 px-4 py-3 text-kiosk-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
         />
       </div>
@@ -222,7 +228,7 @@ function cancel(): void {
         @click="complete"
       >
         <span v-if="canComplete">
-          {{ t("payment.change") }}: {{ formatPrice(changeAmount) }}원
+          {{ t("payment.change") }}: {{ formatPrice(changeAmount) }}{{ t("common.currency") }}
         </span>
         <span v-else>{{ t("payment.enterCash") }}</span>
       </button>

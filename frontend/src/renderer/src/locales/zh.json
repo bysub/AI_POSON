@@ -8,7 +8,8 @@
     "confirm": "确认",
     "back": "返回",
     "next": "下一步",
-    "close": "关闭"
+    "close": "关闭",
+    "currency": "元"
   },
   "welcome": {
     "title": "欢迎光临",
@@ -30,7 +31,9 @@
     "category": "分类",
     "soldOut": "售罄",
     "preparing": "准备中",
-    "addToCart": "添加"
+    "addToCart": "添加",
+    "empty": "暂无商品",
+    "options": "选项"
   },
   "cart": {
     "title": "购物车",
@@ -42,7 +45,8 @@
     "totalAmount": "总金额",
     "items": "件",
     "proceedToPayment": "去结账",
-    "added": "已添加"
+    "added": "已添加",
+    "delete": "删除"
   },
   "payment": {
     "title": "支付",
@@ -67,7 +71,30 @@
     "tax": "税费",
     "payNow": "立即支付",
     "secureCheckout": "安全结账 · 加密支付",
-    "offline": "离线"
+    "offline": "离线",
+    "orderCreateFailed": "订单创建失败",
+    "scannerNotReady": "扫码支付正在准备中"
+  },
+  "orderConfirm": {
+    "headerTitle": "请确认您的订单。",
+    "title": "订单确认",
+    "doNotInsertCard": "请先不要插入银行卡！",
+    "colNo": "序号",
+    "colProduct": "商品名",
+    "colQty": "数量",
+    "colPrice": "价格",
+    "summary": "合计",
+    "itemCount": "{count}件",
+    "totalAmount": "总金额",
+    "dineIn": "堂食",
+    "takeout": "外带",
+    "table": "桌号 {no}",
+    "tableInputTitle": "输入桌号",
+    "tableInputDesc": "请输入桌号 (1~{max})",
+    "tableInputPlaceholder": "桌号",
+    "tableNotFound": "该桌号不存在。",
+    "goBack": "返回",
+    "currency": "元"
   },
   "complete": {
     "title": "订单完成",
@@ -79,5 +106,71 @@
     "returnToHome": "返回首页",
     "autoReset": "秒后自动重置",
     "approvalNumber": "批准号"
+  },
+  "point": {
+    "purchaseInProgress": "购买进行中",
+    "askPointUsage": "是否积累/使用积分？",
+    "noEarn": "不积分",
+    "directPayment": "(直接支付)",
+    "earnPoints": "积分积累",
+    "memberPayment": "(会员支付)",
+    "memberRegister": "会员注册",
+    "enterPhone": "请输入电话号码",
+    "pressConfirm": "然后按确认按钮。",
+    "newMemberGuide": "新会员请输入电话号码后按确认按钮",
+    "registerTitle": "会员注册",
+    "phoneRequired": "手机号码（必填）",
+    "nameOptional": "会员名（选填）",
+    "namePlaceholder": "输入姓名",
+    "registerGuide": "输入会员信息后按完成按钮",
+    "directPayBtn": "直接支付",
+    "completeBtn": "输入完成",
+    "notRegistered": "未注册的号码。请先注册会员。",
+    "lookupFailed": "会员查询失败。",
+    "enterPhoneFirst": "请输入电话号码。",
+    "registerFailed": "会员注册失败。",
+    "defaultMemberName": "会员"
+  },
+  "cardPayment": {
+    "amount": "支付金额",
+    "timeRemaining": "剩余时间: {seconds}秒",
+    "testSimulation": "[测试] 模拟插入银行卡",
+    "pleaseWait": "请稍候...",
+    "completed": "支付已完成",
+    "timeout": "支付超时。",
+    "timeoutShort": "支付超时",
+    "declined": "银行卡被拒绝。请使用其他银行卡。"
+  },
+  "cashPayment": {
+    "amount": "支付金额",
+    "received": "已收金额",
+    "exactAmount": "精确金额",
+    "reset": "重置",
+    "cashReceipt": "现金收据",
+    "phonePlaceholder": "输入手机号码"
+  },
+  "numberPad": {
+    "clear": "清除",
+    "confirm": "确认"
+  },
+  "option": {
+    "requiredSelect": "必选",
+    "required": "必选",
+    "additionalSelect": "附加选择",
+    "free": "免费",
+    "addToCartAmount": "加入 {price}元"
+  },
+  "keyboard": {
+    "confirm": "确认",
+    "modeKorean": "韩文",
+    "modeEnglish": "English",
+    "toggleKo": "韩/英",
+    "toggleEn": "Ko/En",
+    "space": "空格"
+  },
+  "idle": {
+    "warningTitle": "还在使用吗？",
+    "warningMessage": "{seconds}秒后返回首页",
+    "continueButton": "继续使用"
   }
 }

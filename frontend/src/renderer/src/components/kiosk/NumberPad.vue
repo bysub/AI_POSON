@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -15,7 +16,8 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
-const value = ref("");
+const { t } = useI18n();
+const value = ref("010");
 
 const displayValue = computed(() => {
   if (props.format === "phone" && value.value.length > 0) {
@@ -92,7 +94,7 @@ function confirm() {
         class="flex h-14 items-center justify-center rounded-xl bg-gray-200 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-300"
         @click="clearAll"
       >
-        지움
+        {{ t("numberPad.clear") }}
       </button>
     </div>
 
@@ -102,7 +104,7 @@ function confirm() {
       :disabled="value.length === 0"
       @click="confirm"
     >
-      확인
+      {{ t("numberPad.confirm") }}
     </button>
   </div>
 </template>

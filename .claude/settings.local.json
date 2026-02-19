@@ -146,7 +146,48 @@
       "Bash(cmd //c \"taskkill /PID 33376 /F\")",
       "Bash(cmd //c \"taskkill /PID 14764 /F\")",
       "Bash(cmd //c \"taskkill /PID 2172 /F\")",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(wmic process where \"name=''node.exe''\" get ProcessId,CommandLine)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZDdkNzhhYy0zYTRhLTRkZjUtYjQ1Zi1kYzY5ODllYTAzZWYiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcwNjk4NTMxLCJleHAiOjE3NzA3MjczMzF9.hNNl0fObB_7NATk01hLbDb2lvxWC8PCHDJunVryAq88\")",
+      "Bash(wmic process where \"CommandLine like ''%%AI_POSON/backend%%'' and name=''node.exe''\" get ProcessId)",
+      "Bash(do taskkill //PID $pid //F)",
+      "Bash(tmux:*)",
+      "Bash(wsl -- bash:*)",
+      "Bash(wsl --list:*)",
+      "Bash(wsl -d Ubuntu -- bash -c \"sudo apt update && sudo apt install -y tmux\")",
+      "Bash(wsl:*)",
+      "Bash(cmd //c start wt -p \"Ubuntu\" -- bash -ic \"cd /mnt/c/workspaces/AI_POSON && tmux new -s claude -d ''claude'' && tmux attach -t claude\")",
+      "Bash(cmd //c start wt -p \"Ubuntu\" -- bash -ic \"cd ''/mnt/c/workspaces/AI_POSON'' && tmux new-session -s claude\")",
+      "Bash(cmd //c start wt -d \"\\\\wsl$\\\\Ubuntu\\\\home\\\\bysub\" -p \"Ubuntu\")",
+      "Bash(lsof:*)",
+      "Bash(ss:*)",
+      "Bash(cmd.exe /c \"netstat -ano | findstr :3000\")",
+      "Bash(cmd.exe /c \"taskkill /F /PID 14196\")",
+      "Bash(npm:*)",
+      "Bash(cmd //c \"taskkill /F /IM node.exe\")",
+      "Bash(git status:*)",
+      "Bash(cmd //c \"tasklist /FI \"\"IMAGENAME eq POSON Kiosk.exe\"\" 2>nul & tasklist /FI \"\"IMAGENAME eq electron.exe\"\" 2>nul\")",
+      "Bash(cmd /c \"taskkill /F /IM \"\"POSON Kiosk.exe\"\" 2>nul & taskkill /F /IM electron.exe 2>nul & echo Done\")",
+      "Bash(wmic process where \"name like ''%electron%'' or name like ''%POSON%''\" delete)",
+      "Bash(wmic process where \"name like ''%electron%'' or name like ''%POSON%''\" get ProcessId,Name)",
+      "Bash(wmic process where \"name like ''%electron%'' or name like ''%POSON%'' or name like ''%poson%''\" delete)",
+      "Bash(powershell.exe -Command \"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds\")",
+      "Bash(powershell.exe -Command \"\nAdd-Type -AssemblyName System.Windows.Forms\nAdd-Type -AssemblyName System.Drawing\n$screen = [System.Windows.Forms.Screen]::PrimaryScreen\n$bitmap = New-Object System.Drawing.Bitmap\\($screen.Bounds.Width, $screen.Bounds.Height\\)\n$graphics = [System.Drawing.Graphics]::FromImage\\($bitmap\\)\n$graphics.CopyFromScreen\\($screen.Bounds.Location, [System.Drawing.Point]::Empty, $screen.Bounds.Size\\)\n$bitmap.Save\\(''C:\\\\workspaces\\\\AI_POSON\\\\frontend\\\\screenshot-test.png'', [System.Drawing.Imaging.ImageFormat]::Png\\)\n$graphics.Dispose\\(\\)\n$bitmap.Dispose\\(\\)\nWrite-Output ''Screenshot saved''\n\")",
+      "Bash(powershell.exe -NoProfile -Command 'Add-Type @\"\"\nusing System;\nusing System.Runtime.InteropServices;\npublic class W32 {\n    [DllImport\\(\"\"user32.dll\"\"\\)] public static extern bool SetForegroundWindow\\(IntPtr h\\);\n    [DllImport\\(\"\"user32.dll\"\"\\)] public static extern bool ShowWindow\\(IntPtr h, int c\\);\n}\n\"\"@; $p = Get-Process -Id 31272; [W32]::ShowWindow\\($p.MainWindowHandle, 9\\); [W32]::SetForegroundWindow\\($p.MainWindowHandle\\); Start-Sleep -Seconds 1; Write-Output \"\"Done\"\"')",
+      "Bash(powershell.exe -NoProfile -Command \"\nAdd-Type -AssemblyName System.Windows.Forms\nAdd-Type -AssemblyName System.Drawing\n[System.Drawing.Bitmap] $b = New-Object System.Drawing.Bitmap\\(1920, 1080\\)\n[System.Drawing.Graphics] $g = [System.Drawing.Graphics]::FromImage\\($b\\)\n$g.CopyFromScreen\\(0, 0, 0, 0, $b.Size\\)\n$b.Save\\(''C:\\\\workspaces\\\\AI_POSON\\\\frontend\\\\screenshot-app.png'', [System.Drawing.Imaging.ImageFormat]::Png\\)\n$g.Dispose\\(\\)\n$b.Dispose\\(\\)\nWrite-Output ''Done''\n\")",
+      "Bash(powershell.exe:*)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" status)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" diff --stat)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" diff --staged --stat -- frontend/src/main/index.ts frontend/src/renderer/index.html frontend/src/renderer/src/utils/image.ts backend/src/routes/uploads.ts frontend/src/renderer/src/components/ frontend/src/renderer/src/views/ frontend/src/renderer/src/stores/network.ts)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" diff --stat -- backend/src/routes/uploads.ts frontend/src/renderer/src/utils/image.ts frontend/src/renderer/src/views/admin/CategoriesView.vue)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" reset HEAD -- frontend/bring-to-front.ps1 frontend/check-images-cdp.js frontend/check-images-cdp2.js frontend/check-images-http.js frontend/check-images.js frontend/take-screenshot.ps1 frontend/verify-env.js frontend/verify-security.js)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" add frontend/src/main/index.ts frontend/src/renderer/index.html frontend/src/renderer/src/utils/image.ts backend/src/routes/uploads.ts frontend/src/renderer/src/components/cart/CartPanel.vue frontend/src/renderer/src/components/menu/CategoryNav.vue frontend/src/renderer/src/components/menu/MenuGrid.vue frontend/src/renderer/src/stores/network.ts frontend/src/renderer/src/views/CartView.vue frontend/src/renderer/src/views/MenuView.vue frontend/src/renderer/src/views/PaymentView.vue frontend/src/renderer/src/views/admin/CategoriesView.vue frontend/src/renderer/src/views/kiosk/OrderConfirmView.vue)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" diff --staged --stat)",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" commit -m \"$\\(cat <<''EOF''\nfix: Electron 프로덕션 빌드 이미지 로딩 수정 및 보안 강화\n\n- app:// 커스텀 프로토콜로 file:// CORS 제한 우회\n- getImageSrc 유틸리티로 /uploads/ 경로를 절대 URL로 변환\n- helmet CSP가 이미지 로딩 차단하는 문제 해결 \\(서브리소스만 제거\\)\n- Path Traversal 방어: resolve\\(\\) + startsWith\\(\\) 경로 검증\n- env:get IPC 화이트리스트 적용 \\(DB/JWT 시크릿 노출 차단\\)\n- DELETE /uploads 인증 미들웨어 추가\n- CSP 강화: img-src/connect-src를 localhost:3000으로 제한\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" commit -m \"$\\(cat <<''EOF''\nfix: electron 프로덕션 빌드 이미지 로딩 수정 및 보안 강화\n\n- app:// 커스텀 프로토콜로 file:// CORS 제한 우회\n- getImageSrc 유틸리티로 /uploads/ 경로를 절대 URL로 변환\n- helmet CSP가 이미지 로딩 차단하는 문제 해결 \\(서브리소스만 제거\\)\n- Path Traversal 방어: resolve\\(\\) + startsWith\\(\\) 경로 검증\n- env:get IPC 화이트리스트 적용 \\(DB/JWT 시크릿 노출 차단\\)\n- DELETE /uploads 인증 미들웨어 추가\n- CSP 강화: img-src/connect-src를 localhost:3000으로 제한\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" push origin main)",
+      "Bash(pip show:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
@@ -157,7 +198,11 @@
     "automatalabs-playwright-server",
     "DeepGraph Vue MCP",
     "google-ads",
-    "fetch"
+    "fetch",
+    "playwright",
+    "supabase",
+    "postgresql",
+    "mysql"
   ],
   "hooks": {
     "Stop": [
@@ -166,7 +211,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/cleanup-temp.cjs"
+            "command": "node C:/workspaces/AI_POSON/.claude/hooks/cleanup-temp.cjs"
           }
         ]
       }
@@ -177,7 +222,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/post-tool-use.cjs dependency"
+            "command": "node C:/workspaces/AI_POSON/.claude/hooks/post-tool-use.cjs dependency"
           }
         ]
       },
@@ -186,7 +231,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/post-tool-use.cjs eslint"
+            "command": "node C:/workspaces/AI_POSON/.claude/hooks/post-tool-use.cjs eslint"
           }
         ]
       },
@@ -195,7 +240,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/post-tool-use.cjs prettier"
+            "command": "node C:/workspaces/AI_POSON/.claude/hooks/post-tool-use.cjs prettier"
           }
         ]
       },
@@ -204,7 +249,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/post-tool-use.cjs git-add"
+            "command": "node C:/workspaces/AI_POSON/.claude/hooks/post-tool-use.cjs git-add"
           }
         ]
       }
@@ -215,7 +260,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/pre-tool-use.cjs"
+            "command": "node C:/workspaces/AI_POSON/.claude/hooks/pre-tool-use.cjs"
           }
         ]
       }

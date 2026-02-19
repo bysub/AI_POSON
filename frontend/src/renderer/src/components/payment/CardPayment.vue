@@ -19,7 +19,7 @@ type PaymentStatus = "waiting" | "processing" | "success" | "error";
 const status = ref<PaymentStatus>("waiting");
 const statusMessage = ref("");
 const errorMessage = ref("");
-const countdown = ref(60); // 60초 타임아웃
+const countdown = ref(60);
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -58,8 +58,8 @@ function stopCountdown(): void {
 function handleTimeout(): void {
   stopCountdown();
   status.value = "error";
-  errorMessage.value = "결제 시간이 초과되었습니다.";
-  emit("fail", "TIMEOUT", "결제 시간 초과");
+  errorMessage.value = t("cardPayment.timeout");
+  emit("fail", "TIMEOUT", t("cardPayment.timeoutShort"));
 }
 
 /**
@@ -69,11 +69,9 @@ async function processPayment(): Promise<void> {
   status.value = "processing";
   statusMessage.value = t("payment.processing");
 
-  // 결제 처리 시뮬레이션 (3초)
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  // 성공 시뮬레이션 (실제로는 VAN 응답 처리)
-  const success = Math.random() > 0.1; // 90% 성공률
+  const success = Math.random() > 0.1;
 
   if (success) {
     stopCountdown();
@@ -83,7 +81,7 @@ async function processPayment(): Promise<void> {
     emit("success", transactionId, approvalNumber);
   } else {
     status.value = "error";
-    errorMessage.value = "카드가 거부되었습니다. 다른 카드를 사용해주세요.";
+    errorMessage.value = t("cardPayment.declined");
     emit("fail", "CARD_DECLINED", errorMessage.value);
   }
 }
@@ -129,10 +127,12 @@ onUnmounted(() => {
   <div class="flex h-full flex-col items-center justify-center bg-gray-50 p-8">
     <!-- Amount Display -->
     <div class="mb-8 text-center">
-      <p class="text-kiosk-lg text-gray-600">결제 금액</p>
+      <p class="text-kiosk-lg text-gray-600">
+        {{ t("cardPayment.amount") }}
+      </p>
       <p class="text-kiosk-3xl font-bold text-primary-600">
         {{ formatPrice(amount) }}
-        <span class="text-kiosk-xl">원</span>
+        <span class="text-kiosk-xl">{{ t("common.currency") }}</span>
       </p>
     </div>
 
@@ -141,7 +141,6 @@ onUnmounted(() => {
       <!-- Waiting State -->
       <template v-if="status === 'waiting'">
         <div class="relative mb-6">
-          <!-- Card Icon with Animation -->
           <div class="animate-bounce">
             <svg
               class="h-32 w-32 text-primary-600"
@@ -157,7 +156,6 @@ onUnmounted(() => {
               />
             </svg>
           </div>
-          <!-- NFC Waves -->
           <div class="absolute -right-4 top-1/2 -translate-y-1/2">
             <div class="flex flex-col gap-1">
               <div class="h-3 w-3 animate-pulse rounded-full bg-primary-400" />
@@ -177,14 +175,15 @@ onUnmounted(() => {
           {{ t("payment.insertCard") }}
         </p>
 
-        <p class="mt-2 text-kiosk-base text-gray-500">남은 시간: {{ countdown }}초</p>
+        <p class="mt-2 text-kiosk-base text-gray-500">
+          {{ t("cardPayment.timeRemaining", { seconds: countdown }) }}
+        </p>
 
-        <!-- 데모용 버튼 (실제로는 하드웨어 이벤트) -->
         <button
           class="mt-8 rounded-lg bg-gray-200 px-6 py-3 text-gray-700 hover:bg-gray-300"
           @click="simulateCardInsert"
         >
-          [테스트] 카드 삽입 시뮬레이션
+          {{ t("cardPayment.testSimulation") }}
         </button>
       </template>
 
@@ -198,7 +197,9 @@ onUnmounted(() => {
         <p class="text-kiosk-xl font-medium text-gray-800">
           {{ statusMessage }}
         </p>
-        <p class="mt-2 text-kiosk-base text-gray-500">잠시만 기다려주세요...</p>
+        <p class="mt-2 text-kiosk-base text-gray-500">
+          {{ t("cardPayment.pleaseWait") }}
+        </p>
       </template>
 
       <!-- Success State -->
@@ -218,7 +219,9 @@ onUnmounted(() => {
             />
           </svg>
         </div>
-        <p class="text-kiosk-xl font-medium text-green-600">결제가 완료되었습니다</p>
+        <p class="text-kiosk-xl font-medium text-green-600">
+          {{ t("cardPayment.completed") }}
+        </p>
       </template>
 
       <!-- Error State -->

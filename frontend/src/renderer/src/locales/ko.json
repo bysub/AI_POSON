@@ -8,7 +8,8 @@
     "confirm": "확인",
     "back": "뒤로",
     "next": "다음",
-    "close": "닫기"
+    "close": "닫기",
+    "currency": "원"
   },
   "welcome": {
     "title": "환영합니다",
@@ -30,7 +31,9 @@
     "category": "카테고리",
     "soldOut": "품절",
     "preparing": "준비중",
-    "addToCart": "담기"
+    "addToCart": "담기",
+    "empty": "상품이 없습니다",
+    "options": "옵션"
   },
   "cart": {
     "title": "장바구니",
@@ -42,7 +45,8 @@
     "totalAmount": "총 금액",
     "items": "개",
     "proceedToPayment": "결제하기",
-    "added": "추가됨"
+    "added": "추가됨",
+    "delete": "삭제"
   },
   "payment": {
     "title": "결제",
@@ -67,7 +71,30 @@
     "tax": "부가세",
     "payNow": "결제하기",
     "secureCheckout": "안전한 결제 · 암호화된 거래",
-    "offline": "오프라인"
+    "offline": "오프라인",
+    "orderCreateFailed": "주문 생성에 실패했습니다",
+    "scannerNotReady": "스캐너 결제는 준비 중입니다"
+  },
+  "orderConfirm": {
+    "headerTitle": "구매내역을 확인해주세요.",
+    "title": "구매내역 확인",
+    "doNotInsertCard": "아직 카드를 꽂지 마세요!",
+    "colNo": "순번",
+    "colProduct": "상품명",
+    "colQty": "수량",
+    "colPrice": "가격",
+    "summary": "합계",
+    "itemCount": "{count}건",
+    "totalAmount": "총 금액",
+    "dineIn": "매장",
+    "takeout": "포장",
+    "table": "테이블 {no}번",
+    "tableInputTitle": "주문번호 발송",
+    "tableInputDesc": "테이블번호를 입력해주세요 (1~{max})",
+    "tableInputPlaceholder": "테이블번호",
+    "tableNotFound": "해당 테이블은 없습니다.",
+    "goBack": "돌아가기",
+    "currency": "원"
   },
   "complete": {
     "title": "주문 완료",
@@ -79,5 +106,71 @@
     "returnToHome": "처음으로",
     "autoReset": "초 후 자동으로 초기화됩니다",
     "approvalNumber": "승인번호"
+  },
+  "point": {
+    "purchaseInProgress": "구매 진행 중",
+    "askPointUsage": "포인트를 적립/사용 하시겠습니까?",
+    "noEarn": "미적립",
+    "directPayment": "(바로 결제)",
+    "earnPoints": "포인트 적립",
+    "memberPayment": "(회원 결제)",
+    "memberRegister": "회원 등록",
+    "enterPhone": "전화번호를 입력하고",
+    "pressConfirm": "확인버튼을 눌러주세요.",
+    "newMemberGuide": "신규회원은 전화번호 입력 후 확인 버튼을 눌러주세요",
+    "registerTitle": "회원 등록",
+    "phoneRequired": "휴대폰 번호 (필수)",
+    "nameOptional": "회원명 (선택사항)",
+    "namePlaceholder": "이름 입력",
+    "registerGuide": "회원정보 입력 후 입력완료 버튼을 눌러주세요",
+    "directPayBtn": "바로 결제",
+    "completeBtn": "입력완료",
+    "notRegistered": "등록되지 않은 번호입니다. 회원등록 후 이용해주세요.",
+    "lookupFailed": "회원 조회에 실패했습니다.",
+    "enterPhoneFirst": "전화번호를 입력해주세요.",
+    "registerFailed": "회원등록에 실패했습니다.",
+    "defaultMemberName": "회원"
+  },
+  "cardPayment": {
+    "amount": "결제 금액",
+    "timeRemaining": "남은 시간: {seconds}초",
+    "testSimulation": "[테스트] 카드 삽입 시뮬레이션",
+    "pleaseWait": "잠시만 기다려주세요...",
+    "completed": "결제가 완료되었습니다",
+    "timeout": "결제 시간이 초과되었습니다.",
+    "timeoutShort": "결제 시간 초과",
+    "declined": "카드가 거부되었습니다. 다른 카드를 사용해주세요."
+  },
+  "cashPayment": {
+    "amount": "결제 금액",
+    "received": "받은 금액",
+    "exactAmount": "정확한 금액",
+    "reset": "초기화",
+    "cashReceipt": "현금영수증 발급",
+    "phonePlaceholder": "휴대폰 번호 입력"
+  },
+  "numberPad": {
+    "clear": "지움",
+    "confirm": "확인"
+  },
+  "option": {
+    "requiredSelect": "필수 선택",
+    "required": "필수",
+    "additionalSelect": "추가 선택",
+    "free": "무료",
+    "addToCartAmount": "{price}원 담기"
+  },
+  "keyboard": {
+    "confirm": "확인",
+    "modeKorean": "한글",
+    "modeEnglish": "English",
+    "toggleKo": "한/영",
+    "toggleEn": "Ko/En",
+    "space": "스페이스"
+  },
+  "idle": {
+    "warningTitle": "이용 중이신가요?",
+    "warningMessage": "{seconds}초 후 처음 화면으로 돌아갑니다",
+    "continueButton": "계속 이용하기"
   }
 }
