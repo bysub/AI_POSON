@@ -11,6 +11,15 @@ interface OrderItem {
   options: Record<string, unknown> | null;
 }
 
+interface Payment {
+  id: string;
+  paymentType: string;
+  amount: number;
+  status: string;
+  approvalNumber?: string;
+  createdAt: string;
+}
+
 interface Order {
   id: string;
   orderNumber: string;
@@ -19,6 +28,7 @@ interface Order {
   status: "PENDING" | "PAID" | "PREPARING" | "COMPLETED" | "CANCELLED";
   memo?: string;
   items: OrderItem[];
+  payments?: Payment[];
   createdAt: string;
   completedAt?: string;
   cancelledAt?: string;
@@ -217,6 +227,38 @@ watch(dateFilter, () => {
   fetchOrders(1);
 });
 
+// 결제수단 라벨
+function getPaymentMethodLabel(type: string): string {
+  const labels: Record<string, string> = {
+    CARD: "카드",
+    CASH: "현금",
+    TRANSFER: "계좌이체",
+    MIXED: "복합결제",
+  };
+  return labels[type] ?? type;
+}
+
+// 결제유형 뱃지 스타일
+function getPaymentTypeStyle(type: string): string {
+  const styles: Record<string, string> = {
+    CARD: "bg-blue-100 text-blue-700",
+    CASH: "bg-emerald-100 text-emerald-700",
+    MIXED: "bg-purple-100 text-purple-700",
+  };
+  return styles[type] ?? "bg-slate-100 text-slate-600";
+}
+
+// 결제상태 라벨
+function getPaymentStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    APPROVED: "승인",
+    CANCELLED: "취소",
+    PENDING: "대기",
+    FAILED: "실패",
+  };
+  return labels[status] ?? status;
+}
+
 // 컴포넌트 마운트 시 데이터 로드
 onMounted(() => {
   fetchOrders();
@@ -349,8 +391,15 @@ onMounted(() => {
                 {{ statusStyles[order.status]?.label ?? order.status }}
               </span>
             </div>
-            <p class="mt-1 text-sm text-slate-500">
-              {{ formatDate(order.createdAt) }} · {{ order.kioskId ?? "키오스크" }}
+            <p class="mt-1 flex items-center gap-2 text-sm text-slate-500">
+              <span>{{ formatDate(order.createdAt) }} · {{ order.kioskId ?? "키오스크" }}</span>
+              <span
+                v-if="order.payments && order.payments.length > 0"
+                class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                :class="getPaymentTypeStyle(order.payments[0].paymentType)"
+              >
+                {{ getPaymentMethodLabel(order.payments[0].paymentType) }}
+              </span>
             </p>
           </div>
           <div class="text-right">
@@ -488,6 +537,43 @@ onMounted(() => {
                   <span class="text-xl font-bold text-emerald-600">
                     {{ formatPrice(selectedOrder.totalAmount) }}
                   </span>
+                </div>
+              </div>
+
+              <!-- 결제 정보 -->
+              <div v-if="selectedOrder.payments && selectedOrder.payments.length > 0" class="mt-6">
+                <h3 class="mb-3 font-semibold text-slate-700">결제 정보</h3>
+                <div class="space-y-2">
+                  <div
+                    v-for="payment in selectedOrder.payments"
+                    :key="payment.id"
+                    class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span
+                        class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
+                        :class="getPaymentTypeStyle(payment.paymentType)"
+                      >
+                        {{ getPaymentMethodLabel(payment.paymentType) }}
+                      </span>
+                      <span
+                        class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                        :class="
+                          payment.status === 'APPROVED'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
+                        "
+                      >
+                        {{ getPaymentStatusLabel(payment.status) }}
+                      </span>
+                      <span v-if="payment.approvalNumber" class="text-xs text-slate-400">
+                        승인번호: {{ payment.approvalNumber }}
+                      </span>
+                    </div>
+                    <span class="font-semibold text-slate-800">
+                      {{ formatPrice(payment.amount) }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

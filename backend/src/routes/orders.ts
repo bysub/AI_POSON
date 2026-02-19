@@ -332,7 +332,7 @@ router.get("/:id", async (req, res, next) => {
 // Update order status
 router.patch("/:id/status", async (req, res, next) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, paymentType, receivedAmount } = req.body;
 
   const validStatuses = ["PENDING", "PAID", "PREPARING", "COMPLETED", "CANCELLED"];
   if (!validStatuses.includes(status)) {
@@ -362,6 +362,19 @@ router.patch("/:id/status", async (req, res, next) => {
       // CANCELLED로 전환 (이전에 재고 차감된 상태였다면): 재고 복구
       if (newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
         await restoreStockForOrder(tx, id, existing.orderNumber);
+      }
+
+      // PAID 전환 시 paymentType이 전달되면 Payment 레코드 생성
+      if (newStatus === "PAID" && paymentType) {
+        await tx.payment.create({
+          data: {
+            orderId: id,
+            paymentType,
+            amount: existing.totalAmount,
+            receivedAmount: paymentType === "CASH" && receivedAmount ? receivedAmount : null,
+            status: "APPROVED",
+          },
+        });
       }
 
       return tx.order.update({
@@ -600,6 +613,43 @@ router.delete(
       logger.error({ error, orderId: id }, "Failed to cancel order");
       return next(new AppError(500, "주문 취소에 실패했습니다", "ORDER_CANCEL_FAILED"));
     }
+  },
+);
+
+// Payment 레코드 백필 (결제완료 주문 중 Payment 없는 건)
+router.post(
+  "/backfill-payments",
+  authenticate,
+  authorize("SUPER_ADMIN", "ADMIN"),
+  async (_req, res) => {
+    const ordersWithoutPayment = await prisma.order.findMany({
+      where: {
+        status: { in: ["PAID", "PREPARING", "COMPLETED"] },
+        payments: { none: {} },
+      },
+      select: { id: true, totalAmount: true, orderNumber: true },
+    });
+
+    if (ordersWithoutPayment.length === 0) {
+      return res.json({ success: true, message: "백필 대상 없음", count: 0 });
+    }
+
+    const created = await prisma.payment.createMany({
+      data: ordersWithoutPayment.map((order) => ({
+        orderId: order.id,
+        paymentType: "CASH" as const,
+        amount: order.totalAmount,
+        status: "APPROVED" as const,
+      })),
+    });
+
+    logger.info({ count: created.count }, "Payment records backfilled");
+
+    res.json({
+      success: true,
+      message: `${created.count}건 백필 완료`,
+      count: created.count,
+    });
   },
 );
 

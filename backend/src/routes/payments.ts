@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { createPaymentService } from "../services/payment/index.js";
 import { logger } from "../utils/logger.js";
+import { prisma } from "../utils/db.js";
 
 const router = Router();
 const paymentService = createPaymentService();
@@ -108,11 +109,43 @@ router.post("/", async (req, res) => {
     );
 
     if (result.success) {
+      // Payment 레코드를 DB에 저장
+      const payment = await prisma.payment.create({
+        data: {
+          orderId: request.orderId,
+          paymentType: request.paymentType,
+          amount: request.amount,
+          status: "APPROVED",
+          vanCode: request.vanCode ?? null,
+          approvalNumber: result.approvalNumber ?? null,
+          transactionId: result.transactionId ?? null,
+        },
+      });
+
+      logger.info(
+        { paymentId: payment.id, orderId: request.orderId, paymentType: request.paymentType },
+        "Payment: DB record created",
+      );
+
       return res.status(200).json({
         success: true,
-        data: result,
+        data: { ...result, paymentId: payment.id },
       });
     }
+
+    // 실패한 결제도 기록 (선택적)
+    await prisma.payment.create({
+      data: {
+        orderId: request.orderId,
+        paymentType: request.paymentType,
+        amount: request.amount,
+        status: "FAILED",
+        vanCode: request.vanCode ?? null,
+        errorCode: result.errorCode ?? null,
+        errorMessage: result.errorMessage ?? null,
+        transactionId: result.transactionId ?? null,
+      },
+    });
 
     return res.status(400).json({
       success: false,
@@ -161,6 +194,12 @@ router.post("/:transactionId/cancel", async (req, res) => {
     const result = await paymentService.cancelPayment(transactionId, vanCode);
 
     if (result.success) {
+      // DB에서 해당 transactionId의 Payment 상태를 CANCELLED로 업데이트
+      await prisma.payment.updateMany({
+        where: { transactionId },
+        data: { status: "CANCELLED" },
+      });
+
       return res.status(200).json({
         success: true,
         data: result,

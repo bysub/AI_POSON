@@ -2,7 +2,8 @@
 import { ref, computed, onMounted } from "vue";
 import type { Supplier, SupplierType } from "@/types";
 import { apiClient } from "@/services/api/client";
-import { showWarningToast, showApiError, showConfirm } from "@/utils/AlertUtils";
+import { showApiError, showConfirm } from "@/utils/AlertUtils";
+import SupplierFormModal from "@/components/SupplierFormModal.vue";
 
 // 거래처 구분 설정
 const supplierTypeConfig: Record<SupplierType, { label: string; bg: string; text: string }> = {
@@ -30,22 +31,6 @@ const filterActive = ref<"" | "true" | "false">("");
 // 모달 상태
 const showForm = ref(false);
 const editingSupplier = ref<Supplier | null>(null);
-const supplierForm = ref({
-  name: "",
-  type: "ETC" as SupplierType,
-  businessNumber: "",
-  businessType: "",
-  businessItem: "",
-  representative: "",
-  contactName: "",
-  contactPhone: "",
-  contactEmail: "",
-  address: "",
-  addressDetail: "",
-  discountRate: 0,
-  paymentTerms: "",
-  memo: "",
-});
 
 // 필터링된 거래처
 const filteredSuppliers = computed(() => {
@@ -97,67 +82,17 @@ async function loadSuppliers(): Promise<void> {
 
 function openAddForm(): void {
   editingSupplier.value = null;
-  supplierForm.value = {
-    name: "",
-    type: "ETC",
-    businessNumber: "",
-    businessType: "",
-    businessItem: "",
-    representative: "",
-    contactName: "",
-    contactPhone: "",
-    contactEmail: "",
-    address: "",
-    addressDetail: "",
-    discountRate: 0,
-    paymentTerms: "",
-    memo: "",
-  };
   showForm.value = true;
 }
 
 function openEditForm(supplier: Supplier): void {
   editingSupplier.value = supplier;
-  supplierForm.value = {
-    name: supplier.name,
-    type: supplier.type,
-    businessNumber: supplier.businessNumber ?? "",
-    businessType: supplier.businessType ?? "",
-    businessItem: supplier.businessItem ?? "",
-    representative: supplier.representative ?? "",
-    contactName: supplier.contactName ?? "",
-    contactPhone: supplier.contactPhone ?? "",
-    contactEmail: supplier.contactEmail ?? "",
-    address: supplier.address ?? "",
-    addressDetail: supplier.addressDetail ?? "",
-    discountRate: Number(supplier.discountRate) || 0,
-    paymentTerms: supplier.paymentTerms ?? "",
-    memo: supplier.memo ?? "",
-  };
   showForm.value = true;
 }
 
-async function saveSupplier(): Promise<void> {
-  if (!supplierForm.value.name) {
-    showWarningToast("거래처명은 필수입니다");
-    return;
-  }
-
-  isLoading.value = true;
-  try {
-    if (editingSupplier.value) {
-      await apiClient.patch(`/api/v1/suppliers/${editingSupplier.value.id}`, supplierForm.value);
-    } else {
-      await apiClient.post("/api/v1/suppliers", supplierForm.value);
-    }
-    showForm.value = false;
-    await loadSuppliers();
-  } catch (err) {
-    showApiError(err, "저장에 실패했습니다");
-    console.error("Save supplier error:", err);
-  } finally {
-    isLoading.value = false;
-  }
+function onSupplierSaved(): void {
+  showForm.value = false;
+  loadSuppliers();
 }
 
 async function deleteSupplier(supplier: Supplier): Promise<void> {
@@ -330,7 +265,7 @@ onMounted(() => {
             class="transition-colors hover:bg-slate-50"
           >
             <!-- 거래처 정보 -->
-            <td class="px-6 py-4">
+            <td class="cursor-pointer px-6 py-4" @click="openEditForm(supplier)">
               <div class="flex items-center gap-3">
                 <div
                   class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-sm font-bold text-indigo-600"
@@ -338,7 +273,7 @@ onMounted(() => {
                   {{ supplier.name.charAt(0) }}
                 </div>
                 <div>
-                  <p class="font-medium text-slate-800">
+                  <p class="font-medium text-slate-800 hover:text-indigo-600">
                     {{ supplier.name }}
                   </p>
                   <p class="text-xs text-slate-400">
@@ -472,256 +407,11 @@ onMounted(() => {
       </table>
     </div>
 
-    <!-- Supplier Form Modal -->
-    <Teleport to="body">
-      <Transition name="modal">
-        <div
-          v-if="showForm"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-          @click.self="showForm = false"
-        >
-          <div
-            class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"
-          >
-            <div class="mb-6 flex items-center justify-between">
-              <h3 class="text-lg font-bold text-slate-800">
-                {{ editingSupplier ? "거래처 수정" : "거래처 추가" }}
-              </h3>
-              <button
-                class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                @click="showForm = false"
-              >
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div class="space-y-4">
-              <!-- 기본 정보 -->
-              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 class="mb-3 text-sm font-semibold text-slate-700">기본 정보</h4>
-                <!-- 수정 모드: 거래처 코드 표시 -->
-                <div v-if="editingSupplier" class="mb-3 flex items-center gap-2">
-                  <span class="text-sm font-medium text-slate-500">거래처 코드:</span>
-                  <span
-                    class="rounded-lg bg-indigo-100 px-2.5 py-1 text-sm font-semibold text-indigo-700"
-                    >{{ editingSupplier.code }}</span
-                  >
-                </div>
-                <div v-else class="mb-3">
-                  <p class="text-xs text-slate-400">거래처 코드는 저장 시 자동으로 생성됩니다.</p>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                      >거래처명 *</label
-                    >
-                    <input
-                      v-model="supplierForm.name"
-                      type="text"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="거래처명"
-                    />
-                  </div>
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                      >거래처 구분</label
-                    >
-                    <select
-                      v-model="supplierForm.type"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                    >
-                      <option v-for="t in supplierTypes" :key="t.value" :value="t.value">
-                        {{ t.label }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 사업자 정보 -->
-              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 class="mb-3 text-sm font-semibold text-slate-700">사업자 정보</h4>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                      >사업자번호</label
-                    >
-                    <input
-                      v-model="supplierForm.businessNumber"
-                      type="text"
-                      maxlength="20"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="000-00-00000"
-                    />
-                  </div>
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700">대표자</label>
-                    <input
-                      v-model="supplierForm.representative"
-                      type="text"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="대표자명"
-                    />
-                  </div>
-                </div>
-                <div class="mt-4 grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700">업태</label>
-                    <input
-                      v-model="supplierForm.businessType"
-                      type="text"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="예: 제조업, 도소매업, 서비스업"
-                    />
-                  </div>
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700">종목</label>
-                    <input
-                      v-model="supplierForm.businessItem"
-                      type="text"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="예: 식품, 커피원두, 포장재"
-                    />
-                  </div>
-                </div>
-                <div class="mt-4">
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700">주소</label>
-                  <input
-                    v-model="supplierForm.address"
-                    type="text"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                    placeholder="사업장 주소"
-                  />
-                </div>
-                <div class="mt-4">
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700">상세주소</label>
-                  <input
-                    v-model="supplierForm.addressDetail"
-                    type="text"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                    placeholder="동/호수, 층 등 상세주소"
-                  />
-                </div>
-              </div>
-
-              <!-- 담당자 정보 -->
-              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 class="mb-3 text-sm font-semibold text-slate-700">담당자 정보</h4>
-                <div class="grid grid-cols-3 gap-4">
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700">담당자명</label>
-                    <input
-                      v-model="supplierForm.contactName"
-                      type="text"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="담당자명"
-                    />
-                  </div>
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700">연락처</label>
-                    <input
-                      v-model="supplierForm.contactPhone"
-                      type="text"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="010-0000-0000"
-                    />
-                  </div>
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700">이메일</label>
-                    <input
-                      v-model="supplierForm.contactEmail"
-                      type="email"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="email@example.com"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- 거래 조건 -->
-              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h4 class="mb-3 text-sm font-semibold text-slate-700">거래 조건</h4>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                      >할인율 (%)</label
-                    >
-                    <input
-                      v-model.number="supplierForm.discountRate"
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700">결제 조건</label>
-                    <input
-                      v-model="supplierForm.paymentTerms"
-                      type="text"
-                      class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      placeholder="예: 월말 정산, 즉시 결제"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- 메모 -->
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">메모</label>
-                <textarea
-                  v-model="supplierForm.memo"
-                  rows="3"
-                  class="w-full rounded-xl border border-slate-200 px-4 py-2.5 transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="거래처 관련 메모"
-                />
-              </div>
-            </div>
-
-            <div class="mt-6 flex justify-end gap-3">
-              <button
-                class="rounded-xl border border-slate-200 px-5 py-2.5 font-medium text-slate-600 transition-colors hover:bg-slate-50"
-                @click="showForm = false"
-              >
-                취소
-              </button>
-              <button
-                class="rounded-xl bg-indigo-600 px-5 py-2.5 font-medium text-white transition-colors hover:bg-indigo-700"
-                :disabled="isLoading"
-                @click="saveSupplier"
-              >
-                {{ isLoading ? "저장 중..." : "저장" }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+    <SupplierFormModal
+      :visible="showForm"
+      :supplier="editingSupplier"
+      @close="showForm = false"
+      @saved="onSupplierSaved"
+    />
   </div>
 </template>
-
-<style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: all 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-from > div,
-.modal-leave-to > div {
-  transform: scale(0.95);
-}
-</style>

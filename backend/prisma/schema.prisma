@@ -184,6 +184,7 @@ model Payment {
   orderId        String        @map("order_id")
   paymentType    PaymentType   @map("payment_type")
   amount         Decimal       @db.Decimal(18, 2)
+  receivedAmount Decimal?      @map("received_amount") @db.Decimal(18, 2)
   status         PaymentStatus @default(PENDING)
   vanCode        String?       @map("van_code") @db.VarChar(20)
   approvalNumber String?       @map("approval_number") @db.VarChar(50)

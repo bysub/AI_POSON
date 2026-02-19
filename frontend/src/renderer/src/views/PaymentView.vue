@@ -133,14 +133,16 @@ function goBack(): void {
 async function handleCardSuccess(transactionId: string, approvalNumber: string): Promise<void> {
   console.log("Card payment success:", { transactionId, approvalNumber });
 
-  // 주문 상태를 PAID로 업데이트
   if (currentOrder.value?.id) {
     try {
       const { apiClient } = await import("@/services/api/client");
+
+      // 주문 상태를 PAID로 업데이트 + Payment 레코드 생성
       await apiClient.patch(`/api/v1/orders/${currentOrder.value.id}/status`, {
         status: "PAID",
+        paymentType: "CARD",
       });
-      console.log("Order status updated to PAID");
+      console.log("Order status updated to PAID with CARD payment");
     } catch (error) {
       console.error("Failed to update order status:", error);
     }
@@ -173,14 +175,17 @@ function handleCardFail(errorCode: string, errorMessage: string): void {
 async function handleCashSuccess(receivedAmount: number, changeAmount: number): Promise<void> {
   console.log("Cash payment success:", { receivedAmount, changeAmount });
 
-  // 주문 상태를 PAID로 업데이트
   if (currentOrder.value?.id) {
     try {
       const { apiClient } = await import("@/services/api/client");
+
+      // 주문 상태를 PAID로 업데이트 + Payment 레코드 생성
       await apiClient.patch(`/api/v1/orders/${currentOrder.value.id}/status`, {
         status: "PAID",
+        paymentType: "CASH",
+        receivedAmount,
       });
-      console.log("Order status updated to PAID");
+      console.log("Order status updated to PAID with CASH payment");
     } catch (error) {
       console.error("Failed to update order status:", error);
     }

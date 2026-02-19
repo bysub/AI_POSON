@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { apiClient } from "@/services/api/client";
+
+const router = useRouter();
 
 interface PurchaseProduct {
   id: number;
@@ -207,8 +209,15 @@ onMounted(() => loadData());
         </thead>
         <tbody class="divide-y divide-slate-100">
           <tr v-for="product in filtered" :key="product.id" class="hover:bg-slate-50">
-            <td class="px-5 py-3">
-              <p class="font-medium text-slate-800">
+            <td
+              class="cursor-pointer px-5 py-3"
+              @click="
+                router.push(
+                  `/admin/inventory/history?productId=${product.id}&productName=${encodeURIComponent(product.name)}`,
+                )
+              "
+            >
+              <p class="font-medium text-slate-800 hover:text-indigo-600">
                 {{ product.name }}
               </p>
               <p class="text-xs text-slate-500">

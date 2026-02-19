@@ -12,9 +12,11 @@ interface OrderItem {
 
 interface Payment {
   id: string;
-  method: string;
+  paymentType: string;
   amount: number;
+  receivedAmount?: number | null;
   status: string;
+  approvalNumber?: string;
   createdAt: string;
 }
 
@@ -49,6 +51,9 @@ interface OrdersResponse {
 const orders = ref<Order[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
+
+// 기기 이름 맵 (kioskId → name)
+const deviceNameMap = ref<Record<string, string>>({});
 
 // 주문 상세 모달
 const selectedOrder = ref<Order | null>(null);
@@ -168,14 +173,30 @@ function getOrderTypeLabel(type?: string): string {
 }
 
 // 결제수단 라벨
-function getPaymentMethodLabel(method: string): string {
+function getPaymentMethodLabel(type: string): string {
   const labels: Record<string, string> = {
     CARD: "카드",
     CASH: "현금",
     TRANSFER: "계좌이체",
     MIXED: "복합결제",
   };
-  return labels[method] ?? method;
+  return labels[type] ?? type;
+}
+
+// 결제유형 뱃지 스타일
+function getPaymentTypeStyle(type: string): string {
+  const styles: Record<string, string> = {
+    CARD: "bg-blue-100 text-blue-700",
+    CASH: "bg-emerald-100 text-emerald-700",
+    MIXED: "bg-purple-100 text-purple-700",
+  };
+  return styles[type] ?? "bg-slate-100 text-slate-600";
+}
+
+// 주문의 대표 결제유형 가져오기
+function getOrderPaymentType(order: Order): string | null {
+  if (!order.payments || order.payments.length === 0) return null;
+  return order.payments[0].paymentType;
 }
 
 // 결제상태 라벨
@@ -232,7 +253,29 @@ function setThisMonth(): void {
   handleSearch();
 }
 
-onMounted(() => loadData());
+async function loadDevices(): Promise<void> {
+  try {
+    const res = await apiClient.get<{ success: boolean; data: { id: string; name: string }[] }>(
+      "/api/v1/devices",
+    );
+    if (res.data.success) {
+      deviceNameMap.value = Object.fromEntries(res.data.data.map((d) => [d.id, d.name]));
+    }
+  } catch {
+    // 기기 목록 로드 실패 시 무시 (ID만 표시)
+  }
+}
+
+function getDeviceLabel(kioskId?: string): string {
+  if (!kioskId) return "-";
+  const name = deviceNameMap.value[kioskId];
+  return name ? `${name} (${kioskId})` : kioskId;
+}
+
+onMounted(() => {
+  loadDevices();
+  loadData();
+});
 </script>
 
 <template>
@@ -377,6 +420,9 @@ onMounted(() => loadData());
             <th class="px-6 py-4 text-center text-xs font-semibold uppercase text-slate-500">
               상품수
             </th>
+            <th class="px-6 py-4 text-center text-xs font-semibold uppercase text-slate-500">
+              결제유형
+            </th>
             <th class="px-6 py-4 text-right text-xs font-semibold uppercase text-slate-500">
               금액
             </th>
@@ -408,6 +454,16 @@ onMounted(() => loadData());
             </td>
             <td class="px-6 py-4 text-center text-sm text-slate-600">
               {{ order.items?.length ?? 0 }}건
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span
+                v-if="getOrderPaymentType(order)"
+                class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
+                :class="getPaymentTypeStyle(getOrderPaymentType(order)!)"
+              >
+                {{ getPaymentMethodLabel(getOrderPaymentType(order)!) }}
+              </span>
+              <span v-else class="text-sm text-slate-400">-</span>
             </td>
             <td class="px-6 py-4 text-right font-semibold text-slate-800">
               {{ formatPrice(order.totalAmount) }}
@@ -508,9 +564,9 @@ onMounted(() => loadData());
                 </p>
               </div>
               <div>
-                <span class="text-xs text-slate-500">기기ID</span>
+                <span class="text-xs text-slate-500">기기</span>
                 <p class="text-sm font-medium text-slate-800">
-                  {{ selectedOrder.kioskId ?? "-" }}
+                  {{ getDeviceLabel(selectedOrder.kioskId) }}
                 </p>
               </div>
               <div v-if="selectedOrder.completedAt">
@@ -574,26 +630,43 @@ onMounted(() => loadData());
                 <div
                   v-for="payment in selectedOrder.payments"
                   :key="payment.id"
-                  class="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2"
+                  class="rounded-lg bg-slate-50 px-4 py-2"
                 >
-                  <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-slate-800">
-                      {{ getPaymentMethodLabel(payment.method) }}
-                    </span>
-                    <span
-                      class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
-                      :class="
-                        payment.status === 'APPROVED'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      "
-                    >
-                      {{ getPaymentStatusLabel(payment.status) }}
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span class="text-sm font-medium text-slate-800">
+                        {{ getPaymentMethodLabel(payment.paymentType) }}
+                      </span>
+                      <span
+                        class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                        :class="
+                          payment.status === 'APPROVED'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
+                        "
+                      >
+                        {{ getPaymentStatusLabel(payment.status) }}
+                      </span>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-800">
+                      {{ formatPrice(payment.amount) }}
                     </span>
                   </div>
-                  <span class="text-sm font-semibold text-slate-800">
-                    {{ formatPrice(payment.amount) }}
-                  </span>
+                  <div
+                    v-if="payment.paymentType === 'CASH' && payment.receivedAmount"
+                    class="mt-1 flex gap-4 text-xs text-slate-500"
+                  >
+                    <span
+                      >받은금액:
+                      <b class="text-slate-700">{{ formatPrice(payment.receivedAmount) }}</b></span
+                    >
+                    <span
+                      >거스름돈:
+                      <b class="text-emerald-600">{{
+                        formatPrice(Number(payment.receivedAmount) - Number(payment.amount))
+                      }}</b></span
+                    >
+                  </div>
                 </div>
               </div>
             </div>

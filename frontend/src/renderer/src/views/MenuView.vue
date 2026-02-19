@@ -534,7 +534,7 @@ onMounted(async () => {
           {{ t("cart.empty") }}
         </div>
 
-        <div v-else class="max-h-32 space-y-2 overflow-y-auto">
+        <div v-else class="max-h-48 space-y-2 overflow-y-auto">
           <div
             v-for="item in cartStore.items"
             :key="item.id"
@@ -550,7 +550,7 @@ onMounted(async () => {
             <!-- Quantity Controls -->
             <div class="flex items-center gap-2">
               <button
-                class="flex h-6 w-6 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
+                class="product-area-minus flex h-6 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
                 @click="cartStore.updateQuantity(item.id, item.quantity - 1)"
               >
                 -
@@ -559,7 +559,7 @@ onMounted(async () => {
                 item.quantity
               }}</span>
               <button
-                class="flex h-6 w-6 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
+                class="product-area-plus flex h-6 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
                 @click="cartStore.updateQuantity(item.id, item.quantity + 1)"
               >
                 +
@@ -688,7 +688,6 @@ onMounted(async () => {
 .text-order-summany-quantity,
 .text-order-summany-amount {
   font-weight: 700;
-  font-size: 14px;
 }
 .icon-sale-badge {
   font-size: 16px;
@@ -697,5 +696,11 @@ onMounted(async () => {
   font-size: 24px;
   text-align: center;
   padding: 0.5em;
+}
+.product-area-minus,
+.product-area-plus {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2em;
 }
 </style>

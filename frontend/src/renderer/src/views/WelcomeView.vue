@@ -9,17 +9,24 @@ import { useSettingsStore } from "../stores/settings";
 const router = useRouter();
 const cartStore = useCartStore();
 const settingsStore = useSettingsStore();
-
-// 웰컴 페이지 진입 시 장바구니 초기화 + 설정 로딩
-onMounted(() => {
-  cartStore.clear();
-  settingsStore.initialize();
-});
-const { locale, t } = useI18n();
 const localeStore = useLocaleStore();
+
+const { locale, t } = useI18n();
 
 const languages = localeStore.getSupportedLocales();
 const selectedLang = ref<SupportedLocale>(localeStore.currentLocale);
+
+// 웰컴 페이지 진입 시 전체 세션 초기화
+onMounted(() => {
+  // 장바구니 초기화 (items, currentOrder, orderError)
+  cartStore.clear();
+  // 언어 초기화 (한국어로 리셋)
+  localeStore.resetLocale();
+  locale.value = "ko";
+  selectedLang.value = "ko";
+  // 설정 로딩
+  settingsStore.initialize();
+});
 
 // 관리자 모드 진입 (로고 5회 탭)
 const adminTapCount = ref(0);

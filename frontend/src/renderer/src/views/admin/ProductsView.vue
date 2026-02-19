@@ -566,7 +566,7 @@ onMounted(() => {
             :key="product.id"
             class="transition-colors hover:bg-slate-50"
           >
-            <td class="px-6 py-4">
+            <td class="cursor-pointer px-6 py-4" @click="openEditForm(product)">
               <div class="flex items-center gap-4">
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-lg font-bold text-slate-400"
@@ -575,7 +575,7 @@ onMounted(() => {
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
-                    <p class="font-medium text-slate-800">
+                    <p class="font-medium text-slate-800 hover:text-indigo-600">
                       {{ product.name }}
                     </p>
                     <span
