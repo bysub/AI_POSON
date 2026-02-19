@@ -22,6 +22,7 @@
   * {
     user-select: none;
     -webkit-user-select: none;
+    font-size: 18px;
   }
 
   /* Allow text selection only in input fields */

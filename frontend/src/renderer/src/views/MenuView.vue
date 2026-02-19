@@ -260,11 +260,11 @@ onMounted(async () => {
     <!-- Main Content -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Category Sidebar -->
-      <aside class="flex w-20 flex-col items-center gap-2 overflow-y-auto bg-white py-4 shadow-sm">
+      <aside class="flex w-28 flex-col items-center gap-2 overflow-y-auto bg-white py-4 shadow-sm">
         <button
           v-for="category in categoriesWithAll"
           :key="category.id"
-          class="flex w-16 flex-col items-center gap-1 rounded-xl p-2 transition-all"
+          class="flex w-20 flex-col items-center gap-1 rounded-xl p-2 transition-all"
           :class="[
             effectiveSelectedId === category.id
               ? 'bg-amber-400 text-white shadow-md'
@@ -420,7 +420,7 @@ onMounted(async () => {
               class="h-full w-full object-cover"
             />
           </div>
-          <span class="text-center text-[11px] font-medium leading-tight">
+          <span class="text-center text-[14px] font-medium leading-tight">
             {{ getLocalizedName(category) }}
           </span>
         </button>
@@ -436,7 +436,7 @@ onMounted(async () => {
         </div>
 
         <!-- Products -->
-        <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
           <article
             v-for="product in productsStore.filteredProducts"
             :key="product.id"
@@ -597,12 +597,12 @@ onMounted(async () => {
           <p class="text-xs text-gray-400">
             {{ t("cart.total").toUpperCase() }}
           </p>
-          <p class="text-3xl font-bold text-gray-900">
+          <p class="mt-8 text-3xl font-bold text-gray-900">
             {{ formatPrice(cartStore.totalAmount) }}
           </p>
         </div>
 
-        <div class="space-y-2">
+        <div class="mt-8 space-y-2">
           <button
             class="w-full rounded-full bg-red-500 py-3 text-sm font-bold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
             :disabled="cartStore.isEmpty"

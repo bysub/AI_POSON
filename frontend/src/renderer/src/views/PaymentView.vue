@@ -213,7 +213,7 @@ onMounted(() => {
     <template v-if="currentStep === 'select'">
       <!-- Header -->
       <header class="flex-none px-6 pb-4 pt-6">
-        <div class="mx-auto flex max-w-md items-center justify-between">
+        <div class="mx-auto flex max-w-xl items-center justify-between">
           <button
             class="flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-100 bg-white text-red-500 shadow-sm transition-transform active:scale-95"
             @click="goBack"
@@ -236,7 +236,7 @@ onMounted(() => {
 
       <!-- Main Content -->
       <main class="flex-1 overflow-y-auto px-6 pb-6">
-        <div class="mx-auto flex max-w-md flex-col gap-5">
+        <div class="mx-auto flex max-w-xl flex-col gap-5">
           <!-- Order Summary Card -->
           <section class="rounded-3xl border border-orange-50 bg-white p-5 shadow-sm">
             <!-- Cart Items -->

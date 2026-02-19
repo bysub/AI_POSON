@@ -730,7 +730,7 @@ function toggleSidebar(): void {
         </div>
 
         <!-- Actions -->
-        <div class="mt-2 flex gap-2" :class="isSidebarCollapsed ? 'flex-col' : ''">
+        <div class="sidebar-bottom mt-2 flex gap-2" :class="isSidebarCollapsed ? 'flex-col' : ''">
           <RouterLink
             to="/"
             class="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
@@ -837,5 +837,8 @@ function toggleSidebar(): void {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+.sidebar-bottom .text-sm span {
+  font-size: 0.875rem;
 }
 </style>
