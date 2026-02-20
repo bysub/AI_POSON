@@ -56,7 +56,7 @@ mfun.WRITE_INI(Section, Key, Value, FilePath)  ' 쓰기
 | **Server_Fort**   | SQL Server 포트                       | 1433           |
 | **Catalog**       | 데이터베이스 이름                     | TIPS           |
 | **Server_UserID** | DB 사용자 ID                          | sa             |
-| **Server_Pwd**    | DB 비밀번호                           | ****\*****     |
+| **Server_Pwd**    | DB 비밀번호                           | \***\*\*\*\*** |
 | Server_Type       | 서버 유형 (0: SQL Server, 1: LocalDB) | 0              |
 | TServer_IP        | TIPS 서버 IP                          | 122.49.118.102 |
 | TServer_Fort      | TIPS 서버 포트                        | 18971          |

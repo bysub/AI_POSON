@@ -22,7 +22,7 @@ const searchQuery = ref("");
 const showModal = ref(false);
 const isEditing = ref(false);
 const editId = ref(0);
-const form = ref({ code: "", name: "", phone: "", grade: "NORMAL" as string, points: 0 });
+const form = ref({ code: "", name: "", phone: "010-", grade: "NORMAL" as string, points: 0 });
 
 const gradeLabels: Record<string, string> = {
   NORMAL: "일반",

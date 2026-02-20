@@ -31,7 +31,7 @@ const form = ref({
   businessItem: "",
   representative: "",
   contactName: "",
-  contactPhone: "",
+  contactPhone: "010-",
   contactEmail: "",
   address: "",
   addressDetail: "",

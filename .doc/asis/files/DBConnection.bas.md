@@ -266,6 +266,7 @@ End Function
    - 연결 끊김 후에도 레코드셋 유지
 
 3. **LocalDB 지원**
+
    ```vb
    If DB.Server_Type = "1" Then
        sDB.Open "Provider=SQLNCLI11;Data Source=(localdb)\v11.0;Integrated Security=SSPI;"
@@ -394,6 +395,7 @@ End Function
    - 네트워크 부하 감소
 
 2. **연결 실패 시 플래그 설정**
+
    ```vb
    DB_ERR:
        TIPS_SERVER.Conn_Fail_YN = 1
@@ -508,6 +510,7 @@ End Function
    - 에러가 아닌 정상 종료
 
 3. **비밀번호 선택적**
+
    ```vb
    Optional ByVal PassWd As String
    ```
@@ -575,6 +578,7 @@ End Sub
    - 이미 닫힌 연결을 다시 닫으려 하지 않음
 
 2. **메모리 누수 방지**
+
    ```vb
    Set DB = Nothing
    ```
@@ -659,6 +663,7 @@ End Sub
    - 이미 연결되어 있으면 재연결하지 않음
 
 2. **전역 플래그 사용**
+
    ```vb
    Trans.Chk = True/False
    ```
@@ -747,6 +752,7 @@ End Sub
    - 나중에 재전송 가능
 
 2. **연결 상태 플래그 갱신**
+
    ```vb
    Trans.Chk = False
    ```
@@ -1037,6 +1043,7 @@ End Sub
    - 불필요한 연결 시도 방지
 
 3. **재실패 시 재로깅**
+
    ```vb
    If Trans.Chk = True Then
        Call Tran_Execute(...)  ' 재전송

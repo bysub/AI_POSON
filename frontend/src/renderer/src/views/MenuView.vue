@@ -690,16 +690,16 @@ onMounted(async () => {
   font-weight: 700;
 }
 .icon-sale-badge {
-  font-size: 16px;
+  font-size: 1rem;
 }
 .span-unavailable-overlay {
-  font-size: 24px;
+  font-size: 1.5rem;
   text-align: center;
   padding: 0.5em;
 }
 .product-area-minus,
 .product-area-plus {
-  font-size: 18px;
+  font-size: 1.2rem;
   font-weight: 700;
   line-height: 1.2em;
 }

@@ -220,11 +220,18 @@ const router = createRouter({
 });
 
 // 인증 가드
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+
+  // 관리자 영역에서 키오스크 영역으로 전환 시 자동 로그아웃
+  const isFromAdmin = from.path.startsWith("/admin");
+  const isToKiosk = !to.path.startsWith("/admin");
+  if (isFromAdmin && isToKiosk && authStore.isAuthenticated) {
+    authStore.logout();
+  }
+
   // 인증이 필요한 페이지인지 확인
   if (to.meta.requiresAuth) {
-    const authStore = useAuthStore();
-
     // 저장된 인증 정보 복원 시도
     if (!authStore.isAuthenticated) {
       authStore.restoreAuth();

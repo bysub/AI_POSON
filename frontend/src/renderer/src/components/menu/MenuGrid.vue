@@ -159,7 +159,7 @@ function handleProductClick(product: Product): void {
 </template>
 <style lang="css">
 .span-unavailable-overlay {
-  font-size: 24px;
+  font-size: 1.5rem;
   text-align: center;
   padding: 0.5em;
 }

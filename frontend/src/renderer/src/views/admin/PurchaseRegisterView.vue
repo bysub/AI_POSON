@@ -72,7 +72,7 @@ watch(productSearch, (val) => {
 const totalSellAmount = computed(() =>
   purchaseItems.value.reduce((sum, item) => sum + item.sellPrice * item.quantity, 0),
 );
-const marginAmount = computed(() => totalSellAmount.value - totalAmount.value);
+const marginAmount = computed(() => totalSellAmount.value - grandTotal.value);
 const marginRate = computed(() =>
   totalSellAmount.value > 0
     ? ((marginAmount.value / totalSellAmount.value) * 100).toFixed(1)
@@ -559,7 +559,7 @@ onMounted(() => {
           </div>
           <div class="flex justify-between text-sm">
             <span class="text-slate-500">매입가 합계</span>
-            <span class="font-medium text-slate-800">{{ formatPrice(totalAmount) }}원</span>
+            <span class="font-medium text-slate-800">{{ formatPrice(grandTotal) }}원</span>
           </div>
           <div class="flex justify-between border-t border-slate-200 pt-2 text-lg">
             <span class="font-semibold text-slate-700">예상 마진</span>

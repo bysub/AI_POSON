@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+
+const INACTIVITY_TIMEOUT = 30_000; // 30초
 
 const router = useRouter();
 const route = useRoute();
@@ -10,6 +12,46 @@ const authStore = useAuthStore();
 const username = ref("");
 const password = ref("");
 const showPassword = ref(false);
+
+// 비활동 타이머
+let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+
+function resetInactivityTimer(): void {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => {
+    router.push("/");
+  }, INACTIVITY_TIMEOUT);
+}
+
+function clearInactivityTimer(): void {
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = null;
+  }
+}
+
+const activityEvents = ["pointerdown", "keydown"] as const;
+
+onMounted(() => {
+  // 이미 로그인되어 있으면 관리자 페이지로
+  if (authStore.isAuthenticated || authStore.restoreAuth()) {
+    router.replace("/admin");
+    return;
+  }
+
+  // 비활동 타이머 시작
+  resetInactivityTimer();
+  for (const event of activityEvents) {
+    document.addEventListener(event, resetInactivityTimer);
+  }
+});
+
+onBeforeUnmount(() => {
+  clearInactivityTimer();
+  for (const event of activityEvents) {
+    document.removeEventListener(event, resetInactivityTimer);
+  }
+});
 
 async function handleLogin(): Promise<void> {
   if (!username.value || !password.value) {
@@ -28,13 +70,6 @@ async function handleLogin(): Promise<void> {
 function goBack(): void {
   router.push("/");
 }
-
-// 이미 로그인되어 있으면 관리자 페이지로
-onMounted(() => {
-  if (authStore.isAuthenticated || authStore.restoreAuth()) {
-    router.replace("/admin");
-  }
-});
 </script>
 
 <template>

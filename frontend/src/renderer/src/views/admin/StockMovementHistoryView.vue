@@ -997,11 +997,11 @@ const stats = computed(() => {
   align-items: self-start;
 }
 .span-stock-movement-item {
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 28px;
 }
 .span-stock-movement-item button {
   color: #000;
-  font-size: 18px;
+  font-size: 1.2rem;
 }
 </style>

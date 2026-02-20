@@ -664,6 +664,7 @@ End Sub
    - 개선: 프로세스 핸들 저장
 
 3. **에러 메시지 하드코딩**
+
    ```vb
    MsgBox "[lab키보드_Click] : " & err.Number
    ```

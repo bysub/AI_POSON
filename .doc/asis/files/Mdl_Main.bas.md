@@ -1189,7 +1189,7 @@ Mdl_Main.bas
 - Frm_Sale.frm → Shop, S_Config, Product, Card, Cash
 - Frm_Member.frm → Member, Points, MEM_Gubun
 - Frm_Card.frm → Card, VAN, VCAT
-- Frm*Self.frm → C_Config.Self*_, Terminal.Bell\__
+- Frm*Self.frm → C_Config.Self*\_, Terminal.Bell\_\_
 
 ### 7.3 순환 참조 위험
 
