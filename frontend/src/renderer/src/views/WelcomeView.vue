@@ -5,11 +5,19 @@ import { useI18n } from "vue-i18n";
 import { useLocaleStore, type SupportedLocale } from "../stores/locale";
 import { useCartStore } from "../stores/cart";
 import { useSettingsStore } from "../stores/settings";
+import { useAccessibilityStore } from "../stores/accessibility";
+import { useTTS } from "@/composables/useTTS";
+import flagKr from "@/assets/images/flags/kr.svg";
+import flagUs from "@/assets/images/flags/us.svg";
+import flagJp from "@/assets/images/flags/jp.svg";
+import flagCn from "@/assets/images/flags/cn.svg";
 
 const router = useRouter();
 const cartStore = useCartStore();
 const settingsStore = useSettingsStore();
 const localeStore = useLocaleStore();
+const accessibilityStore = useAccessibilityStore();
+const tts = useTTS();
 
 const { locale, t } = useI18n();
 
@@ -26,24 +34,31 @@ onMounted(() => {
   selectedLang.value = "ko";
   // 설정 로딩
   settingsStore.initialize();
+  // 접근성 초기화 (관리자 기본값으로 리셋)
+  accessibilityStore.initialize();
+  accessibilityStore.resetToDefaults();
+  // TTS 웰컴 안내
+  tts.speak(t("a11y.tts.welcome"));
 });
 
 // 관리자 모드 진입 (로고 5회 탭)
 const adminTapCount = ref(0);
 let adminTapTimeout: ReturnType<typeof setTimeout> | null = null;
 
-// 언어별 국기 이미지 URL (실제 배포시 로컬 이미지로 교체)
+// 언어별 국기 이미지 (로컬 SVG — 오프라인 동작 보장)
 const flagImages: Record<SupportedLocale, string> = {
-  ko: "https://flagcdn.com/w80/kr.png",
-  en: "https://flagcdn.com/w80/us.png",
-  ja: "https://flagcdn.com/w80/jp.png",
-  zh: "https://flagcdn.com/w80/cn.png",
+  ko: flagKr,
+  en: flagUs,
+  ja: flagJp,
+  zh: flagCn,
 };
 
 function selectLanguage(code: SupportedLocale) {
   selectedLang.value = code;
   locale.value = code;
   localeStore.setLocale(code);
+  // 변경된 언어로 환영 안내
+  tts.speak(t("a11y.tts.welcome"));
 }
 
 function startOrder() {
@@ -83,7 +98,11 @@ function handleLogoTap() {
         class="cursor-default rounded-full bg-white/95 p-4 shadow-2xl backdrop-blur-md transition-transform active:scale-95"
         @click="handleLogoTap"
       >
-        <svg class="h-12 w-12 text-primary" fill="currentColor" viewBox="0 0 24 24">
+        <svg
+          class="h-12 w-12 text-primary"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"
           />
@@ -102,7 +121,11 @@ function handleLogoTap() {
     </header>
 
     <!-- 메인: Touch To Order 버튼 -->
-    <main class="relative z-10 flex w-full flex-1 items-center justify-center px-8">
+    <main
+      role="main"
+      :aria-label="t('welcome.touch')"
+      class="relative z-10 flex w-full flex-1 items-center justify-center px-8"
+    >
       <button
         class="group relative flex aspect-square w-full max-w-[280px] flex-col items-center justify-center rounded-full transition-all duration-300 active:scale-95"
         @click="startOrder"
@@ -115,7 +138,11 @@ function handleLogoTap() {
         />
         <!-- 버튼 콘텐츠 -->
         <div class="relative z-20 flex flex-col items-center gap-4">
-          <svg class="h-16 w-16 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <svg
+            class="h-16 w-16 text-white"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.21 0-.59-.34-1.09-.91-1.34z"
             />
@@ -165,7 +192,7 @@ function handleLogoTap() {
                 :alt="lang.code.toUpperCase()"
                 :src="flagImages[lang.code]"
                 class="h-full w-full rounded-full object-cover"
-              />
+              >
             </div>
             <span
               :class="[
@@ -183,13 +210,15 @@ function handleLogoTap() {
     </footer>
 
     <!-- 버전 정보 (개발용) -->
-    <div class="absolute bottom-2 right-4 z-10 text-xs text-white/30">v1.0.0</div>
+    <div class="absolute bottom-2 right-4 z-10 text-xs text-white/30">
+      v1.0.0
+    </div>
   </div>
 </template>
 
 <style scoped>
 .bg-welcome {
-  background-image: url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80");
+  background: linear-gradient(135deg, #1a0a05 0%, #3d1a0a 25%, #5c2d15 50%, #8e3524 75%, #2d1810 100%);
   background-size: cover;
   background-position: center;
 }

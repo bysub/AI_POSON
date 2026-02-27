@@ -12,6 +12,7 @@ const tabs = [
   { id: "point", label: "포인트/회원", icon: "point" },
   { id: "barcode", label: "바코드/중량", icon: "barcode" },
   { id: "system", label: "시스템", icon: "system" },
+  { id: "accessibility", label: "접근성", icon: "a11y" },
 ] as const;
 
 // ─── 상태 ───
@@ -155,6 +156,20 @@ const systemConfig = ref({
   backupPath: "",
 });
 
+// ─── 접근성 (키오스크 접근성 기본값) ───
+const accessibilityConfig = ref({
+  enabled: "1",
+  ttsEnabled: "1",
+  defaultFontScale: "standard",
+  defaultContrast: "default",
+  ttsRate: "1.0",
+  ttsVolume: "0.8",
+  voiceEnabled: "0",
+  voiceTimeout: "10",
+  voiceConfidence: "0.4",
+  sttModel: "small",
+});
+
 // ─── 카테고리별 설정 객체 매핑 ───
 const categoryMap: Record<
   string,
@@ -189,6 +204,11 @@ const categoryMap: Record<
     ref: systemConfig as ReturnType<typeof ref<SettingsRecord>>,
     prefix: "system",
     apiCategory: "SYSTEM",
+  },
+  accessibility: {
+    ref: accessibilityConfig as ReturnType<typeof ref<SettingsRecord>>,
+    prefix: "a11y",
+    apiCategory: "ACCESSIBILITY",
   },
 };
 
@@ -337,6 +357,12 @@ const systemToggles: ToggleItem[] = [
   { key: "screenHide", title: "화면 숨김", desc: "작업표시줄 숨김 모드" },
 ];
 
+const accessibilityToggles: ToggleItem[] = [
+  { key: "enabled", title: "접근성 기능 활성화", desc: "키오스크 접근성 기능 전체 ON/OFF" },
+  { key: "ttsEnabled", title: "음성 안내 (TTS)", desc: "시각장애인을 위한 음성 안내 기본 활성화" },
+  { key: "voiceEnabled", title: "음성 인식 (STT)", desc: "마이크 버튼으로 음성 주문 기능 활성화" },
+];
+
 const currentTabLabel = computed(() => tabs.find((t) => t.id === activeTab.value)?.label ?? "");
 
 onMounted(() => {
@@ -349,8 +375,12 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-800">공통 환경설정</h2>
-        <p class="mt-0.5 text-sm text-slate-500">전 기기에서 공유하는 매장 공통 설정입니다</p>
+        <h2 class="text-xl font-bold text-slate-800">
+          공통 환경설정
+        </h2>
+        <p class="mt-0.5 text-sm text-slate-500">
+          전 기기에서 공유하는 매장 공통 설정입니다
+        </p>
       </div>
       <div class="flex items-center gap-3">
         <button
@@ -381,7 +411,10 @@ onMounted(() => {
     </div>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="flex items-center justify-center py-12">
+    <div
+      v-if="isLoading"
+      class="flex items-center justify-center py-12"
+    >
       <div
         class="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"
       />
@@ -393,13 +426,17 @@ onMounted(() => {
         v-show="activeTab === 'sale'"
         class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
-        <h3 class="mb-6 text-base font-semibold text-slate-800">판매 운영 설정</h3>
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          판매 운영 설정
+        </h3>
         <p class="mb-4 text-sm text-slate-500">
           ASIS: INI [Sale] + [Other] 공통 항목 (전 기기 공유)
         </p>
 
         <!-- 영업 관리 -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">영업 관리</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          영업 관리
+        </h4>
         <div class="mb-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">영업 시작일</label>
@@ -408,7 +445,7 @@ onMounted(() => {
                 v-model="saleConfig.openDay"
                 type="date"
                 class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-              />
+              >
               <button
                 class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
                 @click="saleConfig.openDay = getTodayDate()"
@@ -423,7 +460,7 @@ onMounted(() => {
               v-model="saleConfig.finishDay"
               type="date"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">전표 시퀀스</label>
@@ -432,7 +469,7 @@ onMounted(() => {
               type="number"
               min="1"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">시재금</label>
@@ -441,12 +478,14 @@ onMounted(() => {
               type="number"
               min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
         </div>
 
         <!-- 가격/금액 -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">가격/금액</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          가격/금액
+        </h4>
         <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">최대 결제금액</label>
@@ -455,7 +494,7 @@ onMounted(() => {
               type="number"
               min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">최대 현금금액</label>
@@ -464,7 +503,7 @@ onMounted(() => {
               type="number"
               min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">지연 설정</label>
@@ -473,17 +512,23 @@ onMounted(() => {
               type="number"
               min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
         </div>
 
         <!-- 주방/테이블 -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">주방 / 테이블</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          주방 / 테이블
+        </h4>
         <div class="mb-6 grid gap-3 md:grid-cols-2">
           <div class="flex items-center justify-between rounded-xl bg-slate-50 p-3">
             <div>
-              <p class="text-sm font-medium text-slate-800">주방 호출</p>
-              <p class="text-xs text-slate-500">주문 완료 시 주방으로 호출 전송</p>
+              <p class="text-sm font-medium text-slate-800">
+                주방 호출
+              </p>
+              <p class="text-xs text-slate-500">
+                주문 완료 시 주방으로 호출 전송
+              </p>
             </div>
             <button
               class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
@@ -498,8 +543,12 @@ onMounted(() => {
           </div>
           <div class="flex items-center justify-between rounded-xl bg-slate-50 p-3">
             <div>
-              <p class="text-sm font-medium text-slate-800">테이블 선택</p>
-              <p class="text-xs text-slate-500">주문 시 테이블 번호 선택 화면 표시</p>
+              <p class="text-sm font-medium text-slate-800">
+                테이블 선택
+              </p>
+              <p class="text-xs text-slate-500">
+                주문 시 테이블 번호 선택 화면 표시
+              </p>
             </div>
             <button
               class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
@@ -513,7 +562,10 @@ onMounted(() => {
             </button>
           </div>
         </div>
-        <div v-if="saleConfig.tableSelectEnabled === '1'" class="mb-6 grid gap-5 md:grid-cols-3">
+        <div
+          v-if="saleConfig.tableSelectEnabled === '1'"
+          class="mb-6 grid gap-5 md:grid-cols-3"
+        >
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">테이블 갯수</label>
             <input
@@ -522,13 +574,17 @@ onMounted(() => {
               min="0"
               max="999"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
-            <p class="mt-1 text-xs text-slate-400">매장에 배치된 테이블 수 (0: 미사용)</p>
+            >
+            <p class="mt-1 text-xs text-slate-400">
+              매장에 배치된 테이블 수 (0: 미사용)
+            </p>
           </div>
         </div>
 
         <!-- 판매 옵션 -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">판매 옵션</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          판매 옵션
+        </h4>
         <div class="grid gap-3 md:grid-cols-2">
           <div
             v-for="item in saleToggles"
@@ -564,13 +620,17 @@ onMounted(() => {
         v-show="activeTab === 'payment'"
         class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
-        <h3 class="mb-6 text-base font-semibold text-slate-800">결제 정책 설정</h3>
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          결제 정책 설정
+        </h3>
         <p class="mb-4 text-sm text-slate-500">
           ASIS: INI [Other] 카드/결제 + [Card] 공통 + [SuSu] (전 기기 공유)
         </p>
 
         <!-- 카드 결제 -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">카드/결제 정책</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          카드/결제 정책
+        </h4>
         <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">카드 최소금액</label>
@@ -579,8 +639,10 @@ onMounted(() => {
               type="number"
               min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
-            <p class="mt-1 text-xs text-slate-400">0: 제한없음</p>
+            >
+            <p class="mt-1 text-xs text-slate-400">
+              0: 제한없음
+            </p>
           </div>
         </div>
 
@@ -616,7 +678,9 @@ onMounted(() => {
         </div>
 
         <!-- 수수료 -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">수수료 설정</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          수수료 설정
+        </h4>
         <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">카드 수수료 (%)</label>
@@ -627,7 +691,7 @@ onMounted(() => {
               max="100"
               step="0.1"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">포인트 수수료 (%)</label>
@@ -638,7 +702,7 @@ onMounted(() => {
               max="100"
               step="0.1"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">캐시백 수수료 (%)</label>
@@ -649,7 +713,7 @@ onMounted(() => {
               max="100"
               step="0.1"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">현금 수수료 (%)</label>
@@ -660,7 +724,7 @@ onMounted(() => {
               max="100"
               step="0.1"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">현금 비율 (%)</label>
@@ -671,7 +735,7 @@ onMounted(() => {
               max="100"
               step="0.1"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
         </div>
       </div>
@@ -681,7 +745,9 @@ onMounted(() => {
         v-show="activeTab === 'print'"
         class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
-        <h3 class="mb-6 text-base font-semibold text-slate-800">출력 설정</h3>
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          출력 설정
+        </h3>
         <p class="mb-4 text-sm text-slate-500">
           ASIS: INI [Other] 인쇄 관련 + S_Config (전 기기 공유)
         </p>
@@ -715,7 +781,9 @@ onMounted(() => {
           </div>
         </div>
 
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">용지 절단</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          용지 절단
+        </h4>
         <div class="grid gap-5 md:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">절단 위치</label>
@@ -723,9 +791,15 @@ onMounted(() => {
               v-model="printConfig.cutPosition"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="0">기본</option>
-              <option value="1">위</option>
-              <option value="2">아래</option>
+              <option value="0">
+                기본
+              </option>
+              <option value="1">
+                위
+              </option>
+              <option value="2">
+                아래
+              </option>
             </select>
           </div>
         </div>
@@ -736,7 +810,9 @@ onMounted(() => {
         v-show="activeTab === 'point'"
         class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
-        <h3 class="mb-6 text-base font-semibold text-slate-800">포인트/회원 설정</h3>
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          포인트/회원 설정
+        </h3>
         <p class="mb-4 text-sm text-slate-500">
           ASIS: S_Config + INI [Other] 회원 관련 (전 기기 공유)
         </p>
@@ -748,9 +824,15 @@ onMounted(() => {
               v-model="pointConfig.weightPoint"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="0">일반 적립</option>
-              <option value="1">미적립</option>
-              <option value="2">별도 적립률</option>
+              <option value="0">
+                일반 적립
+              </option>
+              <option value="1">
+                미적립
+              </option>
+              <option value="2">
+                별도 적립률
+              </option>
             </select>
           </div>
         </div>
@@ -785,7 +867,9 @@ onMounted(() => {
         </div>
 
         <!-- 고객 UI (키오스크) -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">고객 인터페이스 (키오스크)</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          고객 인터페이스 (키오스크)
+        </h4>
         <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">상단 메시지</label>
@@ -793,7 +877,7 @@ onMounted(() => {
               v-model="pointConfig.selfCusTopMsg"
               type="text"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">버튼 메시지 1</label>
@@ -801,7 +885,7 @@ onMounted(() => {
               v-model="pointConfig.selfCusBTMsg1"
               type="text"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">버튼 메시지 2</label>
@@ -809,7 +893,7 @@ onMounted(() => {
               v-model="pointConfig.selfCusBTMsg2"
               type="text"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">고객 선택 방식</label>
@@ -817,9 +901,15 @@ onMounted(() => {
               v-model="pointConfig.selfCusSelect"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="0">방식 0</option>
-              <option value="1">방식 1</option>
-              <option value="2">방식 2</option>
+              <option value="0">
+                방식 0
+              </option>
+              <option value="1">
+                방식 1
+              </option>
+              <option value="2">
+                방식 2
+              </option>
             </select>
           </div>
           <div>
@@ -828,9 +918,15 @@ onMounted(() => {
               v-model="pointConfig.selfReader"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="0">미사용</option>
-              <option value="1">바코드</option>
-              <option value="2">RF</option>
+              <option value="0">
+                미사용
+              </option>
+              <option value="1">
+                바코드
+              </option>
+              <option value="2">
+                RF
+              </option>
             </select>
           </div>
           <div>
@@ -839,8 +935,12 @@ onMounted(() => {
               v-model="pointConfig.selfStartHotKey"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="0">미사용</option>
-              <option value="1">사용</option>
+              <option value="0">
+                미사용
+              </option>
+              <option value="1">
+                사용
+              </option>
             </select>
           </div>
           <div>
@@ -849,9 +949,15 @@ onMounted(() => {
               v-model="pointConfig.selfPriceType"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="0">기본</option>
-              <option value="1">유형 1</option>
-              <option value="2">유형 2</option>
+              <option value="0">
+                기본
+              </option>
+              <option value="1">
+                유형 1
+              </option>
+              <option value="2">
+                유형 2
+              </option>
             </select>
           </div>
           <div>
@@ -860,8 +966,12 @@ onMounted(() => {
               v-model="pointConfig.selfCusAddEtc"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="0">미사용</option>
-              <option value="1">사용</option>
+              <option value="0">
+                미사용
+              </option>
+              <option value="1">
+                사용
+              </option>
             </select>
           </div>
         </div>
@@ -900,23 +1010,27 @@ onMounted(() => {
         v-show="activeTab === 'barcode'"
         class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
-        <h3 class="mb-6 text-base font-semibold text-slate-800">바코드 / 중량 설정</h3>
-        <p class="mb-4 text-sm text-slate-500">ASIS: INI [Length] + S_Config (전 기기 공유)</p>
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          바코드 / 중량 설정
+        </h3>
+        <p class="mb-4 text-sm text-slate-500">
+          ASIS: INI [Length] + S_Config (전 기기 공유)
+        </p>
 
         <!-- 바코드 -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">바코드 자동부여</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          바코드 자동부여
+        </h4>
         <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700"
-              >바코드 자동부여 숫자</label
-            >
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">바코드 자동부여 숫자</label>
             <input
               v-model="barcodeConfig.barCodeLen"
               type="text"
               maxlength="4"
               placeholder="95"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
             <p class="mt-1 text-xs text-slate-400">
               자동 생성 바코드 앞자리 (예: 95 -> 950000000001)
             </p>
@@ -924,20 +1038,22 @@ onMounted(() => {
         </div>
 
         <!-- 중량 -->
-        <h4 class="mb-3 text-sm font-semibold text-slate-600">중량상품 설정</h4>
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          중량상품 설정
+        </h4>
         <div class="mb-4 grid gap-5 md:grid-cols-3">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700"
-              >중량상품 코드 길이</label
-            >
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">중량상품 코드 길이</label>
             <input
               v-model="barcodeConfig.scaleLen"
               type="text"
               maxlength="2"
               placeholder="4"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
-            <p class="mt-1 text-xs text-slate-400">중량 바코드 상품코드 자릿수</p>
+            >
+            <p class="mt-1 text-xs text-slate-400">
+              중량 바코드 상품코드 자릿수
+            </p>
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">중량상품 시작문자</label>
@@ -947,8 +1063,10 @@ onMounted(() => {
               maxlength="4"
               placeholder="28"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
-            <p class="mt-1 text-xs text-slate-400">중량 바코드 시작 식별자 (예: 28, 29)</p>
+            >
+            <p class="mt-1 text-xs text-slate-400">
+              중량 바코드 시작 식별자 (예: 28, 29)
+            </p>
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">중량 가격 절사</label>
@@ -956,9 +1074,15 @@ onMounted(() => {
               v-model="barcodeConfig.scalePriceCut"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              <option value="0">미사용</option>
-              <option value="1">10원 단위 절사</option>
-              <option value="2">100원 단위 절사</option>
+              <option value="0">
+                미사용
+              </option>
+              <option value="1">
+                10원 단위 절사
+              </option>
+              <option value="2">
+                100원 단위 절사
+              </option>
             </select>
           </div>
         </div>
@@ -966,8 +1090,12 @@ onMounted(() => {
         <div class="grid gap-3 md:grid-cols-2">
           <div class="flex items-center justify-between rounded-xl bg-slate-50 p-3">
             <div>
-              <p class="text-sm font-medium text-slate-800">18자리 중량 바코드</p>
-              <p class="text-xs text-slate-500">18자리 중량 바코드 형식 사용 (기본: 13자리)</p>
+              <p class="text-sm font-medium text-slate-800">
+                18자리 중량 바코드
+              </p>
+              <p class="text-xs text-slate-500">
+                18자리 중량 바코드 형식 사용 (기본: 13자리)
+              </p>
             </div>
             <button
               class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
@@ -988,22 +1116,22 @@ onMounted(() => {
         v-show="activeTab === 'system'"
         class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
-        <h3 class="mb-6 text-base font-semibold text-slate-800">시스템 설정</h3>
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          시스템 설정
+        </h3>
         <p class="mb-4 text-sm text-slate-500">
           ASIS: INI [Other] 시스템 + [Application] + [Backup] (전 기기 공유)
         </p>
 
         <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700"
-              >마스터 다운 주기 (주)</label
-            >
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">마스터 다운 주기 (주)</label>
             <input
               v-model="systemConfig.masterDownWeek"
               type="number"
               min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">백업 경로</label>
@@ -1012,7 +1140,7 @@ onMounted(() => {
               type="text"
               placeholder="백업 경로 (예: D:\backup)"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
+            >
           </div>
         </div>
 
@@ -1044,6 +1172,196 @@ onMounted(() => {
                 :class="(systemConfig as SettingsRecord)[item.key] === '1' ? 'translate-x-4' : ''"
               />
             </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ TAB: 접근성 ═══════ -->
+      <div
+        v-show="activeTab === 'accessibility'"
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          접근성 설정
+        </h3>
+        <p class="mb-4 text-sm text-slate-500">
+          키오스크 접근성 기본값 설정 (KS X 9211 / WCAG 2.1 AA)
+        </p>
+
+        <!-- 토글 항목 -->
+        <div class="mb-6 grid gap-3 md:grid-cols-2">
+          <div
+            v-for="item in accessibilityToggles"
+            :key="item.key"
+            class="flex items-center justify-between rounded-xl bg-slate-50 p-3"
+          >
+            <div>
+              <p class="text-sm font-medium text-slate-800">
+                {{ item.title }}
+              </p>
+              <p class="text-xs text-slate-500">
+                {{ item.desc }}
+              </p>
+            </div>
+            <button
+              class="relative h-6 w-10 flex-shrink-0 rounded-full transition-colors"
+              :class="
+                (accessibilityConfig as SettingsRecord)[item.key] === '1'
+                  ? 'bg-indigo-600'
+                  : 'bg-slate-300'
+              "
+              @click="toggleValue(accessibilityConfig as SettingsRecord, item.key)"
+            >
+              <span
+                class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                :class="
+                  (accessibilityConfig as SettingsRecord)[item.key] === '1' ? 'translate-x-4' : ''
+                "
+              />
+            </button>
+          </div>
+        </div>
+
+        <!-- 기본값 설정 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          기본값 설정
+        </h4>
+        <div class="mb-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">기본 글꼴 크기</label>
+            <select
+              v-model="accessibilityConfig.defaultFontScale"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="standard">
+                표준 (1.0x)
+              </option>
+              <option value="large">
+                크게 (1.25x)
+              </option>
+              <option value="extraLarge">
+                매우 크게 (1.5x)
+              </option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">기본 화면 모드</label>
+            <select
+              v-model="accessibilityConfig.defaultContrast"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="default">
+                기본
+              </option>
+              <option value="highContrast">
+                고대비
+              </option>
+              <option value="invertedContrast">
+                반전 대비
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- TTS 속도/볼륨 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          음성 안내 (TTS) 설정
+        </h4>
+        <div class="mb-6 grid gap-5 md:grid-cols-2">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
+              TTS 속도 ({{ accessibilityConfig.ttsRate }}x)
+            </label>
+            <input
+              v-model="accessibilityConfig.ttsRate"
+              type="range"
+              min="0.8"
+              max="1.2"
+              step="0.1"
+              class="w-full accent-indigo-600"
+            >
+            <div class="mt-1 flex justify-between text-xs text-slate-400">
+              <span>느림 (0.8x)</span>
+              <span>보통 (1.0x)</span>
+              <span>빠름 (1.2x)</span>
+            </div>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
+              TTS 볼륨 ({{ Math.round(Number(accessibilityConfig.ttsVolume) * 100) }}%)
+            </label>
+            <input
+              v-model="accessibilityConfig.ttsVolume"
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              class="w-full accent-indigo-600"
+            >
+            <div class="mt-1 flex justify-between text-xs text-slate-400">
+              <span>음소거</span>
+              <span>50%</span>
+              <span>최대</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 음성 인식 (STT) 설정 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          음성 인식 (STT) 설정
+        </h4>
+        <div class="grid gap-5 md:grid-cols-2">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
+              STT 모델 크기
+            </label>
+            <select
+              v-model="accessibilityConfig.sttModel"
+              class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            >
+              <option value="tiny">tiny (빠름, 낮은 정확도)</option>
+              <option value="base">base (빠름)</option>
+              <option value="small">small (권장)</option>
+              <option value="medium">medium (느림, 높은 정확도)</option>
+              <option value="large-v3">large-v3 (매우 느림, 최고 정확도)</option>
+            </select>
+            <p class="mt-1 text-xs text-slate-400">모델이 클수록 정확하지만 로딩이 느립니다</p>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
+              인식 대기 시간 ({{ accessibilityConfig.voiceTimeout }}초)
+            </label>
+            <input
+              v-model="accessibilityConfig.voiceTimeout"
+              type="range"
+              min="5"
+              max="30"
+              step="5"
+              class="w-full accent-indigo-600"
+            >
+            <div class="mt-1 flex justify-between text-xs text-slate-400">
+              <span>5초</span>
+              <span>15초</span>
+              <span>30초</span>
+            </div>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">
+              최소 신뢰도 ({{ Math.round(Number(accessibilityConfig.voiceConfidence) * 100) }}%)
+            </label>
+            <input
+              v-model="accessibilityConfig.voiceConfidence"
+              type="range"
+              min="0.3"
+              max="0.9"
+              step="0.1"
+              class="w-full accent-indigo-600"
+            >
+            <div class="mt-1 flex justify-between text-xs text-slate-400">
+              <span>낮음 (30%)</span>
+              <span>보통 (60%)</span>
+              <span>높음 (90%)</span>
+            </div>
           </div>
         </div>
       </div>

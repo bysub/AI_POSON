@@ -1,20 +1,27 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
 import { useNetworkStore } from "@/stores/network";
+import { useSettingsStore } from "@/stores/settings";
+import { useVoiceEventStore } from "@/stores/voiceEvent";
+import { useTTS } from "@/composables/useTTS";
 import { showWarningToast, showInfoToast } from "@/utils/AlertUtils";
 import { CardPayment, CashPayment } from "@/components";
 import type { Order, OrderType } from "@/types";
 import { getImageSrc } from "@/utils/image";
 import { getLocalizedName } from "@/utils/i18n";
+import { formatPrice, getOptionsString } from "@/utils/format";
 
 const router = useRouter();
 const route = useRoute();
 const { locale, t } = useI18n();
 const cartStore = useCartStore();
 const networkStore = useNetworkStore();
+const settingsStore = useSettingsStore();
+const voiceEventStore = useVoiceEventStore();
+const tts = useTTS();
 
 // 이전 화면에서 전달받은 주문 메타데이터
 const orderType = computed(() => (route.query.orderType as OrderType) ?? undefined);
@@ -34,35 +41,35 @@ const currentOrder = ref<Order | null>(null);
 const orderCreating = ref(false);
 const orderError = ref<string | null>(null);
 
-// 세금 계산 (10%)
-const TAX_RATE = 0.1;
+// 세금 계산 (설정 기반)
+const taxRate = computed(() => parseFloat(settingsStore.get("sale.taxRate", "0.1")));
+const taxIncluded = computed(() => settingsStore.get("sale.taxIncluded", "0") === "1");
 const subtotal = computed(() => cartStore.totalAmount);
-const tax = computed(() => Math.round(subtotal.value * TAX_RATE));
-const total = computed(() => subtotal.value + tax.value);
-
-/**
- * 가격 포맷팅
- */
-function formatPrice(price: number): string {
-  return "₩" + new Intl.NumberFormat("ko-KR").format(price);
-}
-
-/**
- * 옵션 문자열 생성
- */
-function getOptionsString(options?: Record<string, unknown>): string {
-  if (!options) return "";
-  return Object.values(options)
-    .map((opt: Record<string, unknown>) => opt.name)
-    .filter(Boolean)
-    .join(", ");
-}
+const tax = computed(() => {
+  if (taxIncluded.value) {
+    // 부가세 포함가: 역산 (total / (1 + rate) * rate)
+    return Math.round(subtotal.value - subtotal.value / (1 + taxRate.value));
+  }
+  return Math.round(subtotal.value * taxRate.value);
+});
+const total = computed(() => {
+  if (taxIncluded.value) return subtotal.value;
+  return subtotal.value + tax.value;
+});
 
 /**
  * 결제 수단 선택
  */
+const PAYMENT_METHOD_I18N: Record<PaymentMethod, string> = {
+  card: "payment.card",
+  mobile: "payment.mobilePay",
+  scanner: "payment.scanner",
+  cash: "payment.cash",
+};
+
 function selectPaymentMethod(method: PaymentMethod): void {
   selectedMethod.value = method;
+  tts.speak(t(PAYMENT_METHOD_I18N[method]));
 }
 
 /**
@@ -152,7 +159,7 @@ async function handleCardSuccess(transactionId: string, approvalNumber: string):
   cartStore.clear();
   router.push({
     path: "/complete",
-    query: {
+    state: {
       type: "card",
       approvalNumber,
       orderId: currentOrder.value?.id ?? "",
@@ -195,7 +202,7 @@ async function handleCashSuccess(receivedAmount: number, changeAmount: number): 
   cartStore.clear();
   router.push({
     path: "/complete",
-    query: {
+    state: {
       type: "cash",
       change: changeAmount.toString(),
       orderId: currentOrder.value?.id ?? "",
@@ -204,11 +211,46 @@ async function handleCashSuccess(receivedAmount: number, changeAmount: number): 
   });
 }
 
+// 결제 에러 시 TTS
+watch(orderError, (err) => {
+  if (err) tts.speak(err);
+});
+
+// 음성 결제 수단 선택: Pinia store 구독
+watch(
+  () => voiceEventStore.paymentMethod,
+  (event) => {
+    if (!event || currentStep.value !== "select") return;
+
+    if (event.method === "proceed") {
+      if (selectedMethod.value) proceedPayment();
+      return;
+    }
+
+    const validMethods: PaymentMethod[] = ["card", "mobile", "cash"];
+    if (validMethods.includes(event.method as PaymentMethod)) {
+      selectPaymentMethod(event.method as PaymentMethod);
+      setTimeout(() => proceedPayment(), 500);
+    }
+  },
+);
+
 // 장바구니가 비어있으면 메뉴로 리다이렉트
 onMounted(() => {
   if (cartStore.isEmpty) {
     router.replace("/menu");
+  } else {
+    tts.speak(
+      t("a11y.tts.paymentGuide", {
+        count: cartStore.totalItems,
+        total: total.value.toLocaleString(),
+      }),
+    );
   }
+});
+
+onUnmounted(() => {
+  voiceEventStore.$reset();
 });
 </script>
 
@@ -223,7 +265,12 @@ onMounted(() => {
             class="flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-100 bg-white text-red-500 shadow-sm transition-transform active:scale-95"
             @click="goBack"
           >
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -259,7 +306,7 @@ onMounted(() => {
                       :src="getImageSrc(item.imageUrl)"
                       :alt="getLocalizedName(item, locale)"
                       class="h-full w-full object-cover"
-                    />
+                    >
                     <div
                       v-else
                       class="flex h-full w-full items-center justify-center text-xl text-orange-300"
@@ -270,7 +317,10 @@ onMounted(() => {
                   <div>
                     <h3 class="text-base font-bold leading-tight text-gray-800">
                       {{ getLocalizedName(item, locale) }}
-                      <span v-if="item.quantity > 1" class="text-orange-500">
+                      <span
+                        v-if="item.quantity > 1"
+                        class="text-orange-500"
+                      >
                         x{{ item.quantity }}
                       </span>
                     </h3>
@@ -289,13 +339,13 @@ onMounted(() => {
             </div>
 
             <!-- Price Summary -->
-            <div class="mt-6 flex flex-col gap-2 border-t-2 border-dashed border-orange-100 pt-5">
+            <div class="mt-6 flex flex-col gap-2 border-t-2 border-dashed border-orange-100 pt-5 price-summary-area">
               <div class="flex items-center justify-between font-bold text-orange-700/70">
                 <span>{{ t("payment.subtotal") }}</span>
                 <span>{{ formatPrice(subtotal) }}</span>
               </div>
               <div class="flex items-center justify-between font-bold text-orange-700/70">
-                <span>{{ t("payment.tax") }} (10%)</span>
+                <span>{{ t("payment.tax") }} ({{ Math.round(taxRate * 100) }}%)</span>
                 <span>{{ formatPrice(tax) }}</span>
               </div>
               <div class="mt-2 flex items-center justify-between text-xl font-black text-gray-800">
@@ -325,7 +375,12 @@ onMounted(() => {
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600"
                 >
-                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -370,7 +425,12 @@ onMounted(() => {
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-900 text-white"
                 >
-                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -415,7 +475,12 @@ onMounted(() => {
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600"
                 >
-                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -460,7 +525,12 @@ onMounted(() => {
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-400 text-gray-700"
                 >
-                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
@@ -520,7 +590,10 @@ onMounted(() => {
               />
             </svg>
             <span class="flex-1">{{ orderError }}</span>
-            <button class="font-bold text-red-400 hover:text-red-600" @click="orderError = null">
+            <button
+              class="font-bold text-red-400 hover:text-red-600"
+              @click="orderError = null"
+            >
               ✕
             </button>
           </div>
@@ -550,10 +623,18 @@ onMounted(() => {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
               />
             </svg>
-            <span v-else class="text-xl font-extrabold uppercase tracking-tight text-white">
+            <span
+              v-else
+              class="text-xl font-extrabold uppercase tracking-tight text-white"
+            >
               {{ t("payment.payNow") }}
             </span>
-            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              class="h-6 w-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -589,3 +670,8 @@ onMounted(() => {
     />
   </div>
 </template>
+<style scoped>
+.price-summary-area div span{
+  font-size: var(--kiosk-font-base);
+}
+</style>

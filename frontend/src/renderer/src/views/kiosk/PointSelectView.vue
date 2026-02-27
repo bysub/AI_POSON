@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/stores/settings";
+import { useVoiceEventStore } from "@/stores/voiceEvent";
+import { useTTS } from "@/composables/useTTS";
 import { apiClient } from "@/services/api/client";
 import NumberPad from "@/components/kiosk/NumberPad.vue";
 
@@ -10,6 +12,8 @@ const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const voiceEventStore = useVoiceEventStore();
+const tts = useTTS();
 
 // 이전 화면에서 전달받은 데이터
 const orderType = computed(() => (route.query.orderType as string) ?? null);
@@ -21,7 +25,7 @@ const currentStep = ref<Step>("select");
 
 // 회원 정보
 const foundMember = ref<{ id: number; name: string; phone: string; points: number } | null>(null);
-const phoneInput = ref("");
+const phoneInput = ref("010");
 const memberName = ref("");
 const isLoading = ref(false);
 const errorMsg = ref("");
@@ -46,6 +50,7 @@ function skipPoint() {
 // 포인트 적립 → 전화번호 입력
 function selectPointEarn() {
   currentStep.value = "phone-input";
+  phoneInput.value = "";
   errorMsg.value = "";
 }
 
@@ -67,7 +72,7 @@ async function handlePhoneLookup(phone: string) {
     const res = await apiClient.get<{
       success: boolean;
       data: { id: number; name: string; phone: string; points: number } | null;
-    }>(`/api/v1/members/lookup?phone=${phone}`);
+    }>("/api/v1/members/lookup", { params: { phone } });
 
     if (res.data.success && res.data.data) {
       foundMember.value = res.data.data;
@@ -129,11 +134,30 @@ function goBack() {
   }
 }
 
+// 음성 포인트 적립/미적립: Pinia store 구독
+watch(
+  () => voiceEventStore.pointAction,
+  (event) => {
+    if (!event) return;
+    if (event.action === "earn") {
+      selectPointEarn();
+    } else if (event.action === "skip") {
+      skipPoint();
+    }
+  },
+);
+
 // 포인트 비활성이면 바로 결제로
 onMounted(() => {
   if (!pointEnabled.value) {
     goToPayment();
+  } else {
+    tts.speak(t("a11y.tts.pointAsk"));
   }
+});
+
+onUnmounted(() => {
+  voiceEventStore.$reset();
 });
 </script>
 
@@ -236,7 +260,7 @@ onMounted(() => {
                 maxlength="11"
                 placeholder="01012345678"
                 class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-lg focus:border-red-400 focus:outline-none"
-              />
+              >
             </div>
 
             <div>
@@ -249,7 +273,7 @@ onMounted(() => {
                 maxlength="20"
                 :placeholder="t('point.namePlaceholder')"
                 class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-lg focus:border-red-400 focus:outline-none"
-              />
+              >
             </div>
 
             <p class="text-sm text-gray-500">
@@ -267,7 +291,10 @@ onMounted(() => {
       </template>
 
       <!-- Loading overlay -->
-      <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-white/80">
+      <div
+        v-if="isLoading"
+        class="absolute inset-0 flex items-center justify-center bg-white/80"
+      >
         <div class="h-10 w-10 animate-spin rounded-full border-4 border-red-200 border-t-red-500" />
       </div>
     </main>

@@ -50,6 +50,14 @@ const api = {
     connectAll: () => ipcRenderer.invoke("hardware:connectAll"),
     disconnectAll: () => ipcRenderer.invoke("hardware:disconnectAll"),
   },
+
+  // Speech Recognition (Windows native)
+  stt: {
+    recognize: (lang: string, timeoutSec: number, vocabulary?: string[]) =>
+      ipcRenderer.invoke("stt:recognize", lang, timeoutSec, vocabulary),
+    stop: () => ipcRenderer.invoke("stt:stop"),
+    isAvailable: () => ipcRenderer.invoke("stt:isAvailable"),
+  },
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

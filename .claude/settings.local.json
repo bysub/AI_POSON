@@ -76,7 +76,7 @@
       "Bash(Stop-Process -Force -ErrorAction SilentlyContinue)",
       "Bash(Start-Sleep -Seconds 2)",
       "Bash(sqlcmd:*)",
-      "Bash(del C:workspacesAI_POSONinsert_addons.sql)",
+      "Bash(del c:/workspaces/AI_POSON/insert_addons.sql)",
       "Bash(dotnet dev-certs:*)",
       "mcp__sequential-thinking__sequentialthinking",
       "mcp__context7__resolve-library-id",
@@ -91,8 +91,8 @@
       "Bash(npm run test:e2e:*)",
       "Bash(npm test:*)",
       "Bash(npm run test:*)",
-      "Bash(Remove-Item -Recurse -Force C:workspacesAI_POSONfrontendrelease -ErrorAction SilentlyContinue)",
-      "Bash(Set-Location C:workspacesAI_POSONfrontend)",
+      "Bash(Remove-Item -Recurse -Force c:/workspaces/AI_POSON/frontendrelease -ErrorAction SilentlyContinue)",
+      "Bash(Set-Location c:/workspaces/AI_POSON/frontend)",
       "Bash(npm run package:win:*)",
       "Bash(SKIP_DB_TESTS=true npm test:*)",
       "Bash(npx vitest:*)",
@@ -156,8 +156,8 @@
       "Bash(wsl --list:*)",
       "Bash(wsl -d Ubuntu -- bash -c \"sudo apt update && sudo apt install -y tmux\")",
       "Bash(wsl:*)",
-      "Bash(cmd //c start wt -p \"Ubuntu\" -- bash -ic \"cd /mnt/c/workspaces/AI_POSON && tmux new -s claude -d ''claude'' && tmux attach -t claude\")",
-      "Bash(cmd //c start wt -p \"Ubuntu\" -- bash -ic \"cd ''/mnt/c/workspaces/AI_POSON'' && tmux new-session -s claude\")",
+      "Bash(cmd //c start wt -p \"Ubuntu\" -- bash -ic \"cd c:/workspaces/AI_POSON && tmux new -s claude -d ''claude'' && tmux attach -t claude\")",
+      "Bash(cmd //c start wt -p \"Ubuntu\" -- bash -ic \"cd ''c:/workspaces/AI_POSON'' && tmux new-session -s claude\")",
       "Bash(cmd //c start wt -d \"\\\\wsl$\\\\Ubuntu\\\\home\\\\bysub\" -p \"Ubuntu\")",
       "Bash(lsof:*)",
       "Bash(ss:*)",
@@ -187,7 +187,12 @@
       "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" commit -m \"$\\(cat <<''EOF''\nfix: Electron 프로덕션 빌드 이미지 로딩 수정 및 보안 강화\n\n- app:// 커스텀 프로토콜로 file:// CORS 제한 우회\n- getImageSrc 유틸리티로 /uploads/ 경로를 절대 URL로 변환\n- helmet CSP가 이미지 로딩 차단하는 문제 해결 \\(서브리소스만 제거\\)\n- Path Traversal 방어: resolve\\(\\) + startsWith\\(\\) 경로 검증\n- env:get IPC 화이트리스트 적용 \\(DB/JWT 시크릿 노출 차단\\)\n- DELETE /uploads 인증 미들웨어 추가\n- CSP 강화: img-src/connect-src를 localhost:3000으로 제한\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" commit -m \"$\\(cat <<''EOF''\nfix: electron 프로덕션 빌드 이미지 로딩 수정 및 보안 강화\n\n- app:// 커스텀 프로토콜로 file:// CORS 제한 우회\n- getImageSrc 유틸리티로 /uploads/ 경로를 절대 URL로 변환\n- helmet CSP가 이미지 로딩 차단하는 문제 해결 \\(서브리소스만 제거\\)\n- Path Traversal 방어: resolve\\(\\) + startsWith\\(\\) 경로 검증\n- env:get IPC 화이트리스트 적용 \\(DB/JWT 시크릿 노출 차단\\)\n- DELETE /uploads 인증 미들웨어 추가\n- CSP 강화: img-src/connect-src를 localhost:3000으로 제한\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" push origin main)",
-      "Bash(pip show:*)"
+      "Bash(pip show:*)",
+      "WebFetch(domain:uxkm.io)",
+      "WebFetch(domain:www.tpgi.com)",
+      "WebFetch(domain:vispero.com)",
+      "WebFetch(domain:www.accessibilitychecker.org)",
+      "WebFetch(domain:www.retaillabs.co.kr)"
     ]
   },
   "enableAllProjectMcpServers": true,
@@ -204,67 +209,7 @@
     "postgresql",
     "mysql"
   ],
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:/workspaces/AI_POSON/.claude/hooks/cleanup-temp.cjs"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:/workspaces/AI_POSON/.claude/hooks/post-tool-use.cjs dependency"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:/workspaces/AI_POSON/.claude/hooks/post-tool-use.cjs eslint"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|MultiEdit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:/workspaces/AI_POSON/.claude/hooks/post-tool-use.cjs prettier"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|MultiEdit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:/workspaces/AI_POSON/.claude/hooks/post-tool-use.cjs git-add"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node C:/workspaces/AI_POSON/.claude/hooks/pre-tool-use.cjs"
-          }
-        ]
-      }
-    ]
-  },
-  "prefersReducedMotion": true
+  "hooks": {},
+  "prefersReducedMotion": true,  
+  "language": "korean"
 }

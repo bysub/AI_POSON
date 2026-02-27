@@ -46,6 +46,13 @@ declare global {
         connectAll: () => Promise<{ printer: boolean; scanner: boolean; terminal: boolean }>;
         disconnectAll: () => Promise<void>;
       };
+
+      // Speech Recognition (Windows native)
+      stt: {
+        recognize: (lang: string, timeoutSec: number, vocabulary?: string[]) => Promise<STTResult>;
+        stop: () => Promise<void>;
+        isAvailable: () => Promise<boolean>;
+      };
     };
   }
 }
@@ -143,6 +150,14 @@ interface TerminalStatus {
   connected: boolean;
   terminalId?: string;
   vanCode?: string;
+  error?: string;
+}
+
+// STT Result
+interface STTResult {
+  success: boolean;
+  transcript?: string;
+  confidence?: number;
   error?: string;
 }
 

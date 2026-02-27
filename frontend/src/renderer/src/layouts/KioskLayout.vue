@@ -1,12 +1,23 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useNetworkStore } from "@/stores/network";
+import { useAccessibilityStore } from "@/stores/accessibility";
 import { useVirtualKeyboard } from "@/composables/useVirtualKeyboard";
 import { useIdleTimer } from "@/composables/useIdleTimer";
+import { useTTS } from "@/composables/useTTS";
 import VirtualKeyboard from "@/components/kiosk/VirtualKeyboard.vue";
-import { onMounted, onUnmounted } from "vue";
+import AccessibilityToggle from "@/components/kiosk/AccessibilityToggle.vue";
+import AccessibilityPanel from "@/components/kiosk/AccessibilityPanel.vue";
+import TTSReplayButton from "@/components/kiosk/TTSReplayButton.vue";
+import VoiceMicButton from "@/components/kiosk/VoiceMicButton.vue";
+import VoiceSubtitleBar from "@/components/kiosk/VoiceSubtitleBar.vue";
+import { onMounted, onUnmounted, watch } from "vue";
 
+const { t } = useI18n();
 const networkStore = useNetworkStore();
+const a11yStore = useAccessibilityStore();
+const tts = useTTS();
 const { init: initKeyboard, destroy: destroyKeyboard, contentShift } = useVirtualKeyboard();
 const {
   showWarning,
@@ -14,6 +25,13 @@ const {
   start: startIdleTimer,
   stop: stopIdleTimer,
 } = useIdleTimer(30);
+
+// IdleWarning 표시 시 TTS 발화
+watch(showWarning, (visible) => {
+  if (visible) {
+    tts.speak(t("a11y.tts.idleWarning", { seconds: remainingSeconds.value }));
+  }
+});
 
 onMounted(() => {
   networkStore.startMonitoring();
@@ -40,10 +58,21 @@ onUnmounted(() => {
     <!-- Virtual Keyboard -->
     <VirtualKeyboard />
 
+    <!-- Accessibility -->
+    <AccessibilityToggle />
+    <AccessibilityPanel v-if="a11yStore.showPanel" />
+    <TTSReplayButton />
+
+    <!-- Voice Ordering -->
+    <VoiceMicButton />
+    <VoiceSubtitleBar />
+
     <!-- Idle Warning Overlay -->
     <Transition name="fade">
       <div
         v-if="showWarning"
+        role="alertdialog"
+        :aria-label="t('idle.warningTitle')"
         class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60"
       >
         <div class="mx-8 w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">

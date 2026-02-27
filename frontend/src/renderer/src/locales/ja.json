@@ -9,7 +9,7 @@
     "back": "戻る",
     "next": "次へ",
     "close": "閉じる",
-    "currency": "円"
+    "currency": "ウォン"
   },
   "welcome": {
     "title": "ようこそ",
@@ -94,7 +94,7 @@
     "tableInputPlaceholder": "テーブル番号",
     "tableNotFound": "該当テーブルはありません。",
     "goBack": "戻る",
-    "currency": "円"
+    "currency": "ウォン"
   },
   "complete": {
     "title": "注文完了",
@@ -104,7 +104,7 @@
     "receiptGuide": "下のプリンターからレシートをお取りください。",
     "printingReceipt": "印刷中...",
     "returnToHome": "最初に戻る",
-    "autoReset": "秒後に自動的にリセットされます",
+    "autoReset": "{seconds}秒後に自動的にリセットされます",
     "approvalNumber": "承認番号"
   },
   "point": {
@@ -158,7 +158,9 @@
     "required": "必須",
     "additionalSelect": "追加選択",
     "free": "無料",
-    "addToCartAmount": "{price}円 追加"
+    "addToCartAmount": "{price}ウォン 追加",
+    "optionSeparator": "、",
+    "withOptions": "{name} {options}追加"
   },
   "keyboard": {
     "confirm": "確認",
@@ -172,5 +174,71 @@
     "warningTitle": "ご利用中ですか？",
     "warningMessage": "{seconds}秒後に最初の画面に戻ります",
     "continueButton": "続ける"
+  },
+  "voice": {
+    "micLabel": "音声で注文する",
+    "micListening": "聞いています...",
+    "micProcessing": "処理中...",
+    "response": {
+      "added": "{name}を{count}個追加しました",
+      "removed": "{name}を削除しました",
+      "goPayment": "お支払い画面に移動します",
+      "goConfirm": "注文確認画面に移動します",
+      "goBack": "前の画面に戻ります",
+      "cancelled": "注文がキャンセルされました",
+      "notFound": "{query}が見つかりません。もう一度お試しください",
+      "multipleCandidates": "複数の商品があります: {names}。一つを選んでください",
+      "notUnderstood": "聞き取れませんでした。もう一度お試しください",
+      "lowConfidence": "よく聞こえませんでした。もう一度お願いします",
+      "whatProduct": "どの商品を追加しますか？",
+      "whatRemove": "どの商品を削除しますか？",
+      "notInCart": "{query}はカートにありません",
+      "removeFailed": "商品の削除に失敗しました",
+      "help": "商品名を言うと追加します。お会計、キャンセル、戻るも可能です。",
+      "dineIn": "店内でお召し上がりを選択しました",
+      "takeout": "お持ち帰りを選択しました",
+      "earnPoint": "ポイント積立画面に移動します",
+      "skipPoint": "ポイント積立をスキップします",
+      "goHome": "最初の画面に戻ります"
+    }
+  },
+  "a11y": {
+    "openSettings": "アクセシビリティ設定を開く",
+    "settingsTitle": "アクセシビリティ設定",
+    "fontScale": "文字サイズ",
+    "fontStandard": "標準",
+    "fontLarge": "大きい",
+    "fontExtraLarge": "とても大きい",
+    "contrastMode": "表示モード",
+    "contrastDefault": "デフォルト",
+    "contrastHigh": "高コントラスト",
+    "contrastInverted": "反転コントラスト",
+    "ttsLabel": "音声ガイド",
+    "ttsOn": "オン",
+    "ttsOff": "オフ",
+    "apply": "適用する",
+    "presetTitle": "クイック設定",
+    "presetDefault": "標準",
+    "presetDefaultDesc": "標準サイズ",
+    "presetSenior": "シニア",
+    "presetSeniorDesc": "大きい文字 + 音声",
+    "presetLowVision": "低視力",
+    "presetLowVisionDesc": "最大文字 + 高コントラスト",
+    "replay": "もう一度聞く",
+    "tts": {
+      "welcome": "画面をタッチして注文を始めてください",
+      "menuGuide": "メニューをお選びください。商品をタッチすると音声でご案内いたします。",
+      "cartAdded": "{name}を{count}点、{price}ウォンで追加いたしました",
+      "cartUpdated": "カートに{count}点の商品がございます。合計{total}ウォンです",
+      "orderConfirm": "ご注文内容をご確認ください。合計{count}点、{total}ウォンでございます。",
+      "tableSelected": "テーブル{no}番が選択されました。",
+      "dineIn": "店内でのお食事が選択されました",
+      "takeout": "テイクアウトが選択されました",
+      "pointAsk": "ポイントをお貯めになりますか？",
+      "paymentGuide": "お支払い方法をお選びください。ご注文は合計{count}点、{total}ウォンでございます。",
+      "complete": "ご注文が完了いたしました。注文番号は{number}番でございます。ありがとうございました。",
+      "idleWarning": "操作がない場合、{seconds}秒後に最初の画面に戻ります。",
+      "settingsOpened": "アクセシビリティ設定画面です。"
+    }
   }
 }

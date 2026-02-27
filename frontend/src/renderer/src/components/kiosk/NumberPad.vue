@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const value = ref("010");
+const value = ref( props.format === "phone" ? "010":"" );
 
 const displayValue = computed(() => {
   if (props.format === "phone" && value.value.length > 0) {
@@ -40,6 +40,7 @@ function backspace() {
 }
 
 function clearAll() {
+  console.log( "화면오픈시?" + props.format )
   value.value = "";
 }
 

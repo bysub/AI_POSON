@@ -1,18 +1,23 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useCartStore } from "@/stores/cart";
 import { useSettingsStore } from "@/stores/settings";
+import { useVoiceEventStore } from "@/stores/voiceEvent";
+import { useTTS } from "@/composables/useTTS";
 import NumberPad from "@/components/kiosk/NumberPad.vue";
 import { showWarningToast } from "@/utils/AlertUtils";
 import { getImageSrc } from "@/utils/image";
 import { getLocalizedName } from "@/utils/i18n";
+import { formatPrice } from "@/utils/format";
 
 const router = useRouter();
 const { locale, t } = useI18n();
 const cartStore = useCartStore();
 const settingsStore = useSettingsStore();
+const voiceEventStore = useVoiceEventStore();
+const tts = useTTS();
 
 // 테이블 선택 설정
 const tableSelectEnabled = computed(
@@ -25,11 +30,6 @@ type OrderTypeValue = "DINE_IN" | "TAKEOUT";
 const selectedOrderType = ref<OrderTypeValue | null>(null);
 const showTableInput = ref(false);
 const tableNo = ref<number | null>(null);
-
-// 가격 포맷
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
-}
 
 // 매장/포장 선택
 function selectOrderType(type: OrderTypeValue) {
@@ -48,6 +48,7 @@ function handleTableConfirm(value: string) {
   if (num > 0 && num <= tableCount.value) {
     tableNo.value = num;
     showTableInput.value = false;
+    tts.speak(t("a11y.tts.tableSelected", { no: num }));
   } else {
     showWarningToast(t("orderConfirm.tableNotFound"));
   }
@@ -91,10 +92,39 @@ function goBack() {
   }
 }
 
-// 테이블 선택 비활성이면 바로 스킵
-if (!tableSelectEnabled.value) {
-  skipToNext();
-}
+// 음성 매장/포장 선택: Pinia store 구독
+watch(
+  () => voiceEventStore.orderType,
+  (event) => {
+    if (!event) return;
+    if (event.type === "DINE_IN" || event.type === "TAKEOUT") {
+      selectOrderType(event.type);
+      tts.speak(t(event.type === "DINE_IN" ? "a11y.tts.dineIn" : "a11y.tts.takeout"));
+    }
+  },
+);
+
+// TTS 주문확인 안내 + 장바구니 비어있으면 메뉴로 + 테이블 선택 비활성이면 바로 스킵
+onMounted(() => {
+  if (cartStore.items.length === 0) {
+    router.replace("/menu");
+    return;
+  }
+  if (!tableSelectEnabled.value) {
+    skipToNext();
+    return;
+  }
+  tts.speak(
+    t("a11y.tts.orderConfirm", {
+      count: cartStore.totalItems,
+      total: cartStore.totalAmount.toLocaleString(),
+    }),
+  );
+});
+
+onUnmounted(() => {
+  voiceEventStore.$reset();
+});
 </script>
 
 <template>
@@ -148,7 +178,7 @@ if (!tableSelectEnabled.value) {
 
         <!-- Order Items Table -->
         <div class="flex-1 overflow-y-auto px-6 py-4">
-          <table class="w-full">
+          <table class="w-full order-items-table-area">
             <thead>
               <tr class="border-b-2 border-red-400 text-left text-sm text-red-500">
                 <th class="pb-2 font-bold">
@@ -171,24 +201,24 @@ if (!tableSelectEnabled.value) {
                 :key="item.id"
                 class="border-b border-gray-100"
               >
-                <td class="py-3 text-sm text-gray-600">
+                <td class="py-3 text-sm text-gray-600 colNo">
                   {{ idx + 1 }}
                 </td>
-                <td class="py-3 text-sm text-gray-800">
+                <td class="py-3 text-sm text-gray-800 colProduct">
                   <div class="flex items-center gap-2">
                     <img
                       v-if="item.imageUrl"
                       :src="getImageSrc(item.imageUrl)"
                       class="h-8 w-8 rounded object-cover"
-                    />
+                    >
                     <span>{{ getLocalizedName(item, locale) }}</span>
                   </div>
                 </td>
-                <td class="py-3 text-center text-sm text-gray-600">
+                <td class="py-3 text-center text-sm text-gray-600 colQty">
                   {{ item.quantity }}
                 </td>
-                <td class="py-3 text-right text-sm font-medium text-gray-800">
-                  {{ formatPrice(item.price * item.quantity) }}{{ t("orderConfirm.currency") }}
+                <td class="py-3 text-right text-sm font-medium text-gray-800 colPrice">
+                  {{ formatPrice(item.price * item.quantity) }}
                 </td>
               </tr>
             </tbody>
@@ -209,7 +239,7 @@ if (!tableSelectEnabled.value) {
                 t("orderConfirm.totalAmount")
               }}</span>
               <span class="ml-2 text-xl font-extrabold text-gray-800">
-                {{ formatPrice(cartStore.totalAmount) }}{{ t("orderConfirm.currency") }}
+                {{ formatPrice(cartStore.totalAmount) }}
               </span>
             </div>
           </div>
@@ -224,7 +254,12 @@ if (!tableSelectEnabled.value) {
                 ? 'border-red-500 bg-red-500 text-white'
                 : 'border-gray-300 bg-white text-gray-700 hover:border-red-300'
             "
-            @click="selectOrderType('DINE_IN')"
+            role="radio"
+            :aria-checked="selectedOrderType === 'DINE_IN'"
+            @click="
+              selectOrderType('DINE_IN');
+              tts.speak(t('a11y.tts.dineIn'));
+            "
           >
             <span
               class="flex h-5 w-5 items-center justify-center rounded-full border-2"
@@ -244,7 +279,12 @@ if (!tableSelectEnabled.value) {
                 ? 'border-red-500 bg-red-500 text-white'
                 : 'border-gray-300 bg-white text-gray-700 hover:border-red-300'
             "
-            @click="selectOrderType('TAKEOUT')"
+            role="radio"
+            :aria-checked="selectedOrderType === 'TAKEOUT'"
+            @click="
+              selectOrderType('TAKEOUT');
+              tts.speak(t('a11y.tts.takeout'));
+            "
           >
             <span
               class="flex h-5 w-5 items-center justify-center rounded-full border-2"
@@ -260,7 +300,10 @@ if (!tableSelectEnabled.value) {
         </div>
 
         <!-- 테이블번호 표시 (매장 선택 + 테이블 입력 완료 시) -->
-        <div v-if="selectedOrderType === 'DINE_IN' && tableNo" class="px-6 pb-2 text-center">
+        <div
+          v-if="selectedOrderType === 'DINE_IN' && tableNo"
+          class="px-6 pb-2 text-center"
+        >
           <span class="rounded-full bg-amber-100 px-4 py-1 text-sm font-bold text-amber-700">
             {{ t("orderConfirm.table", { no: tableNo }) }}
           </span>
@@ -269,7 +312,10 @@ if (!tableSelectEnabled.value) {
     </main>
 
     <!-- Footer -->
-    <footer v-if="!showTableInput" class="flex gap-4 bg-white px-6 pb-6 pt-2">
+    <footer
+      v-if="!showTableInput"
+      class="flex gap-4 bg-white px-6 pb-6 pt-2"
+    >
       <button
         class="flex-1 rounded-xl bg-red-500 py-4 text-lg font-extrabold text-white transition-colors hover:bg-red-600 disabled:opacity-40"
         :disabled="!selectedOrderType"
@@ -286,3 +332,17 @@ if (!tableSelectEnabled.value) {
     </footer>
   </div>
 </template>
+<style scoped>
+.order-items-table-area {
+  font-size: var(--kiosk-font-base);
+}
+.order-items-table-area tbody{
+  font-size: var(--kiosk-font-base);
+}
+.order-items-table-area tbody tr td{
+  line-height: var(--kiosk-line-height);
+}
+.order-items-table-area tbody tr td.colProduct span{
+  font-size: var(--kiosk-font-base);
+}
+</style>

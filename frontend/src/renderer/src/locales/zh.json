@@ -9,7 +9,7 @@
     "back": "返回",
     "next": "下一步",
     "close": "关闭",
-    "currency": "元"
+    "currency": "韩元"
   },
   "welcome": {
     "title": "欢迎光临",
@@ -94,7 +94,7 @@
     "tableInputPlaceholder": "桌号",
     "tableNotFound": "该桌号不存在。",
     "goBack": "返回",
-    "currency": "元"
+    "currency": "韩元"
   },
   "complete": {
     "title": "订单完成",
@@ -104,7 +104,7 @@
     "receiptGuide": "请从下方打印机取走收据。",
     "printingReceipt": "打印中...",
     "returnToHome": "返回首页",
-    "autoReset": "秒后自动重置",
+    "autoReset": "{seconds}秒后自动重置",
     "approvalNumber": "批准号"
   },
   "point": {
@@ -158,7 +158,9 @@
     "required": "必选",
     "additionalSelect": "附加选择",
     "free": "免费",
-    "addToCartAmount": "加入 {price}元"
+    "addToCartAmount": "加入 {price}韩元",
+    "optionSeparator": "、",
+    "withOptions": "{name} 加 {options}"
   },
   "keyboard": {
     "confirm": "确认",
@@ -172,5 +174,71 @@
     "warningTitle": "还在使用吗？",
     "warningMessage": "{seconds}秒后返回首页",
     "continueButton": "继续使用"
+  },
+  "voice": {
+    "micLabel": "语音点餐",
+    "micListening": "正在听...",
+    "micProcessing": "处理中...",
+    "response": {
+      "added": "已添加{count}个{name}",
+      "removed": "已删除{name}",
+      "goPayment": "前往支付页面",
+      "goConfirm": "前往订单确认页面",
+      "goBack": "返回上一页",
+      "cancelled": "订单已取消",
+      "notFound": "找不到{query}。请再试一次",
+      "multipleCandidates": "找到多个商品: {names}。请选择一个",
+      "notUnderstood": "无法识别指令。请再说一次",
+      "lowConfidence": "没有听清楚。请再说一次",
+      "whatProduct": "要添加什么商品？",
+      "whatRemove": "要删除什么商品？",
+      "notInCart": "{query}不在购物车中",
+      "removeFailed": "商品删除失败",
+      "help": "说出商品名称即可添加。也可以说结账、取消、返回。",
+      "dineIn": "已选择堂食",
+      "takeout": "已选择打包",
+      "earnPoint": "前往积分页面",
+      "skipPoint": "跳过积分",
+      "goHome": "返回首页"
+    }
+  },
+  "a11y": {
+    "openSettings": "打开无障碍设置",
+    "settingsTitle": "无障碍设置",
+    "fontScale": "字体大小",
+    "fontStandard": "标准",
+    "fontLarge": "大",
+    "fontExtraLarge": "超大",
+    "contrastMode": "显示模式",
+    "contrastDefault": "默认",
+    "contrastHigh": "高对比度",
+    "contrastInverted": "反转对比度",
+    "ttsLabel": "语音引导",
+    "ttsOn": "开启",
+    "ttsOff": "关闭",
+    "apply": "应用",
+    "presetTitle": "快速设置",
+    "presetDefault": "默认",
+    "presetDefaultDesc": "标准大小",
+    "presetSenior": "老年人",
+    "presetSeniorDesc": "大字体 + 语音",
+    "presetLowVision": "低视力",
+    "presetLowVisionDesc": "最大字体 + 高对比度",
+    "replay": "重新播放",
+    "tts": {
+      "welcome": "请触摸屏幕开始点餐",
+      "menuGuide": "请选择菜品。触摸商品即可语音播报。",
+      "cartAdded": "已为您添加{name} {count}份，共{price}韩元",
+      "cartUpdated": "购物车共{count}件商品，合计{total}韩元",
+      "orderConfirm": "请确认您的订单。共{count}件商品，合计{total}韩元。",
+      "tableSelected": "已选择{no}号桌。",
+      "dineIn": "已选择堂食",
+      "takeout": "已选择外带",
+      "pointAsk": "是否需要积分？",
+      "paymentGuide": "请选择支付方式。您的订单共{count}件商品，合计{total}韩元。",
+      "complete": "您的订单已完成。订单号为{number}号。感谢您的惠顾。",
+      "idleWarning": "如无操作，{seconds}秒后将返回首页。",
+      "settingsOpened": "无障碍设置界面。"
+    }
   }
 }

@@ -158,7 +158,9 @@
     "required": "Required",
     "additionalSelect": "Additional",
     "free": "Free",
-    "addToCartAmount": "Add {price}"
+    "addToCartAmount": "Add {price}",
+    "optionSeparator": ", ",
+    "withOptions": "{name} with {options}"
   },
   "keyboard": {
     "confirm": "Done",
@@ -172,5 +174,71 @@
     "warningTitle": "Are you still there?",
     "warningMessage": "Returning to start in {seconds} seconds",
     "continueButton": "Continue"
+  },
+  "voice": {
+    "micLabel": "Order by voice",
+    "micListening": "Listening...",
+    "micProcessing": "Processing...",
+    "response": {
+      "added": "Added {count} {name}",
+      "removed": "Removed {name}",
+      "goPayment": "Going to payment",
+      "goConfirm": "Going to order confirmation",
+      "goBack": "Going back",
+      "cancelled": "Order has been cancelled",
+      "notFound": "Could not find {query}. Please try again",
+      "multipleCandidates": "Multiple items found: {names}. Please select one",
+      "notUnderstood": "Sorry, I didn't catch that. Please try again",
+      "lowConfidence": "I didn't hear you clearly. Please try again",
+      "whatProduct": "What would you like to add?",
+      "whatRemove": "What would you like to remove?",
+      "notInCart": "{query} is not in your cart",
+      "removeFailed": "Failed to remove item",
+      "help": "Say a product name to add it. You can also say pay, cancel, or go back.",
+      "dineIn": "Selected dine in",
+      "takeout": "Selected takeout",
+      "earnPoint": "Going to earn points",
+      "skipPoint": "Skipping points",
+      "goHome": "Going back to home"
+    }
+  },
+  "a11y": {
+    "openSettings": "Open accessibility settings",
+    "settingsTitle": "Accessibility Settings",
+    "fontScale": "Font Size",
+    "fontStandard": "Standard",
+    "fontLarge": "Large",
+    "fontExtraLarge": "Extra Large",
+    "contrastMode": "Display Mode",
+    "contrastDefault": "Default",
+    "contrastHigh": "High Contrast",
+    "contrastInverted": "Inverted Contrast",
+    "ttsLabel": "Voice Guide",
+    "ttsOn": "ON",
+    "ttsOff": "OFF",
+    "apply": "Apply",
+    "presetTitle": "Quick Presets",
+    "presetDefault": "Default",
+    "presetDefaultDesc": "Standard size",
+    "presetSenior": "Senior",
+    "presetSeniorDesc": "Large font + Voice",
+    "presetLowVision": "Low Vision",
+    "presetLowVisionDesc": "Max font + High contrast",
+    "replay": "Replay",
+    "tts": {
+      "welcome": "Touch the screen to start ordering",
+      "menuGuide": "Select a menu item. Touch a product to hear its details.",
+      "cartAdded": "{name}, {count} added to your cart. {price} won.",
+      "cartUpdated": "Your cart has {count} items, totaling {total} won",
+      "orderConfirm": "Please confirm your order. {count} items, total {total} won.",
+      "tableSelected": "Table {no} selected.",
+      "dineIn": "Dine-in selected",
+      "takeout": "Takeout selected",
+      "pointAsk": "Would you like to earn points?",
+      "paymentGuide": "Select a payment method. You have {count} items, totaling {total} won.",
+      "complete": "Your order is complete. Order number {number}. Thank you.",
+      "idleWarning": "The screen will reset in {seconds} seconds.",
+      "settingsOpened": "Accessibility settings screen."
+    }
   }
 }

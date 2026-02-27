@@ -1,0 +1,179 @@
+/* ========================================
+   접근성 CSS Custom Properties
+   ======================================== */
+
+/* 키오스크 폰트 크기 CSS 변수 */
+:root {
+  --kiosk-font-sm: 0.875rem;
+  --kiosk-font-base: 1rem;
+  --kiosk-font-lg: 1.125rem;
+  --kiosk-font-xl: 1.25rem;
+  --kiosk-font-2xl: 1.5rem;
+  --kiosk-line-height: 2rem;
+}
+
+.a11y-font-large {
+  --kiosk-font-sm: 1rem;
+  --kiosk-font-base: 1.25rem;
+  --kiosk-font-lg: 1.375rem;
+  --kiosk-font-xl: 1.5rem;
+  --kiosk-font-2xl: 1.75rem;
+  --kiosk-line-height: 2.5rem;
+}
+
+.a11y-font-xl {
+  --kiosk-font-sm: 1.125rem;
+  --kiosk-font-base: 1.5rem;
+  --kiosk-font-lg: 1.625rem;
+  --kiosk-font-xl: 1.75rem;
+  --kiosk-font-2xl: 2rem;
+  --kiosk-line-height: 3rem;
+}
+
+/* 기본 모드: 기존 테마 색상 매핑 */
+:root {
+  --a11y-bg: #fdf9f3;
+  --a11y-bg-secondary: #f5ede0;
+  --a11y-surface: #ffffff;
+  --a11y-text: #1e293b;
+  --a11y-text-secondary: #64748b;
+  --a11y-primary: #8e3524;
+  --a11y-primary-hover: #7a3125;
+  --a11y-accent: #c96231;
+  --a11y-border: #e2e8f0;
+  --a11y-border-strong: #cbd5e1;
+  --a11y-success: #22c55e;
+  --a11y-error: #ef4444;
+  --a11y-warning: #f59e0b;
+  --a11y-button-text: #ffffff;
+  --a11y-focus-ring: 0 0 0 3px rgba(142, 53, 36, 0.4);
+  --a11y-btn-border: 0px;
+}
+
+/* ========================================
+   반전 대비 모드 - macOS/iOS/Android 표준 색상 반전
+   ======================================== */
+.a11y-inverted-contrast {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* 반전 모드에서 이미지/비디오는 다시 원래대로 복원 */
+.a11y-inverted-contrast img,
+.a11y-inverted-contrast video,
+.a11y-inverted-contrast canvas,
+.a11y-inverted-contrast [data-no-invert] {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* ========================================
+   고대비 모드 - 반전대비와 동일한 filter 기반 접근
+   invert + hue-rotate + contrast 증폭으로
+   순수 흑/백 + 고채도 색상의 고대비 화면 생성
+
+   CSS 변수는 기본값 유지 (filter가 시각적 변환 담당)
+   예: 배경(#fdf9f3) → filter → 검정
+       텍스트(#1e293b) → filter → 흰색
+       primary(#8e3524) → filter → 시안 계열
+   ======================================== */
+.a11y-high-contrast {
+  filter: invert(1) hue-rotate(180deg) contrast(2);
+}
+
+/* 고대비 모드에서 이미지/비디오는 원본 복원 */
+.a11y-high-contrast img,
+.a11y-high-contrast video,
+.a11y-high-contrast canvas,
+.a11y-high-contrast [data-no-invert] {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* ========================================
+   모달 backdrop 보정 (고대비/반전 공통)
+   부모 filter가 bg-black/50 → bg-white/50으로 반전시키므로
+   역필터를 적용하여 원래 어두운 오버레이를 유지
+   ======================================== */
+.a11y-high-contrast [class*="bg-black/"],
+.a11y-inverted-contrast [class*="bg-black/"] {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* ========================================
+   버튼 가시성 향상 (고대비/반전 공통)
+   filter로 연한 배경(bg-gray-100 등)이 검정에 가깝게
+   변환되어 배경과 합쳐지는 문제를 테두리로 해결
+   ======================================== */
+.a11y-high-contrast button,
+.a11y-high-contrast [role="button"],
+.a11y-inverted-contrast button,
+.a11y-inverted-contrast [role="button"] {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+/* ========================================
+   빨간 배경 요소 고대비 전환 (고대비/반전 공통)
+   CSS hue-rotate(180deg)는 비가역적이므로 역필터 불가.
+   대신 흑/백 강제 지정으로 확실한 대비 보장.
+   black/white는 hue에 무관하여 invert만으로 정확히 반전.
+   pre-filter: 검정 배경 + 흰 글씨
+   post-filter: 흰 배경 + 검정 글씨 = 최대 대비
+   ======================================== */
+.a11y-high-contrast [class*="bg-red"],
+.a11y-inverted-contrast [class*="bg-red"] {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* 빨간 텍스트 고대비 전환
+   pre-filter: 검정 글씨 → post-filter: 흰 글씨 (어두운 배경에서 선명) */
+.a11y-high-contrast [class*="text-red"],
+.a11y-inverted-contrast [class*="text-red"] {
+  color: #000000 !important;
+}
+
+/* ========================================
+   연한 회색 placeholder 텍스트 고대비 전환 (고대비/반전 공통)
+   text-gray-200(#e5e7eb), text-gray-300(#d1d5db) 등 밝은 회색은
+   invert 후 어두운 색이 되어 어두운 배경과 합쳐져 안 보임.
+   pre-filter: 검정(#000) → post-filter: 흰색(#FFF) = 어두운 배경에서 선명
+   ======================================== */
+.a11y-high-contrast [class*="text-gray-2"],
+.a11y-high-contrast [class*="text-gray-3"],
+.a11y-inverted-contrast [class*="text-gray-2"],
+.a11y-inverted-contrast [class*="text-gray-3"] {
+  color: #000000 !important;
+}
+
+/* ========================================
+   포커스 표시 (고대비/반전 공통)
+   ======================================== */
+.a11y-high-contrast *:focus-visible,
+.a11y-inverted-contrast *:focus-visible {
+  outline: 3px solid currentColor !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+/* ========================================
+   글꼴 크기별 최소 터치 영역
+   ======================================== */
+.a11y-font-large {
+  --a11y-min-touch: 56px;
+}
+
+.a11y-font-xl {
+  --a11y-min-touch: 64px;
+}
+
+/* sr-only 유틸리티 (screen reader only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
