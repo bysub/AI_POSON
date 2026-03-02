@@ -187,7 +187,14 @@
       "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" commit -m \"$\\(cat <<''EOF''\nfix: Electron 프로덕션 빌드 이미지 로딩 수정 및 보안 강화\n\n- app:// 커스텀 프로토콜로 file:// CORS 제한 우회\n- getImageSrc 유틸리티로 /uploads/ 경로를 절대 URL로 변환\n- helmet CSP가 이미지 로딩 차단하는 문제 해결 \\(서브리소스만 제거\\)\n- Path Traversal 방어: resolve\\(\\) + startsWith\\(\\) 경로 검증\n- env:get IPC 화이트리스트 적용 \\(DB/JWT 시크릿 노출 차단\\)\n- DELETE /uploads 인증 미들웨어 추가\n- CSP 강화: img-src/connect-src를 localhost:3000으로 제한\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" commit -m \"$\\(cat <<''EOF''\nfix: electron 프로덕션 빌드 이미지 로딩 수정 및 보안 강화\n\n- app:// 커스텀 프로토콜로 file:// CORS 제한 우회\n- getImageSrc 유틸리티로 /uploads/ 경로를 절대 URL로 변환\n- helmet CSP가 이미지 로딩 차단하는 문제 해결 \\(서브리소스만 제거\\)\n- Path Traversal 방어: resolve\\(\\) + startsWith\\(\\) 경로 검증\n- env:get IPC 화이트리스트 적용 \\(DB/JWT 시크릿 노출 차단\\)\n- DELETE /uploads 인증 미들웨어 추가\n- CSP 강화: img-src/connect-src를 localhost:3000으로 제한\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C \"C:\\\\workspaces\\\\AI_POSON\" push origin main)",
-      "Bash(pip show:*)"
+      "Bash(pip show:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(choco install:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(~/.claude/scripts/context-bar.sh)",
+      "Bash(~/bin/jq.exe:*)",
+      "Bash(~/.bashrc)",
+      "Bash(source ~/.bashrc)"
     ]
   },
   "enableAllProjectMcpServers": true,
