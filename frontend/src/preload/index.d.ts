@@ -47,11 +47,17 @@ declare global {
         disconnectAll: () => Promise<void>;
       };
 
-      // Speech Recognition (Windows native)
+      // Speech Recognition (Whisper Daemon)
       stt: {
         recognize: (lang: string, timeoutSec: number, vocabulary?: string[]) => Promise<STTResult>;
         stop: () => Promise<void>;
-        isAvailable: () => Promise<boolean>;
+        isAvailable: () => Promise<{
+          available: boolean;
+          ready: boolean;
+          error?: string | null;
+          python?: string | null;
+        }>;
+        setModel: (model: string) => Promise<{ success: boolean; model?: string; error?: string }>;
       };
     };
   }

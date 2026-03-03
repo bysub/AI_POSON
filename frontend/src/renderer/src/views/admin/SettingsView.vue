@@ -1253,12 +1253,14 @@ onMounted(() => {
               <option value="default">
                 기본
               </option>
+              <!--
               <option value="highContrast">
                 고대비
               </option>
               <option value="invertedContrast">
                 반전 대비
               </option>
+              -->
             </select>
           </div>
         </div>
@@ -1334,15 +1336,15 @@ onMounted(() => {
             <input
               v-model="accessibilityConfig.voiceTimeout"
               type="range"
-              min="5"
-              max="30"
-              step="5"
+              min="3"
+              max="20"
+              step="1"
               class="w-full accent-indigo-600"
             >
             <div class="mt-1 flex justify-between text-xs text-slate-400">
-              <span>5초</span>
-              <span>15초</span>
-              <span>30초</span>
+              <span>3초</span>
+              <span>10초</span>
+              <span>20초</span>
             </div>
           </div>
           <div>

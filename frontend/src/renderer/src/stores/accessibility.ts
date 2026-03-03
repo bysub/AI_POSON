@@ -38,6 +38,7 @@ export const useAccessibilityStore = defineStore("accessibility", () => {
   const voiceEnabled = ref(false);
   const voiceTimeout = ref("10");
   const voiceConfidence = ref("0.4");
+  const sttModel = ref("small");
 
   // === Getters ===
   const isHighContrast = computed(() => contrastMode.value !== "default");
@@ -65,9 +66,16 @@ export const useAccessibilityStore = defineStore("accessibility", () => {
     const defaultTts = settingsStore.get("a11y.ttsEnabled", "1");
     ttsEnabled.value = defaultTts === "1";
 
-    voiceEnabled.value = settingsStore.get("a11y.voiceEnabled", "0") === "1";
+    const voiceRaw = settingsStore.get("a11y.voiceEnabled", "0");
+    voiceEnabled.value = voiceRaw === "1";
     voiceTimeout.value = settingsStore.get("a11y.voiceTimeout", "10");
     voiceConfidence.value = settingsStore.get("a11y.voiceConfidence", "0.4");
+    sttModel.value = settingsStore.get("a11y.sttModel", "small");
+
+    // DB에서 읽은 STT 모델을 데몬에 적용
+    if (typeof window !== "undefined" && window.api?.stt?.setModel) {
+      window.api.stt.setModel(sttModel.value).catch(() => {});
+    }
 
     applyToDOM();
   }
@@ -145,6 +153,7 @@ export const useAccessibilityStore = defineStore("accessibility", () => {
     voiceEnabled,
     voiceTimeout,
     voiceConfidence,
+    sttModel,
     isHighContrast,
     htmlClasses,
     initialize,

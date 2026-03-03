@@ -1,0 +1,45 @@
+appId: com.poson.kiosk
+productName: POSON_Kiosk
+copyright: Copyright (c) POSON Team
+
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - "out/**/*"
+  - "!out/**/*.map"
+
+# STT Whisper 데몬 스크립트 + 의존성 명세를 resources 디렉토리에 포함
+extraResources:
+  - from: "src/main/stt-whisper.py"
+    to: "stt-whisper.py"
+  - from: "src/main/stt-requirements.txt"
+    to: "stt-requirements.txt"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: build/icon.icns
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  icon: build/icon.png

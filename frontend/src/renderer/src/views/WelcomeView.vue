@@ -25,15 +25,15 @@ const languages = localeStore.getSupportedLocales();
 const selectedLang = ref<SupportedLocale>(localeStore.currentLocale);
 
 // 웰컴 페이지 진입 시 전체 세션 초기화
-onMounted(() => {
+onMounted(async () => {
   // 장바구니 초기화 (items, currentOrder, orderError)
   cartStore.clear();
   // 언어 초기화 (한국어로 리셋)
   localeStore.resetLocale();
   locale.value = "ko";
   selectedLang.value = "ko";
-  // 설정 로딩
-  settingsStore.initialize();
+  // 설정 로딩 (API 완료 대기 후 접근성 초기화)
+  await settingsStore.initialize();
   // 접근성 초기화 (관리자 기본값으로 리셋)
   accessibilityStore.initialize();
   accessibilityStore.resetToDefaults();

@@ -193,8 +193,13 @@ Redis 기반 캐싱 (`cacheService`):
 
 Welcome 화면에서 로고 5회 탭 → 로그인 → 관리자 대시보드
 
-## 레거시 참조
+## 참조 문서
+
+`.doc/` - 추가적인 문서 폴더
+`.doc/analysis/kiosk-system-review.analysis.md` - 현재 개발된 정보 분석 문서
+
+## ASIS 레거시 참조
 
 `prev_kiosk/POSON_SELF21` - VB6 원본 코드 (마이그레이션 참조용)
-`.doc/migration-plan-v2.md` - 전체 마이그레이션 계획
 `.doc/asis/` - 레거시 시스템 분석 문서
+

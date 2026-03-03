@@ -4,6 +4,5 @@
   },
   "enabledPlugins": {
     "bkit@bkit-marketplace": true
-  },
-  "teammateMode": "tmux"
+  }
 }

@@ -199,7 +199,8 @@
       "takeout": "お持ち帰りを選択しました",
       "earnPoint": "ポイント積立画面に移動します",
       "skipPoint": "ポイント積立をスキップします",
-      "goHome": "最初の画面に戻ります"
+      "goHome": "最初の画面に戻ります",
+      "goMenu": "メニューに移動します"
     }
   },
   "a11y": {
@@ -221,9 +222,9 @@
     "presetDefault": "標準",
     "presetDefaultDesc": "標準サイズ",
     "presetSenior": "シニア",
-    "presetSeniorDesc": "大きい文字 + 音声",
+    "presetSeniorDesc": "大きい文字",
     "presetLowVision": "低視力",
-    "presetLowVisionDesc": "最大文字 + 高コントラスト",
+    "presetLowVisionDesc": "最大文字",
     "replay": "もう一度聞く",
     "tts": {
       "welcome": "画面をタッチして注文を始めてください",

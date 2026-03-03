@@ -18,22 +18,45 @@ const interimTranscript = ref("");
 const confidence = ref(0);
 const errorMessage = ref("");
 const isDaemonReady = ref(false);
+const sttAvailable = ref(false);
+const sttError = ref<string | null>(null);
 
 const isListening = computed(() => status.value === "listening");
 const isSupported = computed(() => !!window.api);
 
 // 데몬 준비 상태 주기적 확인 (최초 1회 + 미준비 시 폴링)
 let readyCheckTimer: ReturnType<typeof setInterval> | null = null;
+let readyCheckCount = 0;
+const MAX_READY_CHECKS = 90; // 최대 3분 (2초 간격 × 90회)
 
 async function checkDaemonReady(): Promise<void> {
   if (!window.api?.stt) return;
+  readyCheckCount++;
+
   try {
     const result = await window.api.stt.isAvailable();
-    if (result && typeof result === "object" && result.ready) {
+    if (!result || typeof result !== "object") return;
+
+    sttAvailable.value = result.available;
+    sttError.value = result.error ?? null;
+
+    if (result.ready) {
       isDaemonReady.value = true;
       if (readyCheckTimer) {
         clearInterval(readyCheckTimer);
         readyCheckTimer = null;
+      }
+      console.log(`[STT] Daemon ready (python: ${result.python})`);
+    } else if (!result.available || readyCheckCount >= MAX_READY_CHECKS) {
+      // Python/스크립트 없거나 최대 대기 초과 → 폴링 중단
+      if (readyCheckTimer) {
+        clearInterval(readyCheckTimer);
+        readyCheckTimer = null;
+      }
+      if (!result.available) {
+        console.warn(`[STT] STT 사용 불가: ${result.error ?? "unknown"}`);
+      } else {
+        console.warn("[STT] Daemon 준비 대기 시간 초과");
       }
     }
   } catch {
@@ -127,6 +150,8 @@ export function useSTT() {
     isListening,
     isSupported,
     isDaemonReady,
+    sttAvailable,
+    sttError,
     currentLang,
     start,
     stop,

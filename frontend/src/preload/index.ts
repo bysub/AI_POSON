@@ -51,12 +51,13 @@ const api = {
     disconnectAll: () => ipcRenderer.invoke("hardware:disconnectAll"),
   },
 
-  // Speech Recognition (Windows native)
+  // Speech Recognition (Whisper Daemon)
   stt: {
     recognize: (lang: string, timeoutSec: number, vocabulary?: string[]) =>
       ipcRenderer.invoke("stt:recognize", lang, timeoutSec, vocabulary),
     stop: () => ipcRenderer.invoke("stt:stop"),
     isAvailable: () => ipcRenderer.invoke("stt:isAvailable"),
+    setModel: (model: string) => ipcRenderer.invoke("stt:setModel", model),
   },
 };
 

@@ -111,7 +111,7 @@ onMounted(() => {
           </button>
         </div>
 
-        <!-- Quick Presets -->
+        <!-- Quick Presets 
         <div class="mb-5">
           <p class="mb-3 text-base font-semibold">{{ t("a11y.presetTitle") }}</p>
           <div class="grid grid-cols-3 gap-3">
@@ -133,7 +133,7 @@ onMounted(() => {
             </button>
           </div>
         </div>
-
+-->
         <!-- Font Scale -->
         <div class="mb-5">
           <p class="mb-3 text-base font-semibold">{{ t("a11y.fontScale") }}</p>

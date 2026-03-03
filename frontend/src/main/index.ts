@@ -1,7 +1,8 @@
 import { app, shell, BrowserWindow, ipcMain, session, protocol, net } from "electron";
 import { join, resolve, sep } from "path";
 import { pathToFileURL } from "url";
-import { spawn, ChildProcess } from "child_process";
+import { spawn, execFileSync, ChildProcess } from "child_process";
+import { existsSync } from "fs";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { hardwareManager } from "./hardware";
 import type { ReceiptData, KitchenOrderData, PaymentTerminalRequest } from "./hardware/interfaces";
@@ -273,8 +274,13 @@ app.whenReady().then(() => {
   // Python 상주 프로세스: 모델을 1회 로드하고 stdin/stdout JSON 프로토콜로 통신
   let sttDaemon: ChildProcess | null = null;
   let sttReady = false;
+  let sttAvailable = false; // Python + 스크립트가 존재하는지 여부
   let sttBuffer = "";
   let sttModelSize = process.env.STT_MODEL ?? "small";
+  let sttPythonPath: string | null = null;
+  let sttError: string | null = null;
+  let sttRetryCount = 0;
+  const STT_MAX_RETRIES = 3;
 
   // STT 요청 큐: 동시 요청 시 순차 처리
   interface SttQueueItem {
@@ -287,15 +293,66 @@ app.whenReady().then(() => {
   const sttQueue: SttQueueItem[] = [];
   let sttProcessing = false;
 
+  /** Python 실행 경로를 자동 탐색 (python → python3 → py) */
+  function findPythonPath(): string | null {
+    const candidates = process.platform === "win32"
+      ? ["python", "python3", "py"]
+      : ["python3", "python"];
+
+    for (const cmd of candidates) {
+      try {
+        const version = execFileSync(cmd, ["--version"], {
+          encoding: "utf8",
+          timeout: 5000,
+          stdio: ["pipe", "pipe", "pipe"],
+        }).trim();
+        console.log(`[STT] Found Python: ${cmd} → ${version}`);
+        return cmd;
+      } catch {
+        // 이 경로에 Python이 없음 — 다음 시도
+      }
+    }
+    return null;
+  }
+
+  /** STT 스크립트 경로 결정 */
+  function getSttScriptPath(): string {
+    return is.dev
+      ? join(__dirname, "../../src/main/stt-whisper.py")
+      : join(process.resourcesPath, "stt-whisper.py");
+  }
+
   function startSttDaemon(): void {
     if (sttDaemon) return;
 
-    const scriptPath = is.dev
-      ? join(__dirname, "../../src/main/stt-whisper.py")
-      : join(process.resourcesPath, "stt-whisper.py");
+    // Python 경로 캐싱 (최초 1회만 탐색)
+    if (!sttPythonPath) {
+      sttPythonPath = findPythonPath();
+      if (!sttPythonPath) {
+        sttError = "python_not_found";
+        sttAvailable = false;
+        console.warn("[STT] Python을 찾을 수 없습니다. 음성 인식이 비활성화됩니다.");
+        console.warn("[STT] Python 3.8+ 설치 후 PATH에 추가해 주세요.");
+        return;
+      }
+    }
 
-    console.log(`[STT] Starting Whisper daemon (model=${sttModelSize})...`);
-    sttDaemon = spawn("python", [scriptPath, "-model", sttModelSize], {
+    const scriptPath = getSttScriptPath();
+
+    // 스크립트 파일 존재 확인
+    if (!existsSync(scriptPath)) {
+      sttError = "script_not_found";
+      sttAvailable = false;
+      console.warn(`[STT] 스크립트를 찾을 수 없습니다: ${scriptPath}`);
+      console.warn("[STT] 프로덕션 빌드 시 electron-builder.yml의 extraResources를 확인해 주세요.");
+      return;
+    }
+
+    sttAvailable = true;
+    sttError = null;
+
+    console.log(`[STT] Starting Whisper daemon (python=${sttPythonPath}, model=${sttModelSize}, script=${scriptPath})...`);
+    sttDaemon = spawn(sttPythonPath, [scriptPath, "-model", sttModelSize], {
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env, PYTHONIOENCODING: "utf-8" },
     });
@@ -319,7 +376,13 @@ app.whenReady().then(() => {
           // 최초 ready 신호
           if (msg.ready !== undefined) {
             sttReady = msg.ready;
-            console.log(`[STT] Daemon ready: model=${msg.model}`);
+            sttRetryCount = 0; // 성공 시 재시도 카운터 리셋
+            if (msg.ready) {
+              console.log(`[STT] Daemon ready: model=${msg.model}, device=${msg.device}`);
+            } else {
+              console.warn(`[STT] Daemon failed to initialize: ${msg.error ?? "unknown"}`);
+              sttError = msg.error ?? "init_failed";
+            }
             continue;
           }
 
@@ -348,12 +411,30 @@ app.whenReady().then(() => {
       sttDaemon = null;
       sttReady = false;
       drainSttQueue("daemon_exited");
+
+      // 비정상 종료 시 자동 재시작 (최대 3회)
+      if (code !== 0 && code !== null && sttRetryCount < STT_MAX_RETRIES) {
+        sttRetryCount++;
+        const delay = sttRetryCount * 5000; // 5s, 10s, 15s
+        console.log(`[STT] 자동 재시작 예약 (${sttRetryCount}/${STT_MAX_RETRIES}, ${delay / 1000}s 후)`);
+        setTimeout(() => startSttDaemon(), delay);
+      }
     });
 
     sttDaemon.on("error", (err) => {
-      console.error("[STT] Daemon error:", err.message);
+      console.error("[STT] Daemon spawn error:", err.message);
       sttDaemon = null;
       sttReady = false;
+
+      // ENOENT = Python 실행 파일 문제 → Python 경로 재탐색
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        sttPythonPath = null;
+        sttAvailable = false;
+        sttError = "python_not_found";
+      } else {
+        sttError = err.message;
+      }
+
       drainSttQueue(err.message);
     });
   }
@@ -394,13 +475,23 @@ app.whenReady().then(() => {
 
   ipcMain.handle("stt:isAvailable", async () => {
     // 데몬이 죽었으면 재시작 시도
-    if (!sttDaemon) startSttDaemon();
-    return { available: true, ready: sttReady };
+    if (!sttDaemon && sttAvailable) startSttDaemon();
+    return {
+      available: sttAvailable,
+      ready: sttReady,
+      error: sttError,
+      python: sttPythonPath,
+    };
   });
 
   ipcMain.handle(
     "stt:recognize",
     async (_event, lang: string, timeoutSec: number, vocabulary?: string[]) => {
+
+    // Python/스크립트가 없으면 즉시 에러 반환
+    if (!sttAvailable) {
+      return { success: false, error: sttError ?? "stt_not_available" };
+    }
 
     // 데몬이 죽었으면 재시작
     if (!sttDaemon) startSttDaemon();
@@ -416,7 +507,7 @@ app.whenReady().then(() => {
     }
 
     if (!sttReady) {
-      return { success: false, error: "daemon_not_ready" };
+      return { success: false, error: sttError ?? "daemon_not_ready" };
     }
 
     const timeout = Math.min(Math.max(timeoutSec || 10, 3), 30);
@@ -450,17 +541,25 @@ app.whenReady().then(() => {
   ipcMain.handle("stt:setModel", async (_event, model: string) => {
     const validModels = ["tiny", "base", "small", "medium", "large-v3"];
     if (!validModels.includes(model)) return { success: false, error: "invalid_model" };
-    if (model === sttModelSize && sttReady) return { success: true, model: sttModelSize };
+    // 같은 모델이 이미 실행 중이거나 로딩 중이면 재시작 불필요
+    if (model === sttModelSize && (sttReady || sttDaemon)) return { success: true, model: sttModelSize };
 
     console.log(`[STT] Switching model: ${sttModelSize} → ${model}`);
     sttModelSize = model;
 
-    // 기존 데몬 종료 후 재시작
+    // 기존 데몬 종료 (close 이벤트에서 새 데몬을 건드리지 않도록 참조 분리)
     if (sttDaemon) {
-      try { sendSttCommand({ cmd: "quit" }); } catch {}
-      sttDaemon.kill();
+      const oldDaemon = sttDaemon;
       sttDaemon = null;
       sttReady = false;
+      try {
+        if (oldDaemon.stdin?.writable) {
+          oldDaemon.stdin.write(JSON.stringify({ cmd: "quit" }) + "\n", "utf8");
+        }
+      } catch {}
+      oldDaemon.removeAllListeners("close");
+      oldDaemon.kill();
+      drainSttQueue("model_switch");
     }
     startSttDaemon();
     return { success: true, model: sttModelSize };

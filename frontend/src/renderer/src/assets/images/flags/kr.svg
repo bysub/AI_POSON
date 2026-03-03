@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
+  <rect width="900" height="600" fill="#fff"/>
+  <!-- Taegeuk -->
+  <circle cx="450" cy="300" r="150" fill="#CD2E3A"/>
+  <path d="M450,150A150,150 0 0,0 450,450A75,75 0 0,0 450,300A75,75 0 0,1 450,150Z" fill="#0047A0"/>
+  <!-- Geon (Heaven) upper-left: 3 solid -->
+  <g transform="rotate(213.69 450 300)">
+    <rect x="640" y="262" width="22" height="76" fill="#000"/>
+    <rect x="672" y="262" width="22" height="76" fill="#000"/>
+    <rect x="704" y="262" width="22" height="76" fill="#000"/>
+  </g>
+  <!-- Gon (Earth) lower-right: 3 broken -->
+  <g transform="rotate(33.69 450 300)">
+    <rect x="640" y="262" width="22" height="33" fill="#000"/>
+    <rect x="640" y="305" width="22" height="33" fill="#000"/>
+    <rect x="672" y="262" width="22" height="33" fill="#000"/>
+    <rect x="672" y="305" width="22" height="33" fill="#000"/>
+    <rect x="704" y="262" width="22" height="33" fill="#000"/>
+    <rect x="704" y="305" width="22" height="33" fill="#000"/>
+  </g>
+  <!-- Gam (Water) upper-right: broken-solid-broken -->
+  <g transform="rotate(-33.69 450 300)">
+    <rect x="640" y="262" width="22" height="33" fill="#000"/>
+    <rect x="640" y="305" width="22" height="33" fill="#000"/>
+    <rect x="672" y="262" width="22" height="76" fill="#000"/>
+    <rect x="704" y="262" width="22" height="33" fill="#000"/>
+    <rect x="704" y="305" width="22" height="33" fill="#000"/>
+  </g>
+  <!-- Ri (Fire) lower-left: solid-broken-solid -->
+  <g transform="rotate(146.31 450 300)">
+    <rect x="640" y="262" width="22" height="76" fill="#000"/>
+    <rect x="672" y="262" width="22" height="33" fill="#000"/>
+    <rect x="672" y="305" width="22" height="33" fill="#000"/>
+    <rect x="704" y="262" width="22" height="76" fill="#000"/>
+  </g>
+</svg>

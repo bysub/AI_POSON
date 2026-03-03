@@ -24,8 +24,8 @@ export const useSettingsStore = defineStore("settings", () => {
     return deviceSettings.value[key] ?? fallback;
   }
 
-  async function initialize() {
-    if (isLoaded.value) return;
+  async function initialize(force = false) {
+    if (isLoaded.value && !force) return;
 
     error.value = null;
 
@@ -43,7 +43,13 @@ export const useSettingsStore = defineStore("settings", () => {
       }
 
       await Promise.all(promises);
-      isLoaded.value = true;
+
+      // 설정 데이터가 실제로 로드된 경우만 isLoaded 마킹
+      if (Object.keys(systemSettings.value).length > 0) {
+        isLoaded.value = true;
+      } else {
+        console.warn("[SettingsStore] 설정 데이터가 비어 있음 — 다음 호출 시 재시도됨");
+      }
     } catch (e) {
       error.value = e instanceof Error ? e.message : "설정 로딩 실패";
       console.warn("[SettingsStore] initialize failed:", e);

@@ -55,7 +55,9 @@ def send(obj):
 
 
 def record_audio(timeout_sec):
-    """Record audio with energy-based VAD, return numpy float32 array or None."""
+    """Record audio with energy-based VAD, return numpy float32 array or None.
+    timeout_sec is the wall-clock limit for recording (not chunk-based).
+    """
     try:
         import sounddevice as sd
         import numpy as np
@@ -79,17 +81,20 @@ def record_audio(timeout_sec):
             channels=1,
             callback=callback,
         ):
-            max_chunks = int(timeout_sec * SAMPLE_RATE / 4096)
-            chunk_count = 0
+            start_time = time.time()
 
-            while chunk_count < max_chunks:
+            while True:
+                elapsed = time.time() - start_time
+                if elapsed >= timeout_sec:
+                    break
+
+                # 남은 시간만큼만 대기 (최소 0.1초)
+                remaining = max(0.1, timeout_sec - elapsed)
                 try:
-                    data = audio_queue.get(timeout=0.5)
+                    data = audio_queue.get(timeout=min(0.3, remaining))
                 except queue.Empty:
-                    chunk_count += 1
                     continue
 
-                chunk_count += 1
                 frames_data.append(data)
 
                 # Energy-based VAD

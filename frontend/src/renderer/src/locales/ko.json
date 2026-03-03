@@ -199,7 +199,8 @@
       "takeout": "포장으로 선택합니다",
       "earnPoint": "포인트 적립 화면으로 이동합니다",
       "skipPoint": "포인트 적립을 건너뜁니다",
-      "goHome": "처음 화면으로 돌아갑니다"
+      "goHome": "처음 화면으로 돌아갑니다",
+      "goMenu": "메뉴로 이동합니다"
     }
   },
   "a11y": {
@@ -221,9 +222,9 @@
     "presetDefault": "기본",
     "presetDefaultDesc": "표준 크기",
     "presetSenior": "시니어",
-    "presetSeniorDesc": "큰 글꼴 + 음성",
+    "presetSeniorDesc": "큰 글꼴",
     "presetLowVision": "저시력",
-    "presetLowVisionDesc": "최대 글꼴 + 고대비",
+    "presetLowVisionDesc": "최대 글꼴",
     "replay": "다시 듣기",
     "tts": {
       "welcome": "주문을 시작하려면 화면을 터치하세요",

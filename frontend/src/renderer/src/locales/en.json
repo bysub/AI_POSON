@@ -199,7 +199,8 @@
       "takeout": "Selected takeout",
       "earnPoint": "Going to earn points",
       "skipPoint": "Skipping points",
-      "goHome": "Going back to home"
+      "goHome": "Going back to home",
+      "goMenu": "Going to menu"
     }
   },
   "a11y": {
@@ -221,9 +222,9 @@
     "presetDefault": "Default",
     "presetDefaultDesc": "Standard size",
     "presetSenior": "Senior",
-    "presetSeniorDesc": "Large font + Voice",
+    "presetSeniorDesc": "Large font",
     "presetLowVision": "Low Vision",
-    "presetLowVisionDesc": "Max font + High contrast",
+    "presetLowVisionDesc": "Max font",
     "replay": "Replay",
     "tts": {
       "welcome": "Touch the screen to start ordering",

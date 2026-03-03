@@ -2,6 +2,7 @@
 import { RouterView } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useNetworkStore } from "@/stores/network";
+import { useSettingsStore } from "@/stores/settings";
 import { useAccessibilityStore } from "@/stores/accessibility";
 import { useVirtualKeyboard } from "@/composables/useVirtualKeyboard";
 import { useIdleTimer } from "@/composables/useIdleTimer";
@@ -16,6 +17,7 @@ import { onMounted, onUnmounted, watch } from "vue";
 
 const { t } = useI18n();
 const networkStore = useNetworkStore();
+const settingsStore = useSettingsStore();
 const a11yStore = useAccessibilityStore();
 const tts = useTTS();
 const { init: initKeyboard, destroy: destroyKeyboard, contentShift } = useVirtualKeyboard();
@@ -33,10 +35,14 @@ watch(showWarning, (visible) => {
   }
 });
 
-onMounted(() => {
+onMounted(async () => {
   networkStore.startMonitoring();
   initKeyboard();
   startIdleTimer();
+
+  // 설정 + 접근성 초기화 (VoiceMicButton 등 하위 컴포넌트보다 먼저 실행)
+  await settingsStore.initialize();
+  a11yStore.initialize();
 });
 
 onUnmounted(() => {

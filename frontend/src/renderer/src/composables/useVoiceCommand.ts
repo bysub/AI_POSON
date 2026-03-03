@@ -159,24 +159,52 @@ export function useVoiceCommand() {
 
   const isActive = computed(() => stt.isListening.value || stt.status.value === "processing");
 
+  /** 정확(exact) 키워드 매칭: text.includes(keyword) */
+  function exactMatchKeyword(text: string, keywordList: string[]): boolean {
+    return keywordList.some((k) => k && text.includes(k));
+  }
+
   /**
-   * 퍼지 키워드 매칭: exact match 실패 시 Levenshtein 거리 기반 매칭
-   * threshold: 편집 거리 ≤ ceil(keyword.length * 0.35) 이면 매칭
+   * 퍼지 키워드 매칭: Levenshtein 거리 기반
+   * threshold: 편집 거리 ≤ ceil(keyword.length * 0.3) 이면 매칭
+   * 최소 키워드 길이 3자 이상만 퍼지 매칭 (2자 이하는 오매칭 위험)
    */
   function fuzzyMatchKeyword(text: string, keywordList: string[]): boolean {
-    // 1단계: exact includes (기존 로직)
-    if (keywordList.some((k) => text.includes(k))) return true;
-
-    // 2단계: 각 키워드와 텍스트 내 동일 길이 서브스트링 비교
     const words = text.split(/\s+/);
     for (const kw of keywordList) {
-      if (!kw) continue;
-      const maxDist = Math.ceil(kw.length * 0.35);
+      if (!kw || kw.length < 3) continue; // 짧은 키워드는 퍼지 매칭 제외
+      const maxDist = Math.ceil(kw.length * 0.3);
       for (const word of words) {
         if (levenshtein(word, kw) <= maxDist) return true;
       }
     }
     return false;
+  }
+
+  /**
+   * 동작 식별: 2단계 매칭
+   * Pass 1 — 정확 매칭 (includes): 오탐 없이 확실한 매칭
+   * Pass 2 — 퍼지 매칭 (Levenshtein): 정확 매칭 실패 시 보완
+   */
+  function detectAction(text: string, keywords: Record<VoiceAction, string[]>): VoiceAction {
+    // 동작 우선순위 정의
+    const priorityOrder: VoiceAction[] = [
+      "home", "back","confirm" , "add", "remove",
+      "cancel", "pay", "dineIn", "takeout", "earnPoint", 
+      "skipPoint","help",
+    ];
+
+    // Pass 1: 정확 매칭 (exact includes)
+    for (const action of priorityOrder) {
+      if (exactMatchKeyword(text, keywords[action])) return action;
+    }
+
+    // Pass 2: 퍼지 매칭 (Levenshtein, 3자 이상 키워드만)
+    for (const action of priorityOrder) {
+      if (fuzzyMatchKeyword(text, keywords[action])) return action;
+    }
+
+    return "unknown";
   }
 
   function parseCommand(transcript: string): VoiceCommand {
@@ -208,23 +236,10 @@ export function useVoiceCommand() {
       }
     }
 
-    // 동작 식별 (우선순위: cancel > pay > dineIn/takeout > earnPoint/skipPoint > home > confirm > back > help > remove > add)
-    // fuzzyMatchKeyword: exact match + Levenshtein 퍼지 매칭
-    let action: VoiceAction = "unknown";
+    // 동작 식별 (2단계: exact → fuzzy)
+    let action = detectAction(text, keywords);
 
-    if (fuzzyMatchKeyword(text, keywords.cancel)) action = "cancel";
-    else if (fuzzyMatchKeyword(text, keywords.pay)) action = "pay";
-    else if (fuzzyMatchKeyword(text, keywords.dineIn)) action = "dineIn";
-    else if (fuzzyMatchKeyword(text, keywords.takeout)) action = "takeout";
-    else if (fuzzyMatchKeyword(text, keywords.earnPoint)) action = "earnPoint";
-    else if (fuzzyMatchKeyword(text, keywords.skipPoint)) action = "skipPoint";
-    else if (fuzzyMatchKeyword(text, keywords.home)) action = "home";
-    else if (fuzzyMatchKeyword(text, keywords.confirm)) action = "confirm";
-    else if (fuzzyMatchKeyword(text, keywords.back)) action = "back";
-    else if (fuzzyMatchKeyword(text, keywords.help)) action = "help";
-    else if (fuzzyMatchKeyword(text, keywords.remove)) action = "remove";
-    else if (fuzzyMatchKeyword(text, keywords.add)) action = "add";
-    else {
+    if (action === "unknown") {
       // 키워드 없이 상품명만 말한 경우 → add로 간주
       action = "add";
     }
@@ -254,6 +269,15 @@ export function useVoiceCommand() {
   }
 
   function executeCommand(command: VoiceCommand): CommandResult {
+    const currentPath = router.currentRoute.value.path;
+    const isWelcome = currentPath === "/" || currentPath === "/welcome";
+
+    // WelcomeView에서 add/remove 시도 시 → 메뉴로 이동
+    if (isWelcome && (command.action === "add" || command.action === "remove")) {
+      router.push("/menu");
+      return { success: true, message: t("voice.response.goMenu", "메뉴로 이동합니다"), action: command.action };
+    }
+
     switch (command.action) {
       case "add":
         return handleAdd(command);
@@ -298,9 +322,16 @@ export function useVoiceCommand() {
         return { success: true, message: t("voice.response.goConfirm"), action: "confirm" };
       case "dineIn":
         voiceEventStore.emitOrderType("DINE_IN");
+        // WelcomeView에서는 주문유형 선택 후 메뉴로 이동
+        if (router.currentRoute.value.path === "/" || router.currentRoute.value.path === "/welcome") {
+          router.push("/menu");
+        }
         return { success: true, message: t("voice.response.dineIn"), action: "dineIn" };
       case "takeout":
         voiceEventStore.emitOrderType("TAKEOUT");
+        if (router.currentRoute.value.path === "/" || router.currentRoute.value.path === "/welcome") {
+          router.push("/menu");
+        }
         return { success: true, message: t("voice.response.takeout"), action: "takeout" };
       case "earnPoint":
         voiceEventStore.emitPointAction("earn");
@@ -478,9 +509,12 @@ export function useVoiceCommand() {
 
   function processTranscript() {
     const newTranscript = stt.transcript.value;
+    console.log(`[Voice] processTranscript: transcript="${newTranscript}", confidence=${stt.confidence.value}, status=${stt.status.value}`);
+
     if (!newTranscript) {
       // 에러 메시지 표시
       if (stt.errorMessage.value) {
+        console.log(`[Voice] STT error: ${stt.errorMessage.value}`);
         subtitleText.value = stt.errorMessage.value;
         showSubtitle.value = true;
         setTimeout(() => {
@@ -492,9 +526,11 @@ export function useVoiceCommand() {
       return;
     }
 
-    const minConfidence = parseFloat(a11yStore.voiceConfidence ?? "0.7");
+    const minConfidence = parseFloat(a11yStore.voiceConfidence) || 0.4;
+    console.log(`[Voice] confidence check: ${stt.confidence.value} vs min=${minConfidence}`);
 
     if (stt.confidence.value < minConfidence) {
+      console.log("[Voice] Confidence too low, skipping");
       subtitleText.value = newTranscript;
       showSubtitle.value = true;
       tts.speak(t("voice.response.lowConfidence"));
@@ -505,7 +541,11 @@ export function useVoiceCommand() {
     }
 
     const command = parseCommand(newTranscript);
+    console.log(`[Voice] Parsed command:`, JSON.stringify(command));
+    console.log(`[Voice] Products in store: ${productsStore.products.length}개`);
+
     const result = executeCommand(command);
+    console.log(`[Voice] Execute result:`, JSON.stringify({ success: result.success, message: result.message, action: result.action, product: result.product?.name }));
     lastCommand.value = result;
 
     subtitleText.value = result.message;

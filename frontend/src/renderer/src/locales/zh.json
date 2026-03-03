@@ -199,7 +199,8 @@
       "takeout": "已选择打包",
       "earnPoint": "前往积分页面",
       "skipPoint": "跳过积分",
-      "goHome": "返回首页"
+      "goHome": "返回首页",
+      "goMenu": "前往菜单"
     }
   },
   "a11y": {
@@ -221,9 +222,9 @@
     "presetDefault": "默认",
     "presetDefaultDesc": "标准大小",
     "presetSenior": "老年人",
-    "presetSeniorDesc": "大字体 + 语音",
+    "presetSeniorDesc": "大字体",
     "presetLowVision": "低视力",
-    "presetLowVisionDesc": "最大字体 + 高对比度",
+    "presetLowVisionDesc": "最大字体",
     "replay": "重新播放",
     "tts": {
       "welcome": "请触摸屏幕开始点餐",

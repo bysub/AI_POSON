@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed } from "vue";
 import { useVoiceCommand } from "@/composables/useVoiceCommand";
 import { useSTT } from "@/composables/useSTT";
 import { useAccessibilityStore } from "@/stores/accessibility";
@@ -6,43 +7,40 @@ import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const a11yStore = useAccessibilityStore();
-const voice = useVoiceCommand();
-const stt = useSTT();
+const setupError = ref<string | null>(null);
+
+// try-catch: Electron preload 미로드 등 예외 상황에서도 앱이 크래시하지 않도록 보호
+let voice: ReturnType<typeof useVoiceCommand> | null = null;
+let stt: ReturnType<typeof useSTT> | null = null;
+
+try {
+  voice = useVoiceCommand();
+  stt = useSTT();
+} catch (e) {
+  setupError.value = e instanceof Error ? e.message : String(e);
+  console.error("[VoiceMicButton] Setup failed:", e);
+}
+
+const isSupported = computed(() => voice?.isSupported.value ?? false);
+const isListening = computed(() => voice?.isListening.value ?? false);
+const sttStatus = computed(() => voice?.sttStatus.value ?? "idle");
 </script>
 
 <template>
   <button
-    v-if="a11yStore.voiceEnabled && voice.isSupported.value"
+    v-if="a11yStore.voiceEnabled && isSupported && !setupError"
     class="voice-mic-btn"
     :class="{
-      'voice-mic-btn--loading': !stt.isDaemonReady.value,
-      'voice-mic-btn--listening': voice.isListening.value,
-      'voice-mic-btn--processing': voice.sttStatus.value === 'processing',
-      'voice-mic-btn--error': voice.sttStatus.value === 'error',
+      'voice-mic-btn--listening': isListening,
+      'voice-mic-btn--processing': sttStatus === 'processing',
+      'voice-mic-btn--error': sttStatus === 'error',
     }"
-    :aria-label="!stt.isDaemonReady.value ? t('voice.micLoading', 'Loading...') : voice.isListening.value ? t('voice.micListening') : t('voice.micLabel')"
-    :disabled="!stt.isDaemonReady.value"
-    @click="voice.toggleListening()"
+    :aria-label="isListening ? t('voice.micListening') : t('voice.micLabel', '음성 주문')"
+    @click="voice?.toggleListening()"
   >
-    <!-- Loading: STT 데몬 로딩 중 -->
-    <svg
-      v-if="!stt.isDaemonReady.value"
-      class="h-8 w-8 animate-spin"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-      <path
-        class="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-      />
-    </svg>
-
     <!-- Idle: 마이크 아이콘 -->
     <svg
-      v-else-if="!voice.isListening.value && voice.sttStatus.value !== 'processing'"
+      v-if="!isListening && sttStatus !== 'processing'"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -56,7 +54,7 @@ const stt = useSTT();
 
     <!-- Listening: 파형 아이콘 -->
     <svg
-      v-else-if="voice.isListening.value"
+      v-else-if="isListening"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="currentColor"
@@ -86,7 +84,7 @@ const stt = useSTT();
     </svg>
 
     <!-- 펄스 링 (listening 상태) -->
-    <span v-if="voice.isListening.value" class="voice-mic-pulse" />
+    <span v-if="isListening" class="voice-mic-pulse" />
   </button>
 </template>
 
@@ -120,12 +118,6 @@ const stt = useSTT();
 
 .voice-mic-btn--processing {
   background-color: #f97316;
-}
-
-.voice-mic-btn--loading {
-  background-color: #9ca3af;
-  opacity: 0.7;
-  cursor: wait;
 }
 
 .voice-mic-btn--error {
