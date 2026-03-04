@@ -3,6 +3,7 @@ import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
@@ -10,7 +11,7 @@ const router = Router();
 const CACHE_TTL = 300;
 
 // Get all categories (캐싱 적용)
-router.get("/", async (_req, res) => {
+router.get("/", asyncHandler(async (_req, res) => {
   const categories = await cacheService.getOrSet(
     CACHE_KEYS.CATEGORIES,
     async () => {
@@ -26,10 +27,10 @@ router.get("/", async (_req, res) => {
     success: true,
     data: categories,
   });
-});
+}));
 
 // Get category by ID with products (캐싱 적용)
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -60,7 +61,7 @@ router.get("/:id", async (req, res, next) => {
     success: true,
     data: category,
   });
-});
+}));
 
 // ========== 관리자 전용 API ==========
 
@@ -69,7 +70,7 @@ router.post(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { name, nameEn, nameJa, nameZh, imageUrl, isDiscount, isPopular, sortOrder } = req.body;
 
     if (!name) {
@@ -97,7 +98,7 @@ router.post(
       success: true,
       data: category,
     });
-  },
+  }),
 );
 
 // Update category (관리자)
@@ -105,7 +106,7 @@ router.patch(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
@@ -143,11 +144,11 @@ router.patch(
       success: true,
       data: category,
     });
-  },
+  }),
 );
 
 // Delete category (관리자)
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res, next) => {
+router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -188,10 +189,10 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
     success: true,
     message: "카테고리가 삭제되었습니다",
   });
-});
+}));
 
 // 캐시 무효화 (관리자용)
-router.delete("/cache", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (_req, res) => {
+router.delete("/cache", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (_req, res) => {
   await cacheService.deletePattern("categor*");
   await cacheService.deletePattern("product*");
 
@@ -199,6 +200,6 @@ router.delete("/cache", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (
     success: true,
     message: "캐시가 초기화되었습니다",
   });
-});
+}));
 
 export { router as categoriesRouter };

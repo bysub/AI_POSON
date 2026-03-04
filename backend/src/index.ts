@@ -23,16 +23,16 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowedOrigins = [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:5175",
-      ];
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin || allowedOrigins.includes(origin)) {
+      // origin 없는 요청 허용 (Electron 앱, curl 등)
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      // S-3: config에서 허용 origin 목록 참조, 비허용 시 에러
+      if (config.cors.origin.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true); // Allow all origins in development
+        callback(new Error(`CORS: Origin '${origin}' is not allowed`));
       }
     },
     credentials: true,

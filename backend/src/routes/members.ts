@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { prisma } from "../utils/db.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
 // ─── 키오스크용: 전화번호로 회원 조회 (인증 불필요) ───
-router.get("/lookup", async (req, res) => {
+router.get("/lookup", asyncHandler(async (req, res) => {
   const { phone } = req.query;
 
   if (!phone || typeof phone !== "string" || phone.length < 10) {
@@ -24,10 +25,10 @@ router.get("/lookup", async (req, res) => {
   }
 
   res.json({ success: true, data: member });
-});
+}));
 
 // ─── 키오스크용: 간편 회원 등록 (인증 불필요) ───
-router.post("/register", async (req, res) => {
+router.post("/register", asyncHandler(async (req, res) => {
   const { phone, name } = req.body as { phone?: string; name?: string };
 
   if (!phone || phone.length < 10) {
@@ -60,10 +61,10 @@ router.post("/register", async (req, res) => {
   });
 
   res.status(201).json({ success: true, data: member });
-});
+}));
 
 // ─── 고객 목록 (검색) ───
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, asyncHandler(async (req, res) => {
   const { search } = req.query;
 
   const where: Record<string, unknown> = { isActive: true };
@@ -80,10 +81,10 @@ router.get("/", authenticate, async (req, res) => {
     orderBy: { name: "asc" },
   });
   res.json({ success: true, data: members });
-});
+}));
 
 // ─── 고객 등록 ───
-router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN", "MANAGER"), async (req, res) => {
+router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN", "MANAGER"), asyncHandler(async (req, res) => {
   const { code, name, phone, grade } = req.body as {
     code: string;
     name: string;
@@ -113,14 +114,14 @@ router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN", "MANAGER"), asy
   });
 
   res.status(201).json({ success: true, data: member });
-});
+}));
 
 // ─── 고객 수정 ───
 router.patch(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res) => {
+  asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       res.status(400).json({ success: false, message: "유효하지 않은 ID입니다" });
@@ -143,11 +144,11 @@ router.patch(
 
     const member = await prisma.member.update({ where: { id }, data });
     res.json({ success: true, data: member });
-  },
+  }),
 );
 
 // ─── 고객 삭제 (비활성) ───
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ success: false, message: "유효하지 않은 ID입니다" });
@@ -162,6 +163,6 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
 
   await prisma.member.update({ where: { id }, data: { isActive: false } });
   res.json({ success: true, message: "삭제되었습니다" });
-});
+}));
 
 export { router as membersRouter };

@@ -41,19 +41,20 @@ function createWindow(): void {
       }
     });
   } else {
-    // 프로덕션: backend helmet CSP가 이미지/폰트 로딩을 차단하지 않도록
-    // 서브리소스 응답에서만 제한적인 CSP 헤더 제거 (API 응답은 유지)
+    // S-4: 프로덕션에서도 적절한 CSP 정책 유지 (삭제 대신 교체)
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      if (
-        details.responseHeaders &&
-        (details.resourceType === "image" ||
-          details.resourceType === "stylesheet" ||
-          details.resourceType === "font")
-      ) {
-        delete details.responseHeaders["content-security-policy"];
-        delete details.responseHeaders["Content-Security-Policy"];
+      if (details.resourceType === "mainFrame" || details.resourceType === "subFrame") {
+        callback({
+          responseHeaders: {
+            ...details.responseHeaders,
+            "Content-Security-Policy": [
+              "default-src 'self' app:; script-src 'self' app:; style-src 'self' app: 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' app: data: blob: https://*.unsplash.com https://images.unsplash.com https://flagcdn.com; font-src 'self' app: data: https://fonts.gstatic.com; connect-src 'self' app: http://localhost:* http://127.0.0.1:* https://*.google.com wss://*.google.com https://*.googleapis.com;",
+            ],
+          },
+        });
+      } else {
+        callback({ responseHeaders: details.responseHeaders });
       }
-      callback({ responseHeaders: details.responseHeaders });
     });
   }
 
@@ -143,6 +144,30 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
+  // S-5: IPC sender origin 검증 헬퍼
+  function validateIpcSender(event: Electron.IpcMainInvokeEvent): boolean {
+    const senderUrl = event.senderFrame?.url ?? "";
+    // 개발 환경: localhost, 프로덕션: app:// 프로토콜만 허용
+    if (is.dev) {
+      return senderUrl.startsWith("http://localhost:") || senderUrl === "";
+    }
+    return senderUrl.startsWith("app://") || senderUrl === "";
+  }
+
+  // IPC 핸들러 래퍼: sender 검증 후 실행
+  function secureHandle(
+    channel: string,
+    handler: (event: Electron.IpcMainInvokeEvent, ...args: unknown[]) => unknown,
+  ): void {
+    ipcMain.handle(channel, (event, ...args) => {
+      if (!validateIpcSender(event)) {
+        console.error(`[Security] IPC blocked: ${channel} from ${event.senderFrame?.url}`);
+        return { success: false, errorCode: "UNAUTHORIZED_SENDER" };
+      }
+      return handler(event, ...args);
+    });
+  }
+
   // Environment IPC handler (화이트리스트 기반 - 보안상 허용된 키만 노출)
   const SAFE_ENV_KEYS = new Set([
     "POSON_DEVICE_ID",
@@ -167,37 +192,38 @@ app.whenReady().then(() => {
     }
   });
 
-  // Hardware IPC handlers - Printer
-  ipcMain.handle("printer:connect", async () => {
+  // Hardware IPC handlers - Printer (S-5: secureHandle로 sender 검증)
+  secureHandle("printer:connect", async () => {
     const printer = hardwareManager.getPrinter();
     if (!printer) {
-      // 기본 프린터 초기화 (설정에서 포트 읽기)
       hardwareManager.initPrinter({ port: process.env.PRINTER_PORT ?? "COM1" });
     }
     return hardwareManager.getPrinter()?.connect() ?? false;
   });
 
-  ipcMain.handle("printer:disconnect", async () => {
+  secureHandle("printer:disconnect", async () => {
     return hardwareManager.getPrinter()?.disconnect();
   });
 
-  ipcMain.handle("printer:printReceipt", async (_event, data: ReceiptData) => {
+  secureHandle("printer:printReceipt", async (_event, ...args: unknown[]) => {
+    const data = args[0] as ReceiptData;
     const printer = hardwareManager.getPrinter();
     if (!printer) return { success: false, errorCode: "NOT_INITIALIZED" };
     return printer.printReceipt(data);
   });
 
-  ipcMain.handle("printer:printKitchenOrder", async (_event, data: KitchenOrderData) => {
+  secureHandle("printer:printKitchenOrder", async (_event, ...args: unknown[]) => {
+    const data = args[0] as KitchenOrderData;
     const printer = hardwareManager.getPrinter();
     if (!printer) return { success: false, errorCode: "NOT_INITIALIZED" };
     return printer.printKitchenOrder(data);
   });
 
-  ipcMain.handle("printer:openCashDrawer", async () => {
+  secureHandle("printer:openCashDrawer", async () => {
     return hardwareManager.getPrinter()?.openCashDrawer() ?? false;
   });
 
-  ipcMain.handle("printer:status", async () => {
+  secureHandle("printer:status", async () => {
     return (
       hardwareManager.getPrinter()?.getStatus() ?? {
         connected: false,
@@ -208,7 +234,7 @@ app.whenReady().then(() => {
   });
 
   // Hardware IPC handlers - Scanner
-  ipcMain.handle("scanner:connect", async () => {
+  secureHandle("scanner:connect", async () => {
     const scanner = hardwareManager.getScanner();
     if (!scanner) {
       hardwareManager.initScanner();
@@ -216,16 +242,16 @@ app.whenReady().then(() => {
     return hardwareManager.getScanner()?.connect() ?? false;
   });
 
-  ipcMain.handle("scanner:disconnect", async () => {
+  secureHandle("scanner:disconnect", async () => {
     return hardwareManager.getScanner()?.disconnect();
   });
 
-  ipcMain.handle("scanner:status", async () => {
+  secureHandle("scanner:status", async () => {
     return hardwareManager.getScanner()?.getStatus() ?? { connected: false };
   });
 
   // Hardware IPC handlers - Payment Terminal
-  ipcMain.handle("terminal:connect", async () => {
+  secureHandle("terminal:connect", async () => {
     const terminal = hardwareManager.getTerminal();
     if (!terminal) {
       hardwareManager.initTerminal({
@@ -237,36 +263,38 @@ app.whenReady().then(() => {
     return hardwareManager.getTerminal()?.connect() ?? false;
   });
 
-  ipcMain.handle("terminal:disconnect", async () => {
+  secureHandle("terminal:disconnect", async () => {
     return hardwareManager.getTerminal()?.disconnect();
   });
 
-  ipcMain.handle("terminal:requestPayment", async (_event, data: PaymentTerminalRequest) => {
+  secureHandle("terminal:requestPayment", async (_event, ...args: unknown[]) => {
+    const data = args[0] as PaymentTerminalRequest;
     const terminal = hardwareManager.getTerminal();
     if (!terminal) return { success: false, errorCode: "NOT_INITIALIZED" };
     return terminal.requestPayment(data);
   });
 
-  ipcMain.handle("terminal:cancelPayment", async (_event, transactionId: string) => {
+  secureHandle("terminal:cancelPayment", async (_event, ...args: unknown[]) => {
+    const transactionId = args[0] as string;
     const terminal = hardwareManager.getTerminal();
     if (!terminal) return { success: false, errorCode: "NOT_INITIALIZED" };
     return terminal.cancelPayment(transactionId);
   });
 
-  ipcMain.handle("terminal:status", async () => {
+  secureHandle("terminal:status", async () => {
     return hardwareManager.getTerminal()?.getStatus() ?? { connected: false };
   });
 
   // Hardware status
-  ipcMain.handle("hardware:status", async () => {
+  secureHandle("hardware:status", async () => {
     return hardwareManager.getStatus();
   });
 
-  ipcMain.handle("hardware:connectAll", async () => {
+  secureHandle("hardware:connectAll", async () => {
     return hardwareManager.connectAll();
   });
 
-  ipcMain.handle("hardware:disconnectAll", async () => {
+  secureHandle("hardware:disconnectAll", async () => {
     return hardwareManager.disconnectAll();
   });
 

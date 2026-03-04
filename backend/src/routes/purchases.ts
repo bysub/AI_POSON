@@ -3,6 +3,7 @@ import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
@@ -28,7 +29,7 @@ async function generatePurchaseCode(): Promise<string> {
 }
 
 // Get all purchases (필터/페이지네이션)
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, asyncHandler(async (req, res) => {
   const { page = "1", limit = "20", supplierId, status, startDate, endDate, search } = req.query;
 
   const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
@@ -86,10 +87,10 @@ router.get("/", authenticate, async (req, res) => {
       totalPages: Math.ceil(total / limitNum),
     },
   });
-});
+}));
 
 // 통계 API (/:id 보다 먼저 선언)
-router.get("/stats/summary", authenticate, async (req, res) => {
+router.get("/stats/summary", authenticate, asyncHandler(async (req, res) => {
   const { startDate, endDate } = req.query;
 
   const where: Record<string, unknown> = {
@@ -119,10 +120,10 @@ router.get("/stats/summary", authenticate, async (req, res) => {
       count,
     },
   });
-});
+}));
 
 // Get purchase by ID (상세 조회)
-router.get("/:id", authenticate, async (req, res, next) => {
+router.get("/:id", authenticate, asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -154,14 +155,14 @@ router.get("/:id", authenticate, async (req, res, next) => {
     success: true,
     data: purchase,
   });
-});
+}));
 
 // Create purchase (매입 등록)
 router.post(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { supplierId, purchaseDate, items, memo, taxIncluded = true } = req.body;
 
     if (!supplierId || !items || !Array.isArray(items) || items.length === 0) {
@@ -287,7 +288,7 @@ router.post(
       success: true,
       data: purchase,
     });
-  },
+  }),
 );
 
 // Update purchase (매입 수정 - DRAFT 상태만)
@@ -295,7 +296,7 @@ router.patch(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
@@ -439,11 +440,11 @@ router.patch(
       success: true,
       data: purchase,
     });
-  },
+  }),
 );
 
 // Cancel purchase (매입 취소)
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res, next) => {
+router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -505,7 +506,7 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
     success: true,
     message: "매입이 취소되었습니다",
   });
-});
+}));
 
 // ========== 캐시 관리 ==========
 

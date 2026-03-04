@@ -2,11 +2,12 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import { prisma } from "../utils/db.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
 // ─── 관리자 목록 ───
-router.get("/", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (_req, res) => {
+router.get("/", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (_req, res) => {
   const admins = await prisma.admin.findMany({
     select: {
       id: true,
@@ -20,10 +21,10 @@ router.get("/", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (_req, re
     orderBy: [{ role: "asc" }, { name: "asc" }],
   });
   res.json({ success: true, data: admins });
-});
+}));
 
 // ─── 관리자 등록 ───
-router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res) => {
   const { username, password, name, role } = req.body as {
     username: string;
     password: string;
@@ -55,10 +56,10 @@ router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, re
   });
 
   res.status(201).json({ success: true, data: admin });
-});
+}));
 
 // ─── 관리자 수정 ───
-router.patch("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+router.patch("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, role, isActive, password } = req.body as {
     name?: string;
@@ -86,10 +87,10 @@ router.patch("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req
   });
 
   res.json({ success: true, data: admin });
-});
+}));
 
 // ─── 관리자 삭제 ───
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN"), async (req, res) => {
+router.delete("/:id", authenticate, authorize("SUPER_ADMIN"), asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const existing = await prisma.admin.findUnique({ where: { id } });
@@ -100,6 +101,6 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN"), async (req, res) =
 
   await prisma.admin.delete({ where: { id } });
   res.json({ success: true, message: "삭제되었습니다" });
-});
+}));
 
 export { router as adminsRouter };

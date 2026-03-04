@@ -7,6 +7,7 @@ import { AppError } from "../middleware/errorHandler.js";
 import { logger } from "../utils/logger.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { createStockMovement } from "./stock-movements.js";
 
 type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
@@ -101,7 +102,7 @@ async function restoreStockForOrder(
 // ========== 키오스크용 API ==========
 
 // Create order (키오스크에서 주문 생성)
-router.post("/", async (req, res, next) => {
+router.post("/", asyncHandler(async (req, res, next) => {
   const { items, kioskId, orderType, tableNo, memberId } = req.body;
 
   if (!items || !Array.isArray(items) || items.length === 0) {
@@ -109,11 +110,11 @@ router.post("/", async (req, res, next) => {
   }
 
   try {
-    // 상품 존재 및 판매 상태 확인
+    // 상품 존재 및 판매 상태 확인 + 서버 가격 조회 (S-7: 클라이언트 가격 신뢰 방지)
     const productIds = items.map((item: { productId: number }) => item.productId);
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, name: true, status: true },
+      select: { id: true, name: true, status: true, sellPrice: true, isDiscount: true, discountPrice: true },
     });
 
     const productMap = new Map(products.map((p) => [p.id, p]));
@@ -135,23 +136,40 @@ router.post("/", async (req, res, next) => {
       }
     }
 
-    // Calculate total
+    // 서버에서 DB 가격 기준으로 합계 재계산 (클라이언트 전달 가격 무시)
     const totalAmount = items.reduce(
-      (sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity,
+      (sum: number, item: { productId: number; quantity: number }) => {
+        const product = productMap.get(item.productId)!;
+        const unitPrice = product.isDiscount && product.discountPrice != null
+          ? Number(product.discountPrice)
+          : Number(product.sellPrice);
+        return sum + unitPrice * item.quantity;
+      },
       0,
     );
 
-    // 주문 생성 (트랜잭션 내에서 주문번호 생성 → race condition 방지)
+    // R-1: 트랜잭션 + serializable 격리 수준으로 주문번호 Race Condition 방지
     const order = await prisma.$transaction(async (tx) => {
       // Generate order number (format: YYMMDD-NNNN)
       const now = new Date();
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const datePrefix = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
 
-      const orderCount = await tx.order.count({
+      // DB 레벨에서 MAX 주문번호 조회 (동시 요청 시 트랜잭션 직렬화)
+      const lastOrder = await tx.order.findFirst({
         where: { createdAt: { gte: startOfDay } },
+        orderBy: { orderNumber: "desc" },
+        select: { orderNumber: true },
       });
-      const orderNumber = `${datePrefix}-${String(orderCount + 1).padStart(4, "0")}`;
+
+      let seq = 1;
+      if (lastOrder?.orderNumber) {
+        const parts = lastOrder.orderNumber.split("-");
+        if (parts.length === 2) {
+          seq = parseInt(parts[1], 10) + 1;
+        }
+      }
+      const orderNumber = `${datePrefix}-${String(seq).padStart(4, "0")}`;
 
       return tx.order.create({
         data: {
@@ -171,13 +189,19 @@ router.post("/", async (req, res, next) => {
                 price: number;
                 quantity: number;
                 options?: Prisma.InputJsonValue;
-              }) => ({
-                product: { connect: { id: item.productId } },
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                options: item.options ?? Prisma.JsonNull,
-              }),
+              }) => {
+                const product = productMap.get(item.productId)!;
+                const serverPrice = product.isDiscount && product.discountPrice != null
+                  ? Number(product.discountPrice)
+                  : Number(product.sellPrice);
+                return {
+                  product: { connect: { id: item.productId } },
+                  name: product.name, // DB 기준 상품명 사용
+                  price: serverPrice,  // DB 기준 가격 사용
+                  quantity: item.quantity,
+                  options: item.options ?? Prisma.JsonNull,
+                };
+              },
             ),
           },
         },
@@ -201,14 +225,14 @@ router.post("/", async (req, res, next) => {
     logger.error({ error, errMsg }, "Failed to create order");
     return next(new AppError(500, `Failed to create order: ${errMsg}`, "ORDER_CREATE_FAILED"));
   }
-});
+}));
 
 // Get order statistics (관리자 대시보드용) - /:id 보다 먼저 정의해야 함
 router.get(
   "/stats/summary",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res) => {
+  asyncHandler(async (req, res) => {
     const { startDate, endDate } = req.query;
 
     const dateFilter = {
@@ -250,7 +274,7 @@ router.get(
         ),
       },
     });
-  },
+  }),
 );
 
 // Get daily sales report (관리자) - /:id 보다 먼저 정의해야 함
@@ -258,7 +282,7 @@ router.get(
   "/stats/daily",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res) => {
+  asyncHandler(async (req, res) => {
     const { days = "7" } = req.query;
     const daysNum = Math.min(parseInt(days as string), 90);
 
@@ -304,11 +328,11 @@ router.get(
       success: true,
       data: dailyStats,
     });
-  },
+  }),
 );
 
 // Get order by ID
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
   const order = await prisma.order.findUnique({
@@ -327,10 +351,10 @@ router.get("/:id", async (req, res, next) => {
     success: true,
     data: order,
   });
-});
+}));
 
-// Update order status
-router.patch("/:id/status", async (req, res, next) => {
+// Update order status (S-8: 인증 필수)
+router.patch("/:id/status", authenticate, asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { status, paymentType, receivedAmount } = req.body;
 
@@ -406,7 +430,7 @@ router.patch("/:id/status", async (req, res, next) => {
     logger.error({ error, orderId: id }, "Failed to update order status");
     return next(new AppError(500, "주문 상태 변경에 실패했습니다", "STATUS_UPDATE_FAILED"));
   }
-});
+}));
 
 // ========== 관리자용 API ==========
 
@@ -415,7 +439,7 @@ router.get(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER", "STAFF"),
-  async (req, res) => {
+  asyncHandler(async (req, res) => {
     const { page = "1", limit = "20", status, kioskId, startDate, endDate } = req.query;
 
     const pageNum = parseInt(page as string);
@@ -459,7 +483,7 @@ router.get(
         totalPages: Math.ceil(total / limitNum),
       },
     });
-  },
+  }),
 );
 
 // Update order (관리자)
@@ -467,7 +491,7 @@ router.put(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const { kioskId, status, memo } = req.body;
 
@@ -539,7 +563,7 @@ router.put(
       logger.error({ error, orderId: id }, "Failed to update order");
       return next(new AppError(500, "주문 수정에 실패했습니다", "ORDER_UPDATE_FAILED"));
     }
-  },
+  }),
 );
 
 // Cancel order (관리자) - 재고 복구 포함
@@ -547,7 +571,7 @@ router.delete(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { id } = req.params;
 
     const existing = await prisma.order.findUnique({
@@ -613,7 +637,7 @@ router.delete(
       logger.error({ error, orderId: id }, "Failed to cancel order");
       return next(new AppError(500, "주문 취소에 실패했습니다", "ORDER_CANCEL_FAILED"));
     }
-  },
+  }),
 );
 
 // Payment 레코드 백필 (결제완료 주문 중 Payment 없는 건)
@@ -621,7 +645,7 @@ router.post(
   "/backfill-payments",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN"),
-  async (_req, res) => {
+  asyncHandler(async (_req, res) => {
     const ordersWithoutPayment = await prisma.order.findMany({
       where: {
         status: { in: ["PAID", "PREPARING", "COMPLETED"] },
@@ -650,7 +674,7 @@ router.post(
       message: `${created.count}건 백필 완료`,
       count: created.count,
     });
-  },
+  }),
 );
 
 export { router as ordersRouter };

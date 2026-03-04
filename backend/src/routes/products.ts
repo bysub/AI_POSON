@@ -2,7 +2,9 @@ import { Router } from "express";
 import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
-import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { authenticate, authorize, optionalAuth } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import type { AuthenticatedRequest } from "../types/auth.js";
 
 const router = Router();
 
@@ -23,10 +25,16 @@ const productInclude = {
 };
 
 // Get all products (검색어 없을 때만 캐싱)
-// admin=true 파라미터가 있으면 모든 상품 조회 (관리자용)
-router.get("/", async (req, res) => {
+// admin=true 파라미터가 있으면 모든 상품 조회 (관리자용 - S-11: 인증 필수)
+router.get("/", optionalAuth, asyncHandler(async (req, res, next) => {
+  const authReq = req as AuthenticatedRequest;
   const { categoryId, search, admin } = req.query;
   const isAdminMode = admin === "true";
+
+  // admin=true 쿼리는 인증된 사용자만 허용
+  if (isAdminMode && !authReq.user) {
+    return next(new AppError(401, "관리자 모드 조회는 인증이 필요합니다", "UNAUTHORIZED"));
+  }
 
   const categoryFilter = categoryId
     ? { categories: { some: { id: parseInt(categoryId as string) } } }
@@ -97,10 +105,10 @@ router.get("/", async (req, res) => {
     success: true,
     data: products,
   });
-});
+}));
 
 // Get product by barcode (캐싱 적용)
-router.get("/barcode/:barcode", async (req, res, next) => {
+router.get("/barcode/:barcode", asyncHandler(async (req, res, next) => {
   const { barcode } = req.params;
 
   const product = await cacheService.getOrSet(
@@ -122,10 +130,10 @@ router.get("/barcode/:barcode", async (req, res, next) => {
     success: true,
     data: product,
   });
-});
+}));
 
 // Get product by ID (캐싱 적용)
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -151,7 +159,7 @@ router.get("/:id", async (req, res, next) => {
     success: true,
     data: product,
   });
-});
+}));
 
 // ========== 관리자 전용 API ==========
 
@@ -160,7 +168,7 @@ router.post(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const {
       barcode,
       purchaseProductId,
@@ -259,7 +267,7 @@ router.post(
       success: true,
       data: product,
     });
-  },
+  }),
 );
 
 // Update product (관리자)
@@ -267,7 +275,7 @@ router.patch(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
@@ -361,11 +369,11 @@ router.patch(
       success: true,
       data: product,
     });
-  },
+  }),
 );
 
 // Delete product (soft delete, 관리자)
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res, next) => {
+router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -393,7 +401,7 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
     success: true,
     message: "상품이 삭제되었습니다",
   });
-});
+}));
 
 // ========== 상품 옵션 API ==========
 
@@ -402,7 +410,7 @@ router.post(
   "/:id/options",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const productId = parseInt(req.params.id);
 
     if (isNaN(productId)) {
@@ -441,7 +449,7 @@ router.post(
       success: true,
       data: option,
     });
-  },
+  }),
 );
 
 // Update option
@@ -449,7 +457,7 @@ router.patch(
   "/:id/options/:optionId",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const productId = parseInt(req.params.id);
     const optionId = parseInt(req.params.optionId);
 
@@ -489,7 +497,7 @@ router.patch(
       success: true,
       data: updated,
     });
-  },
+  }),
 );
 
 // Delete option
@@ -497,7 +505,7 @@ router.delete(
   "/:id/options/:optionId",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const productId = parseInt(req.params.id);
     const optionId = parseInt(req.params.optionId);
 
@@ -527,7 +535,7 @@ router.delete(
       success: true,
       message: "옵션이 삭제되었습니다",
     });
-  },
+  }),
 );
 
 // ========== 상품 상태 변경 API ==========
@@ -537,7 +545,7 @@ router.patch(
   "/:id/status",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER", "STAFF"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
@@ -578,7 +586,7 @@ router.patch(
       success: true,
       data: updated,
     });
-  },
+  }),
 );
 
 // ========== 캐시 관리 ==========
@@ -594,7 +602,7 @@ async function invalidateProductCache(categoryIds?: number[] | null): Promise<vo
 }
 
 // 캐시 전체 무효화 (관리자)
-router.delete("/cache", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (_req, res) => {
+router.delete("/cache", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (_req, res) => {
   await cacheService.del(CACHE_KEYS.PRODUCTS);
   // 모든 카테고리 캐시 삭제는 패턴 매칭이 필요하므로 개별 삭제
   const categories = await prisma.category.findMany({ select: { id: true } });
@@ -606,6 +614,6 @@ router.delete("/cache", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (
     success: true,
     message: "상품 캐시가 초기화되었습니다",
   });
-});
+}));
 
 export { router as productsRouter };

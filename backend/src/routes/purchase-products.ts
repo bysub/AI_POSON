@@ -3,13 +3,14 @@ import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
 // 다음 바코드 번호 자동 생성 (설정 > 바코드/중량 탭 기준)
 // ?productType=WEIGHT 이면 중량상품 설정(scaleStartChar + scaleLen) 사용
 // 그 외에는 일반상품 설정(barCodeLen) 사용
-router.get("/next-barcode", authenticate, async (req, res) => {
+router.get("/next-barcode", authenticate, asyncHandler(async (req, res) => {
   const productType = (req.query.productType as string) || "";
   const isWeight = productType === "WEIGHT";
 
@@ -61,10 +62,10 @@ router.get("/next-barcode", authenticate, async (req, res) => {
     success: true,
     data: { barcode: nextBarcode, prefix, productType: isWeight ? "WEIGHT" : "GENERAL" },
   });
-});
+}));
 
 // 매입상품 목록 (거래처별 필터, 검색)
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, asyncHandler(async (req, res) => {
   const { supplierId, search, taxType, lCode, mCode, sCode } = req.query;
 
   const where: Record<string, unknown> = { isActive: true };
@@ -106,10 +107,10 @@ router.get("/", authenticate, async (req, res) => {
     success: true,
     data: products,
   });
-});
+}));
 
 // 매입상품 상세 조회
-router.get("/:id", authenticate, async (req, res, next) => {
+router.get("/:id", authenticate, asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -131,14 +132,14 @@ router.get("/:id", authenticate, async (req, res, next) => {
     success: true,
     data: product,
   });
-});
+}));
 
 // 매입상품 등록
 router.post(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const {
       barcode,
       name,
@@ -213,7 +214,7 @@ router.post(
       success: true,
       data: product,
     });
-  },
+  }),
 );
 
 // 매입상품 수정
@@ -221,7 +222,7 @@ router.patch(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
@@ -295,11 +296,11 @@ router.patch(
       success: true,
       data: product,
     });
-  },
+  }),
 );
 
 // 매입상품 삭제 (soft delete)
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res, next) => {
+router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -322,10 +323,10 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
     success: true,
     message: "매입상품이 삭제되었습니다",
   });
-});
+}));
 
 // 재고 동기화 (확정된 매입 데이터 기반으로 stock 재계산)
-router.post("/sync-stock", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+router.post("/sync-stock", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res) => {
   // 동기화 전 모든 상품의 현재 stock 저장
   const allProducts = await prisma.purchaseProduct.findMany({
     select: { id: true, stock: true },
@@ -385,7 +386,7 @@ router.post("/sync-stock", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyn
     success: true,
     message: `${stockSums.length}개 상품의 재고가 동기화되었습니다`,
   });
-});
+}));
 
 // ========== 캐시 관리 ==========
 

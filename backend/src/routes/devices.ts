@@ -1,19 +1,20 @@
 import { Router } from "express";
 import { prisma } from "../utils/db.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
 // ─── 기기 목록 조회 ───
-router.get("/", authenticate, async (_req, res) => {
+router.get("/", authenticate, asyncHandler(async (_req, res) => {
   const devices = await prisma.device.findMany({
     orderBy: [{ type: "asc" }, { id: "asc" }],
   });
   res.json({ success: true, data: devices });
-});
+}));
 
 // ─── 기기 단건 조회 (인증 불필요 - 키오스크 자기 기기 조회) ───
-router.get("/:id", async (req, res) => {
+router.get("/:id", asyncHandler(async (req, res) => {
   const device = await prisma.device.findUnique({
     where: { id: req.params.id },
   });
@@ -22,10 +23,10 @@ router.get("/:id", async (req, res) => {
     return;
   }
   res.json({ success: true, data: device });
-});
+}));
 
 // ─── 기기 등록 ───
-router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN", "MANAGER"), async (req, res) => {
+router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN", "MANAGER"), asyncHandler(async (req, res) => {
   const { id, name, type } = req.body as {
     id: string;
     name: string;
@@ -55,10 +56,10 @@ router.post("/", authenticate, authorize("SUPER_ADMIN", "ADMIN", "MANAGER"), asy
   });
 
   res.status(201).json({ success: true, data: device });
-});
+}));
 
 // ─── 기기 삭제 (설정도 cascade) ───
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const existing = await prisma.device.findUnique({ where: { id } });
@@ -69,10 +70,10 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
 
   await prisma.device.delete({ where: { id } });
   res.json({ success: true, message: "삭제되었습니다" });
-});
+}));
 
 // ─── 기기별 전체 설정 조회 (인증 불필요 - 키오스크 자기 설정 조회) ───
-router.get("/:id/settings", async (req, res) => {
+router.get("/:id/settings", asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const settings = await prisma.deviceSetting.findMany({
@@ -85,10 +86,10 @@ router.get("/:id/settings", async (req, res) => {
   }
 
   res.json({ success: true, data });
-});
+}));
 
 // ─── 기기별 카테고리 설정 조회 (인증 불필요 - 읽기 전용) ───
-router.get("/:id/settings/:category", async (req, res) => {
+router.get("/:id/settings/:category", asyncHandler(async (req, res) => {
   const { id, category } = req.params;
 
   const settings = await prisma.deviceSetting.findMany({
@@ -104,14 +105,14 @@ router.get("/:id/settings/:category", async (req, res) => {
   }
 
   res.json({ success: true, data });
-});
+}));
 
 // ─── 기기별 카테고리 설정 일괄 저장 ───
 router.put(
   "/:id/settings/:category",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res) => {
+  asyncHandler(async (req, res) => {
     const deviceId = req.params.id;
     const category = req.params.category.toUpperCase();
     const entries = req.body as Record<string, string>;
@@ -144,7 +145,7 @@ router.put(
     }
 
     res.json({ success: true, data });
-  },
+  }),
 );
 
 export { router as devicesRouter };

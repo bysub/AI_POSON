@@ -4,13 +4,14 @@ import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
 const CACHE_TTL = 300;
 
 // Get all suppliers (검색/필터 지원)
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, asyncHandler(async (req, res) => {
   const { search, type, active } = req.query;
 
   // 검색/필터가 있으면 캐싱하지 않음
@@ -60,10 +61,10 @@ router.get("/", authenticate, async (req, res) => {
     success: true,
     data: suppliers,
   });
-});
+}));
 
 // Get supplier by ID
-router.get("/:id", authenticate, async (req, res, next) => {
+router.get("/:id", authenticate, asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -96,7 +97,7 @@ router.get("/:id", authenticate, async (req, res, next) => {
     success: true,
     data: supplier,
   });
-});
+}));
 
 // ========== 관리자 전용 API ==========
 
@@ -120,7 +121,7 @@ router.post(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const {
       name,
       type,
@@ -182,7 +183,7 @@ router.post(
       success: true,
       data: supplier,
     });
-  },
+  }),
 );
 
 // Update supplier
@@ -190,7 +191,7 @@ router.patch(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
@@ -270,11 +271,11 @@ router.patch(
       success: true,
       data: supplier,
     });
-  },
+  }),
 );
 
 // Delete supplier (soft delete)
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res, next) => {
+router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
 
   if (isNaN(id)) {
@@ -313,7 +314,7 @@ router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (re
     success: true,
     message: "거래처가 삭제되었습니다",
   });
-});
+}));
 
 // ========== 캐시 관리 ==========
 
