@@ -1,0 +1,129 @@
+/* ====================================
+   POSON Kiosk - Dark Theme
+   ====================================
+   다크 모드 테마
+   눈의 피로를 줄이는 어두운 색상 팔레트
+*/
+
+[data-theme="dark"] {
+  /* ========================================
+     색상 (Colors)
+     ======================================== */
+
+  /* 배경 (어두운 그레이) */
+  --theme-bg: #121212;
+  --theme-bg-secondary: #1e1e1e;
+
+  /* 표면 (살짝 밝은 다크 그레이) */
+  --theme-surface: #1e1e1e;
+  --theme-surface-hover: #2d2d2d;
+
+  /* 텍스트 (밝은 색상) */
+  --theme-text: #e4e4e7;
+  --theme-text-secondary: #a1a1aa;
+  --theme-text-muted: #71717a;
+
+  /* 프라이머리 (밝은 브라운/오렌지) */
+  --theme-primary: #f97316;
+  --theme-primary-hover: #fb923c;
+  --theme-primary-text: #1e1e1e;
+
+  /* 액센트 (앰버) */
+  --theme-accent: #fbbf24;
+  --theme-accent-hover: #fcd34d;
+
+  /* 테두리 */
+  --theme-border: #3f3f46;
+  --theme-border-strong: #52525b;
+
+  /* 상태 색상 (다크 모드용 밝은 버전) */
+  --theme-success: #4ade80;
+  --theme-error: #f87171;
+  --theme-warning: #fbbf24;
+  --theme-info: #60a5fa;
+
+  /* ========================================
+     그라데이션 (Gradients)
+     ======================================== */
+
+  --theme-gradient-welcome: linear-gradient(
+    135deg,
+    #0a0a0a 0%,
+    #171717 25%,
+    #262626 50%,
+    #f97316 90%,
+    #ea580c 100%
+  );
+
+  --theme-gradient-button: linear-gradient(
+    135deg,
+    var(--theme-primary),
+    var(--theme-accent)
+  );
+
+  --theme-gradient-overlay: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0.4),
+    rgba(0, 0, 0, 0.9)
+  );
+
+  /* ========================================
+     그림자 (Shadows - 다크 모드용)
+     ======================================== */
+
+  --theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --theme-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+
+  /* ========================================
+     폰트 (Typography)
+     ======================================== */
+
+  --theme-font-sans: "Pretendard", system-ui, -apple-system, sans-serif;
+  --theme-font-display: "Pretendard", system-ui, sans-serif;
+
+  /* ========================================
+     반경 (Border Radius)
+     ======================================== */
+
+  --theme-radius-sm: 4px;
+  --theme-radius-md: 8px;
+  --theme-radius-lg: 16px;
+  --theme-radius-xl: 24px;
+  --theme-radius-full: 9999px;
+
+  /* ========================================
+     터치 피드백 (Touch Feedback)
+     ======================================== */
+
+  --theme-ripple-color: color-mix(in srgb, var(--theme-primary) 35%, transparent);
+  --theme-press-scale: 0.97;
+  --theme-press-duration: 100ms;
+
+  /* ========================================
+     스크롤바 (Scrollbar)
+     ======================================== */
+
+  --theme-scrollbar-track: #1e1e1e;
+  --theme-scrollbar-thumb: #52525b;
+  --theme-scrollbar-thumb-hover: #71717a;
+
+  /* ========================================
+     추가 커스텀 토큰 (Dark Theme Specific)
+     ======================================== */
+
+  --theme-cream: #1e1e1e;
+  --theme-cream-dark: #121212;
+  --theme-glow-primary: rgba(249, 115, 22, 0.5);
+  --theme-glow-accent: rgba(251, 191, 36, 0.5);
+}
+
+/* 시스템 다크 모드 자동 감지 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* 테마가 명시적으로 설정되지 않은 경우에만 적용 */
+    /* 이 부분은 useThemeStore에서 처리하므로 주석 처리 */
+  }
+}

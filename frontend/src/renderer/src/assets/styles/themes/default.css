@@ -1,0 +1,125 @@
+/* ====================================
+   POSON Kiosk - Default Theme
+   ====================================
+   현재 POSON 브랜드 컬러 (따뜻한 브라운 계열)
+   기존 디자인과 100% 호환
+*/
+
+:root,
+[data-theme="default"] {
+  /* ========================================
+     색상 (Colors)
+     ======================================== */
+
+  /* 배경 */
+  --theme-bg: #FDF9F3;
+  --theme-bg-secondary: #f5ede0;
+
+  /* 표면 */
+  --theme-surface: #ffffff;
+  --theme-surface-hover: #f8f8f8;
+
+  /* 텍스트 */
+  --theme-text: #1e293b;
+  --theme-text-secondary: #64748b;
+  --theme-text-muted: #94a3b8;
+
+  /* 프라이머리 (메인 브랜드 컬러) */
+  --theme-primary: #8E3524;
+  --theme-primary-hover: #7a3125;
+  --theme-primary-text: #ffffff;
+
+  /* 액센트 (보조 강조색) */
+  --theme-accent: #C96231;
+  --theme-accent-hover: #a54f26;
+
+  /* 테두리 */
+  --theme-border: #e2e8f0;
+  --theme-border-strong: #cbd5e1;
+
+  /* 상태 색상 */
+  --theme-success: #22c55e;
+  --theme-error: #ef4444;
+  --theme-warning: #f59e0b;
+  --theme-info: #3b82f6;
+
+  /* ========================================
+     그라데이션 (Gradients)
+     ======================================== */
+
+  --theme-gradient-welcome: linear-gradient(
+    135deg,
+    #1a0a05 0%,
+    #3d1a0a 25%,
+    #5c2d15 50%,
+    #8e3524 75%,
+    #2d1810 100%
+  );
+
+  --theme-gradient-button: linear-gradient(
+    135deg,
+    var(--theme-primary),
+    var(--theme-accent)
+  );
+
+  --theme-gradient-overlay: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.3),
+    rgba(0, 0, 0, 0.8)
+  );
+
+  /* ========================================
+     그림자 (Shadows)
+     ======================================== */
+
+  --theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --theme-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ========================================
+     폰트 (Typography)
+     ======================================== */
+
+  --theme-font-sans: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --theme-font-display: "Pretendard", system-ui, sans-serif;
+
+  /* ========================================
+     반경 (Border Radius)
+     ======================================== */
+
+  --theme-radius-sm: 4px;
+  --theme-radius-md: 8px;
+  --theme-radius-lg: 16px;
+  --theme-radius-xl: 24px;
+  --theme-radius-full: 9999px;
+
+  /* ========================================
+     터치 피드백 (Touch Feedback)
+     ======================================== */
+
+  --theme-ripple-color: color-mix(in srgb, var(--theme-primary) 30%, transparent);
+  --theme-press-scale: 0.97;
+  --theme-press-duration: 100ms;
+
+  /* ========================================
+     스크롤바 (Scrollbar)
+     ======================================== */
+
+  --theme-scrollbar-track: transparent;
+  --theme-scrollbar-thumb: #cbd5e1;
+  --theme-scrollbar-thumb-hover: #94a3b8;
+
+  /* ========================================
+     추가 커스텀 토큰 (Default Theme Specific)
+     ======================================== */
+
+  /* 크림 색상 (웰컴 페이지 등) */
+  --theme-cream: #FDF9F3;
+  --theme-cream-dark: #f5ede0;
+
+  /* 버튼 글로우 효과 */
+  --theme-glow-primary: rgba(142, 53, 36, 0.5);
+  --theme-glow-accent: rgba(201, 98, 49, 0.6);
+}

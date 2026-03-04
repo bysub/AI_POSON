@@ -1,0 +1,356 @@
+/* ====================================
+   POSON Kiosk - Common Component Styles
+   ====================================
+   Vue 컴포넌트에서 공통으로 사용되는 스타일
+   개별 <style scoped>에서 이동하여 통합
+*/
+
+/* ========================================
+   트랜지션 (Transitions)
+   ======================================== */
+
+/* Fade 트랜지션 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Slide Fade 트랜지션 (위에서 아래로) */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.slide-fade-enter-from {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+/* Slide Up 트랜지션 (아래에서 위로) */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+/* Modal 트랜지션 */
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+/* Scale 트랜지션 */
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.2s ease;
+}
+
+.scale-enter-from,
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* ========================================
+   스크롤바 (Scrollbar)
+   ======================================== */
+
+/* 스크롤바 숨김 (기능은 유지) */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 커스텀 스크롤바 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--theme-scrollbar-track, transparent);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--theme-scrollbar-thumb, #cbd5e1);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-scrollbar-thumb-hover, #94a3b8);
+}
+
+/* ========================================
+   터치 피드백 (Touch Feedback)
+   ======================================== */
+
+/* 터치 프레스 효과 */
+.touch-press {
+  transition: transform var(--theme-press-duration, 100ms) ease;
+}
+
+.touch-press:active {
+  transform: scale(var(--theme-press-scale, 0.97));
+}
+
+/* 리플 효과 */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: var(--theme-ripple-color, rgba(255, 255, 255, 0.3));
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.ripple:active::after {
+  width: 200%;
+  height: 200%;
+}
+
+/* ========================================
+   음성 주문 하이라이트 (Voice Order)
+   ======================================== */
+
+.voice-highlight {
+  outline: 3px solid var(--theme-success, #22c55e);
+  outline-offset: 2px;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--theme-success, #22c55e) 40%, transparent);
+  animation: voice-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes voice-pulse {
+  0%, 100% {
+    box-shadow: 0 0 16px color-mix(in srgb, var(--theme-success, #22c55e) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 24px color-mix(in srgb, var(--theme-success, #22c55e) 60%, transparent);
+  }
+}
+
+/* ========================================
+   카드 스타일 (Cards)
+   ======================================== */
+
+/* 테마 적용 카드 */
+.card-theme {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--theme-radius-lg, 16px);
+  box-shadow: var(--theme-shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-theme:hover {
+  box-shadow: var(--theme-shadow-md);
+}
+
+.card-theme-selected {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-primary) 20%, transparent);
+}
+
+/* ========================================
+   버튼 스타일 (Buttons)
+   ======================================== */
+
+/* 테마 적용 프라이머리 버튼 */
+.btn-theme-primary {
+  background: var(--theme-primary);
+  color: var(--theme-primary-text);
+  border-radius: var(--theme-radius-md, 8px);
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-theme-primary:hover {
+  background: var(--theme-primary-hover);
+}
+
+.btn-theme-primary:active {
+  transform: scale(var(--theme-press-scale, 0.97));
+}
+
+/* 테마 적용 액센트 버튼 */
+.btn-theme-accent {
+  background: var(--theme-accent);
+  color: var(--theme-primary-text);
+  border-radius: var(--theme-radius-md, 8px);
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-theme-accent:hover {
+  background: var(--theme-accent-hover);
+}
+
+/* 테마 적용 아웃라인 버튼 */
+.btn-theme-outline {
+  background: transparent;
+  color: var(--theme-primary);
+  border: 2px solid var(--theme-primary);
+  border-radius: var(--theme-radius-md, 8px);
+  transition: all 0.2s ease;
+}
+
+.btn-theme-outline:hover {
+  background: var(--theme-primary);
+  color: var(--theme-primary-text);
+}
+
+/* ========================================
+   웰컴 페이지 전용 스타일
+   ======================================== */
+
+/* 웰컴 배경 */
+.bg-welcome {
+  background: var(--theme-gradient-welcome);
+  background-size: cover;
+  background-position: center;
+}
+
+/* 웰컴 오버레이 */
+.bg-welcome-overlay {
+  background: var(--theme-gradient-overlay);
+}
+
+/* 글로우 효과 */
+.glow-primary {
+  box-shadow: 0 0 50px var(--theme-glow-primary, rgba(142, 53, 36, 0.5));
+}
+
+.glow-accent {
+  box-shadow: 0 0 14px var(--theme-glow-accent, rgba(201, 98, 49, 0.6));
+}
+
+/* ========================================
+   로딩/스피너 (Loading)
+   ======================================== */
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--theme-border);
+  border-top-color: var(--theme-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+   토스트/알림 (Toast/Notification)
+   ======================================== */
+
+.toast-theme {
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--theme-radius-md);
+  box-shadow: var(--theme-shadow-lg);
+}
+
+.toast-success {
+  border-left: 4px solid var(--theme-success);
+}
+
+.toast-error {
+  border-left: 4px solid var(--theme-error);
+}
+
+.toast-warning {
+  border-left: 4px solid var(--theme-warning);
+}
+
+.toast-info {
+  border-left: 4px solid var(--theme-info);
+}
+
+/* ========================================
+   모션 감소 모드 (Reduced Motion)
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active,
+  .fade-leave-active,
+  .slide-fade-enter-active,
+  .slide-fade-leave-active,
+  .slide-up-enter-active,
+  .slide-up-leave-active,
+  .modal-enter-active,
+  .modal-leave-active,
+  .scale-enter-active,
+  .scale-leave-active {
+    transition-duration: 0.01ms !important;
+  }
+
+  .voice-highlight {
+    animation: none;
+  }
+
+  .loading-spinner {
+    animation-duration: 1.5s;
+  }
+}
+
+[data-motion="reduced"] {
+  .fade-enter-active,
+  .fade-leave-active,
+  .slide-fade-enter-active,
+  .slide-fade-leave-active,
+  .slide-up-enter-active,
+  .slide-up-leave-active,
+  .modal-enter-active,
+  .modal-leave-active,
+  .scale-enter-active,
+  .scale-leave-active {
+    transition-duration: 0.01ms !important;
+  }
+
+  .voice-highlight {
+    animation: none;
+  }
+}
