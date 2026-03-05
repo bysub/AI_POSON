@@ -21,7 +21,7 @@
           // "auto" 또는 "light"는 기본 테마로 매핑
           if (theme === "auto" || theme === "light" || theme === "default") theme = "classic";
           // 유효한 테마 목록 확인
-          var validThemes = ["classic","modern","modern-red","bootstrap","material","dark"];
+          var validThemes = ["classic","modern","modern-red","bootstrap","material","dark","high-contrast","inverted"];
           if (validThemes.indexOf(theme) === -1) theme = "classic";
           document.documentElement.dataset.theme = theme;
 

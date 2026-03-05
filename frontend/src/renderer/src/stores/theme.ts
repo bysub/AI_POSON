@@ -24,7 +24,9 @@ export type BrandTheme =
   | "modern-red"
   | "bootstrap"
   | "material"
-  | "dark";
+  | "dark"
+  | "high-contrast"
+  | "inverted";
 
 export type ContrastMode = "normal" | "high" | "inverted" | "low";
 export type MotionMode = "normal" | "reduced";
@@ -82,6 +84,20 @@ export const AVAILABLE_THEMES: ThemeMeta[] = [
     description: "다크 모드",
     preview: "linear-gradient(135deg, #1e1e1e, #f97316)",
   },
+  {
+    id: "high-contrast",
+    name: "High Contrast",
+    nameKo: "고대비",
+    description: "WCAG AAA 고대비 (검정 바탕, 노란 강조)",
+    preview: "linear-gradient(135deg, #000000, #ffff00)",
+  },
+  {
+    id: "inverted",
+    name: "Inverted",
+    nameKo: "반전",
+    description: "반전 대비 (어두운 블루그레이)",
+    preview: "linear-gradient(135deg, #0f172a, #60a5fa)",
+  },
 ];
 
 export const useThemeStore = defineStore("theme", () => {
@@ -100,6 +116,8 @@ export const useThemeStore = defineStore("theme", () => {
       bootstrap: "bootstrap",
       material: "material",
       dark: "dark",
+      "high-contrast": "high-contrast",
+      inverted: "inverted",
       // VueUse auto 모드 해석 시 light/dark → 커스텀 테마 매핑
       light: "classic",
     },
@@ -158,7 +176,12 @@ export const useThemeStore = defineStore("theme", () => {
 
   // 다크 테마 여부
   const isDarkTheme = computed(() => {
-    return currentTheme.value === "dark" || currentContrastMode.value === "inverted";
+    return (
+      currentTheme.value === "dark" ||
+      currentTheme.value === "high-contrast" ||
+      currentTheme.value === "inverted" ||
+      currentContrastMode.value === "inverted"
+    );
   });
 
   // ========================================

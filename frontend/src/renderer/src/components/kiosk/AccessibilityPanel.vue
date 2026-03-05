@@ -4,12 +4,16 @@ import { useAccessibilityStore } from "@/stores/accessibility";
 import { useThemeStore, AVAILABLE_THEMES, type BrandTheme } from "@/stores/theme";
 import { useTTS } from "@/composables/useTTS";
 import type { FontScale, ContrastMode, A11yPreset } from "@/stores/accessibility";
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 
 const { t } = useI18n();
 const a11yStore = useAccessibilityStore();
 const themeStore = useThemeStore();
 const tts = useTTS();
+
+const A11Y_THEME_IDS = new Set(["high-contrast", "inverted"]);
+const brandThemes = computed(() => AVAILABLE_THEMES.filter((t) => !A11Y_THEME_IDS.has(t.id)));
+const a11yThemes = computed(() => AVAILABLE_THEMES.filter((t) => A11Y_THEME_IDS.has(t.id)));
 
 const emit = defineEmits<{
   close: [];
@@ -123,9 +127,10 @@ onMounted(() => {
         <!-- Theme Selection (화면 모드) -->
         <div class="mb-5">
           <p class="mb-3 text-base font-semibold">{{ t("a11y.contrastMode") }}</p>
-          <div class="grid grid-cols-4 gap-2">
+          <!-- 브랜드 테마 -->
+          <div class="mb-2 grid grid-cols-4 gap-2">
             <button
-              v-for="theme in AVAILABLE_THEMES"
+              v-for="theme in brandThemes"
               :key="theme.id"
               class="flex flex-col items-center rounded-2xl p-2 transition-all"
               :style="
@@ -148,6 +153,40 @@ onMounted(() => {
                 :style="{ background: theme.preview }"
                 aria-hidden="true"
               />
+              <span class="text-[11px] font-medium leading-tight">{{ theme.nameKo }}</span>
+            </button>
+          </div>
+          <!-- 접근성 테마 -->
+          <div class="grid grid-cols-4 gap-2">
+            <button
+              v-for="theme in a11yThemes"
+              :key="theme.id"
+              class="flex flex-col items-center rounded-2xl p-2 transition-all"
+              :style="
+                themeStore.currentTheme === theme.id
+                  ? {
+                      background: 'var(--theme-bg-secondary, #f9fafb)',
+                      outline: '2px solid var(--theme-primary, #8E3524)',
+                      outlineOffset: '-2px',
+                    }
+                  : {
+                      background: 'var(--theme-bg-secondary, #f3f4f6)',
+                      color: 'var(--theme-text, #374151)',
+                    }
+              "
+              :aria-pressed="themeStore.currentTheme === theme.id"
+              @click="selectTheme(theme.id)"
+            >
+              <span class="relative mb-1 h-8 w-8 rounded-full border border-gray-200" aria-hidden="true">
+                <span
+                  class="absolute inset-0 rounded-full"
+                  :style="{ background: theme.preview }"
+                />
+                <svg class="absolute -right-0.5 -top-0.5 h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </span>
               <span class="text-[11px] font-medium leading-tight">{{ theme.nameKo }}</span>
             </button>
           </div>
