@@ -51,7 +51,7 @@ function handleSelect(categoryId: number) {
 </script>
 
 <template>
-  <aside class="flex w-28 flex-col items-center gap-2 overflow-y-auto bg-white py-4 shadow-sm">
+  <aside class="flex w-28 flex-col items-center gap-2 overflow-y-auto py-4 shadow-sm" style="background: var(--theme-surface, #fff)">
     <button
       v-for="category in categories"
       :key="category.id"
@@ -59,22 +59,22 @@ function handleSelect(categoryId: number) {
       :aria-pressed="selectedId === category.id"
       :aria-label="getLocalizedName(category, locale)"
       class="flex w-20 flex-col items-center gap-1 rounded-xl p-2 transition-all"
-      :class="[
+      :style="
         selectedId === category.id
-          ? 'bg-amber-400 text-white shadow-md'
-          : 'text-gray-600 hover:bg-gray-100',
-      ]"
+          ? { background: 'var(--theme-primary)', color: 'var(--theme-primary-text, #fff)', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }
+          : { color: 'var(--theme-text-secondary, #4b5563)' }
+      "
       @click="handleSelect(category.id)"
     >
       <!-- 전체 카테고리 (apps 아이콘) -->
       <div
         v-if="category.id === 0"
         class="flex h-10 w-10 items-center justify-center rounded-full"
-        :class="selectedId === 0 ? 'bg-amber-500' : 'bg-gray-100'"
+        :style="selectedId === 0 ? { background: 'var(--theme-primary-hover, #d97706)' } : { background: 'var(--theme-bg-secondary, #f3f4f6)' }"
       >
         <svg
           class="h-5 w-5"
-          :class="selectedId === 0 ? 'text-white' : 'text-gray-600'"
+          :style="selectedId === 0 ? { color: '#fff' } : { color: 'var(--theme-text-secondary, #4b5563)' }"
           fill="currentColor"
           viewBox="0 0 24 24"
         >
@@ -87,9 +87,14 @@ function handleSelect(categoryId: number) {
       <div
         v-else-if="isPresetIcon(category.imageUrl)"
         class="flex h-10 w-10 items-center justify-center rounded-full"
+        :style="
+          selectedId === category.id
+            ? { background: 'var(--theme-primary-hover, #d97706)' }
+            : {}
+        "
         :class="
           selectedId === category.id
-            ? 'bg-amber-500'
+            ? ''
             : getIconColors(getIconFromUrl(category.imageUrl)).bg
         "
       >
@@ -194,7 +199,7 @@ function handleSelect(categoryId: number) {
       <div
         v-else
         class="h-10 w-10 overflow-hidden rounded-full"
-        :class="selectedId === category.id ? 'ring-2 ring-amber-500' : 'bg-gray-100'"
+        :style="selectedId === category.id ? { outline: '2px solid var(--theme-primary, #8E3524)', outlineOffset: '-2px' } : { background: 'var(--theme-bg-secondary, #f3f4f6)' }"
       >
         <img
           :src="getImageSrc(category.imageUrl)"

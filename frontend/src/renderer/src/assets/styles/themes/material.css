@@ -1,0 +1,128 @@
+/* ====================================
+   POSON Kiosk - Material Design Theme
+   ====================================
+   Google Material Design 3 스타일
+   딥 퍼플 계열의 현대적 디자인
+*/
+
+[data-theme="material"] {
+  /* ========================================
+     색상 (Colors - MD3 Color System)
+     ======================================== */
+
+  /* 배경 (Surface) */
+  --theme-bg: #fffbfe;
+  --theme-bg-secondary: #f3edf7;
+
+  /* 표면 */
+  --theme-surface: #ffffff;
+  --theme-surface-hover: #f7f2fa;
+
+  /* 텍스트 (On Surface) */
+  --theme-text: #1c1b1f;
+  --theme-text-secondary: #49454f;
+  --theme-text-muted: #79747e;
+
+  /* 프라이머리 (Deep Purple - MD3) */
+  --theme-primary: #6750a4;
+  --theme-primary-hover: #7965af;
+  --theme-primary-text: #ffffff;
+
+  /* 액센트 (Tertiary - Pink) */
+  --theme-accent: #7d5260;
+  --theme-accent-hover: #986977;
+
+  /* 테두리 (Outline) */
+  --theme-border: #cac4d0;
+  --theme-border-strong: #79747e;
+
+  /* 상태 색상 (MD3 Semantic Colors) */
+  --theme-success: #4caf50;
+  --theme-error: #b3261e;
+  --theme-warning: #ff9800;
+  --theme-info: #2196f3;
+
+  /* ========================================
+     그라데이션 (Gradients)
+     ======================================== */
+
+  --theme-gradient-welcome: linear-gradient(
+    135deg,
+    #1c1b1f 0%,
+    #2d2a32 25%,
+    #49454f 50%,
+    #6750a4 80%,
+    #7965af 100%
+  );
+
+  --theme-gradient-button: linear-gradient(
+    135deg,
+    var(--theme-primary),
+    color-mix(in srgb, var(--theme-primary) 80%, black)
+  );
+
+  --theme-gradient-overlay: linear-gradient(
+    to bottom,
+    rgba(28, 27, 31, 0.7),
+    rgba(28, 27, 31, 0.3),
+    rgba(28, 27, 31, 0.8)
+  );
+
+  /* ========================================
+     그림자 (Shadows - MD3 Elevation)
+     ======================================== */
+
+  /* MD3 Elevation Levels */
+  --theme-shadow-sm: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --theme-shadow-md: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px rgba(0, 0, 0, 0.3);
+  --theme-shadow-lg: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+  --theme-shadow-xl: 0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.3);
+
+  /* ========================================
+     폰트 (Typography - MD3)
+     ======================================== */
+
+  --theme-font-sans: "Pretendard", "Roboto", system-ui, sans-serif;
+  --theme-font-display: "Pretendard", "Roboto", system-ui, sans-serif;
+
+  /* ========================================
+     반경 (Border Radius - MD3 Shape)
+     ======================================== */
+
+  --theme-radius-sm: 8px;
+  --theme-radius-md: 12px;
+  --theme-radius-lg: 16px;
+  --theme-radius-xl: 28px;
+  --theme-radius-full: 9999px;
+
+  /* ========================================
+     터치 피드백 (Touch Feedback - MD3 State Layer)
+     ======================================== */
+
+  --theme-ripple-color: color-mix(in srgb, var(--theme-primary) 12%, transparent);
+  --theme-press-scale: 0.98;
+  --theme-press-duration: 100ms;
+
+  /* ========================================
+     스크롤바 (Scrollbar)
+     ======================================== */
+
+  --theme-scrollbar-track: transparent;
+  --theme-scrollbar-thumb: #cac4d0;
+  --theme-scrollbar-thumb-hover: #79747e;
+
+  /* ========================================
+     추가 커스텀 토큰 (Material Theme Specific)
+     ======================================== */
+
+  --theme-cream: #fffbfe;
+  --theme-cream-dark: #f3edf7;
+  --theme-glow-primary: rgba(103, 80, 164, 0.4);
+  --theme-glow-accent: rgba(125, 82, 96, 0.5);
+
+  /* MD3 State Layer Opacities */
+  --md3-state-hover: 0.08;
+  --md3-state-focus: 0.12;
+  --md3-state-pressed: 0.12;
+  --md3-state-dragged: 0.16;
+}

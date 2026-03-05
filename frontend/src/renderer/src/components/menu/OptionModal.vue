@@ -133,11 +133,15 @@ function handleBackdropClick(): void {
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
         @click.self="handleBackdropClick"
       >
-        <div class="max-h-[90vh] w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div
+          class="max-h-[90vh] w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl"
+          style="background: var(--theme-surface, #fff)"
+        >
           <!-- Header -->
-          <header class="relative bg-gray-100 p-6">
+          <header class="relative p-6" style="background: var(--theme-bg-secondary, #f3f4f6)">
             <button
-              class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-500 shadow-md hover:bg-gray-100"
+              class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full shadow-md transition-colors"
+              style="background: var(--theme-surface, #fff); color: var(--theme-text-secondary, #64748b)"
               @click="emit('close')"
             >
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -150,18 +154,18 @@ function handleBackdropClick(): void {
               </svg>
             </button>
 
-            <h2 class="text-kiosk-xl font-bold text-gray-900">
+            <h2 class="text-kiosk-xl font-bold" style="color: var(--theme-text, #111827)">
               {{ product.name }}
             </h2>
             <template v-if="product.isDiscount && product.discountPrice">
-              <p class="text-sm text-gray-400 line-through">
+              <p class="text-sm line-through" style="color: var(--theme-text-muted, #9ca3af)">
                 {{ formatPrice(product.sellPrice) }}{{ t("common.currency") }}
               </p>
-              <p class="mt-1 text-kiosk-lg text-red-500">
+              <p class="mt-1 text-kiosk-lg" style="color: var(--theme-error, #ef4444)">
                 {{ formatPrice(product.discountPrice) }}{{ t("common.currency") }}
               </p>
             </template>
-            <p v-else class="mt-1 text-kiosk-lg text-primary-600">
+            <p v-else class="mt-1 text-kiosk-lg" style="color: var(--theme-primary, #8E3524)">
               {{ formatPrice(product.sellPrice) }}{{ t("common.currency") }}
             </p>
           </header>
@@ -170,9 +174,9 @@ function handleBackdropClick(): void {
           <div class="max-h-[50vh] overflow-y-auto p-6">
             <!-- Required Options -->
             <div v-if="requiredOptions.length > 0" class="mb-6">
-              <h3 class="mb-3 flex items-center gap-2 text-kiosk-base font-bold text-gray-900">
+              <h3 class="mb-3 flex items-center gap-2 text-kiosk-base font-bold" style="color: var(--theme-text, #111827)">
                 {{ t("option.requiredSelect") }}
-                <span class="rounded bg-red-100 px-2 py-0.5 text-xs text-red-600">{{
+                <span class="rounded px-2 py-0.5 text-xs" style="background: color-mix(in srgb, var(--theme-error, #ef4444) 15%, transparent); color: var(--theme-error, #ef4444)">{{
                   t("option.required")
                 }}</span>
               </h3>
@@ -181,15 +185,15 @@ function handleBackdropClick(): void {
                   v-for="option in requiredOptions"
                   :key="option.id"
                   class="flex w-full items-center justify-between rounded-xl border-2 p-4 transition-all"
-                  :class="
+                  :style="
                     isOptionSelected(option)
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? { borderColor: 'var(--theme-primary, #8E3524)', background: 'color-mix(in srgb, var(--theme-primary) 10%, transparent)' }
+                      : { borderColor: 'var(--theme-border, #e2e8f0)' }
                   "
                   @click="toggleOption(option)"
                 >
-                  <span class="text-kiosk-base font-medium">{{ option.name }}</span>
-                  <span class="text-kiosk-base text-gray-600">
+                  <span class="text-kiosk-base font-medium" style="color: var(--theme-text, #111827)">{{ option.name }}</span>
+                  <span class="text-kiosk-base" style="color: var(--theme-text-secondary, #64748b)">
                     {{
                       option.price > 0
                         ? `+${formatPrice(option.price)}${t("common.currency")}`
@@ -202,7 +206,7 @@ function handleBackdropClick(): void {
 
             <!-- Optional Options -->
             <div v-if="optionalOptions.length > 0">
-              <h3 class="mb-3 text-kiosk-base font-bold text-gray-900">
+              <h3 class="mb-3 text-kiosk-base font-bold" style="color: var(--theme-text, #111827)">
                 {{ t("option.additionalSelect") }}
               </h3>
               <div class="space-y-2">
@@ -210,15 +214,15 @@ function handleBackdropClick(): void {
                   v-for="option in optionalOptions"
                   :key="option.id"
                   class="flex w-full items-center justify-between rounded-xl border-2 p-4 transition-all"
-                  :class="
+                  :style="
                     isOptionSelected(option)
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? { borderColor: 'var(--theme-primary, #8E3524)', background: 'color-mix(in srgb, var(--theme-primary) 10%, transparent)' }
+                      : { borderColor: 'var(--theme-border, #e2e8f0)' }
                   "
                   @click="toggleOption(option)"
                 >
-                  <span class="text-kiosk-base font-medium">{{ option.name }}</span>
-                  <span class="text-kiosk-base text-gray-600">
+                  <span class="text-kiosk-base font-medium" style="color: var(--theme-text, #111827)">{{ option.name }}</span>
+                  <span class="text-kiosk-base" style="color: var(--theme-text-secondary, #64748b)">
                     {{
                       option.price > 0
                         ? `+${formatPrice(option.price)}${t("common.currency")}`
@@ -231,19 +235,24 @@ function handleBackdropClick(): void {
           </div>
 
           <!-- Footer -->
-          <footer class="border-t border-gray-200 bg-gray-50 p-6">
+          <footer
+            class="border-t p-6"
+            style="border-color: var(--theme-border, #e2e8f0); background: var(--theme-bg-secondary, #f9fafb)"
+          >
             <!-- Quantity -->
             <div class="mb-4 flex items-center justify-center gap-4">
               <button
-                class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-2xl font-bold transition-colors hover:bg-gray-300"
+                class="flex h-12 w-12 items-center justify-center rounded-full text-2xl font-bold transition-colors"
+                style="background: var(--theme-border, #e2e8f0); color: var(--theme-text, #111827)"
                 :disabled="quantity <= 1"
                 @click="decrementQuantity"
               >
                 -
               </button>
-              <span class="w-16 text-center text-kiosk-xl font-bold">{{ quantity }}</span>
+              <span class="w-16 text-center text-kiosk-xl font-bold" style="color: var(--theme-text, #111827)">{{ quantity }}</span>
               <button
-                class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-2xl font-bold text-white transition-colors hover:bg-primary-700"
+                class="flex h-12 w-12 items-center justify-center rounded-full text-2xl font-bold transition-colors"
+                style="background: var(--theme-primary, #8E3524); color: var(--theme-primary-text, #fff)"
                 @click="incrementQuantity"
               >
                 +

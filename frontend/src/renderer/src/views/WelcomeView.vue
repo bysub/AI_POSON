@@ -99,7 +99,7 @@ function handleLogoTap() {
         @click="handleLogoTap"
       >
         <svg
-          class="h-12 w-12 text-primary"
+          class="h-12 w-12 text-theme-primary"
           fill="currentColor"
           viewBox="0 0 24 24"
         >
@@ -131,10 +131,10 @@ function handleLogoTap() {
         @click="startOrder"
       >
         <!-- 버튼 글로우 효과 -->
-        <div class="absolute inset-0 scale-110 rounded-full bg-primary/30 blur-xl" />
+        <div class="absolute inset-0 scale-110 rounded-full bg-theme-primary/30 blur-xl" />
         <!-- 버튼 배경 -->
         <div
-          class="absolute inset-0 rounded-full border-[6px] border-white/30 bg-gradient-to-br from-primary via-primary to-accent shadow-[0_0_50px_rgba(142,53,36,0.5)]"
+          class="absolute inset-0 rounded-full border-[6px] border-white/30 bg-gradient-to-br from-theme-primary via-theme-primary to-theme-accent glow-primary"
         />
         <!-- 버튼 콘텐츠 -->
         <div class="relative z-20 flex flex-col items-center gap-4">
@@ -170,7 +170,7 @@ function handleLogoTap() {
           <p class="text-center text-xs font-bold uppercase tracking-[0.25em] text-cream/80">
             {{ t("language.title", "Language Selection") }}
           </p>
-          <div class="h-1 w-12 rounded-full bg-accent" />
+          <div class="h-1 w-12 rounded-full bg-theme-accent" />
         </div>
 
         <div class="hide-scrollbar flex items-center justify-center gap-5 overflow-x-auto">
@@ -184,7 +184,7 @@ function handleLogoTap() {
               :class="[
                 'size-14 overflow-hidden rounded-full p-0.5 transition-all duration-200',
                 selectedLang === lang.code
-                  ? 'border-[3px] border-accent bg-white/20 shadow-[0_0_14px_rgba(201,98,49,0.6)]'
+                  ? 'border-[3px] border-theme-accent bg-white/20 glow-accent'
                   : 'border-2 border-white/40 bg-white/10 shadow-lg',
               ]"
             >
@@ -198,7 +198,7 @@ function handleLogoTap() {
               :class="[
                 'transition-all duration-200',
                 selectedLang === lang.code
-                  ? 'text-sm font-black text-accent'
+                  ? 'text-sm font-black text-theme-accent'
                   : 'text-[13px] font-bold text-white/90',
               ]"
             >
@@ -217,18 +217,6 @@ function handleLogoTap() {
 </template>
 
 <style scoped>
-.bg-welcome {
-  background: linear-gradient(135deg, #1a0a05 0%, #3d1a0a 25%, #5c2d15 50%, #8e3524 75%, #2d1810 100%);
-  background-size: cover;
-  background-position: center;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+/* bg-welcome 클래스는 components.css로 이동됨 - CSS 변수 사용 */
+/* hide-scrollbar 클래스는 components.css로 이동됨 */
 </style>

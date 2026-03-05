@@ -7,13 +7,61 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' http://localhost:3000 https://flagcdn.com data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 ws://localhost:3000; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
     />
+    <!-- FOUC 방지: 렌더링 전 테마/접근성 설정 적용 -->
+    <script>
+      (function () {
+        try {
+          // 저장된 테마 복원 (VueUse useStorage는 raw string으로 저장)
+          var savedTheme = localStorage.getItem("poson-theme");
+          var theme = savedTheme || "classic";
+          // JSON 파싱된 값일 수 있으므로 따옴표 제거
+          if (theme.charAt(0) === '"') {
+            try { theme = JSON.parse(theme); } catch(e) {}
+          }
+          // "auto" 또는 "light"는 기본 테마로 매핑
+          if (theme === "auto" || theme === "light" || theme === "default") theme = "classic";
+          // 유효한 테마 목록 확인
+          var validThemes = ["classic","modern","modern-red","bootstrap","material","dark","high-contrast","inverted"];
+          if (validThemes.indexOf(theme) === -1) theme = "classic";
+          document.documentElement.dataset.theme = theme;
+
+          // 저장된 대비 모드 복원
+          var savedContrast = localStorage.getItem("poson-contrast");
+          if (savedContrast) {
+            var contrast = JSON.parse(savedContrast);
+            if (contrast && contrast !== "normal") {
+              document.documentElement.dataset.contrast = contrast;
+            }
+          }
+
+          // 시스템 고대비 모드 감지 (사용자 설정이 없을 때만)
+          var followSystemContrast = localStorage.getItem("poson-follow-system-contrast");
+          if (!savedContrast || followSystemContrast === "true") {
+            if (window.matchMedia("(prefers-contrast: more)").matches) {
+              document.documentElement.dataset.contrast = "high";
+            }
+          }
+
+          // 모션 감소 설정
+          var followSystemMotion = localStorage.getItem("poson-follow-system-motion");
+          if (followSystemMotion !== "false") {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+              document.documentElement.dataset.motion = "reduced";
+            }
+          }
+        } catch (e) {
+          // 오류 시 기본 테마 적용
+          document.documentElement.dataset.theme = "classic";
+        }
+      })();
+    </script>
     <link
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap"
       rel="stylesheet"
     />
     <title>POSON Kiosk</title>
   </head>
-  <body class="bg-kiosk-background text-kiosk-text antialiased">
+  <body class="bg-theme text-theme antialiased">
     <div id="app"></div>
     <script type="module" src="./src/main.ts"></script>
   </body>

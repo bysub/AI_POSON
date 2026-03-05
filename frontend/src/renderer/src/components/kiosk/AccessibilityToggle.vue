@@ -9,12 +9,8 @@ const a11yStore = useAccessibilityStore();
 <template>
   <button
     v-if="a11yStore.isEnabled"
-    class="fixed bottom-20 right-4 z-[9990] flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-colors"
-    :class="
-      a11yStore.isHighContrast
-        ? 'bg-[var(--a11y-primary)] text-[var(--a11y-button-text)]'
-        : 'bg-primary text-white'
-    "
+    class="fixed bottom-3 right-4 z-[9990] flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-colors"
+    style="background: var(--theme-primary); color: var(--theme-primary-text, #fff)"
     :aria-label="t('a11y.openSettings')"
     @click="a11yStore.openPanel()"
   >

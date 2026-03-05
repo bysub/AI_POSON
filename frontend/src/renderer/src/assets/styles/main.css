@@ -1,6 +1,23 @@
+/* ====================================
+   POSON Kiosk - Main Stylesheet
+   ====================================
+   Tailwind + 테마 시스템 + 공통 컴포넌트
+*/
+
+/* 테마 시스템 (CSS @import는 반드시 @tailwind 보다 먼저 위치해야 함) */
+@import "./themes/index.css";
+
+/* 공통 컴포넌트 스타일 */
+@import "./components.css";
+
+/* Tailwind 기본 레이어 */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ========================================
+   기본 스타일 (Base Layer)
+   ======================================== */
 
 @layer base {
   html,
@@ -13,76 +30,147 @@
   }
 
   html {
-    font-family: "Pretendard", system-ui, sans-serif;
+    font-family: var(--theme-font-sans, "Pretendard", system-ui, sans-serif);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
   }
 
-  /* Disable text selection for kiosk */
+  /* 키오스크용 텍스트 선택 비활성화 */
   * {
     user-select: none;
     -webkit-user-select: none;
     font-size: 16px;
   }
 
-  /* Allow text selection only in input fields */
+  /* 입력 필드에서만 텍스트 선택 허용 */
   input,
   textarea {
     user-select: text;
     -webkit-user-select: text;
   }
 
-  /* Hide scrollbar but keep functionality */
+  /* 테마 적용 스크롤바 */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--theme-scrollbar-track, transparent);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--theme-scrollbar-thumb, #cbd5e1);
     border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: var(--theme-scrollbar-thumb-hover, #94a3b8);
+  }
+
+  /* 테마 전환 애니메이션 */
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* 모션 감소 모드에서는 전환 비활성화 */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      transition: none;
+    }
+  }
+
+  html[data-motion="reduced"] {
+    transition: none;
   }
 }
 
+/* ========================================
+   컴포넌트 스타일 (Components Layer)
+   ======================================== */
+
 @layer components {
-  /* Kiosk-optimized button sizes */
+  /* 키오스크 최적화 버튼 크기 */
   .btn-kiosk {
     @apply min-h-[3rem] min-w-[3rem] rounded-kiosk px-6 py-3 font-medium transition-colors duration-150;
   }
 
   .btn-kiosk-primary {
-    @apply btn-kiosk bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
+    @apply btn-kiosk;
+    background: var(--theme-primary);
+    color: var(--theme-primary-text);
+  }
+
+  .btn-kiosk-primary:hover {
+    background: var(--theme-primary-hover);
+  }
+
+  .btn-kiosk-primary:active {
+    background: var(--theme-primary-hover);
+    transform: scale(var(--theme-press-scale, 0.97));
   }
 
   .btn-kiosk-secondary {
-    @apply btn-kiosk border border-kiosk-border bg-kiosk-surface text-kiosk-text hover:bg-gray-50 active:bg-gray-100;
+    @apply btn-kiosk;
+    background: var(--theme-surface);
+    color: var(--theme-text);
+    border: 1px solid var(--theme-border);
+  }
+
+  .btn-kiosk-secondary:hover {
+    background: var(--theme-surface-hover);
+  }
+
+  .btn-kiosk-secondary:active {
+    transform: scale(var(--theme-press-scale, 0.97));
   }
 
   .btn-kiosk-danger {
-    @apply btn-kiosk bg-red-500 text-white hover:bg-red-600 active:bg-red-700;
+    @apply btn-kiosk;
+    background: var(--theme-error);
+    color: white;
   }
 
-  /* Card component */
+  .btn-kiosk-danger:hover {
+    filter: brightness(0.9);
+  }
+
+  /* 카드 컴포넌트 */
   .card-kiosk {
-    @apply rounded-kiosk border border-kiosk-border bg-kiosk-surface shadow-sm;
+    @apply rounded-kiosk;
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
+    box-shadow: var(--theme-shadow-sm);
   }
 
-  /* Input field */
+  /* 입력 필드 */
   .input-kiosk {
-    @apply min-h-[3rem] w-full rounded-kiosk border border-kiosk-border bg-white px-4 py-3 text-kiosk-text placeholder-kiosk-muted transition-shadow focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500;
+    @apply min-h-[3rem] w-full rounded-kiosk px-4 py-3;
+    background: var(--theme-surface);
+    color: var(--theme-text);
+    border: 1px solid var(--theme-border);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .input-kiosk::placeholder {
+    color: var(--theme-text-muted);
+  }
+
+  .input-kiosk:focus {
+    outline: none;
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-primary) 20%, transparent);
   }
 }
 
+/* ========================================
+   유틸리티 스타일 (Utilities Layer)
+   ======================================== */
+
 @layer utilities {
-  /* Touch-friendly tap area */
+  /* 터치 친화적 탭 영역 */
   .touch-area {
     @apply relative;
   }
@@ -96,24 +184,70 @@
     left: -8px;
   }
 
-  /* Grid layout for menu items */
+  /* 메뉴 아이템 그리드 레이아웃 */
   .menu-grid {
     @apply grid gap-4;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 
-  /* Animation utilities */
+  /* 애니메이션 유틸리티 */
   .animate-press {
     @apply transition-transform duration-75 active:scale-95;
   }
+
+  /* 테마 기반 텍스트 색상 유틸리티 */
+  .text-theme {
+    color: var(--theme-text);
+  }
+
+  .text-theme-secondary {
+    color: var(--theme-text-secondary);
+  }
+
+  .text-theme-muted {
+    color: var(--theme-text-muted);
+  }
+
+  .text-theme-primary {
+    color: var(--theme-primary);
+  }
+
+  /* 테마 기반 배경색 유틸리티 */
+  .bg-theme {
+    background: var(--theme-bg);
+  }
+
+  .bg-theme-secondary {
+    background: var(--theme-bg-secondary);
+  }
+
+  .bg-theme-surface {
+    background: var(--theme-surface);
+  }
+
+  .bg-theme-primary {
+    background: var(--theme-primary);
+  }
+
+  /* 테마 기반 테두리 유틸리티 */
+  .border-theme {
+    border-color: var(--theme-border);
+  }
+
+  .border-theme-strong {
+    border-color: var(--theme-border-strong);
+  }
 }
 
-/* ========== SweetAlert2 Custom Styles ========== */
+/* ========================================
+   SweetAlert2 커스텀 스타일
+   ======================================== */
 
 .custom-confirm-popup {
   max-width: 360px !important;
   padding: 1.5rem !important;
-  border-radius: 12px !important;
+  border-radius: var(--theme-radius-lg, 12px) !important;
+  background: var(--theme-surface) !important;
 }
 
 .confirm-content {
@@ -141,7 +275,7 @@
 .confirm-text {
   font-size: 1rem;
   font-weight: 500;
-  color: #1f2937;
+  color: var(--theme-text, #1f2937);
 }
 
 .custom-confirm-btn,
@@ -149,8 +283,19 @@
   min-width: 80px !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
-  border-radius: 8px !important;
+  border-radius: var(--theme-radius-md, 8px) !important;
   padding: 0.5rem 1.25rem !important;
+}
+
+.custom-confirm-btn {
+  background: var(--theme-primary) !important;
+  color: var(--theme-primary-text) !important;
+}
+
+.custom-cancel-btn {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border: 1px solid var(--theme-border) !important;
 }
 
 /* SweetAlert2 Toast z-index */

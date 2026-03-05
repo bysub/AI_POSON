@@ -107,8 +107,8 @@ const sttStatus = computed(() => voice?.sttStatus.value ?? "idle");
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  background-color: #6b7280;
-  color: white;
+  background-color: var(--theme-primary, #8E3524);
+  color: var(--theme-primary-text, white);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
@@ -117,16 +117,16 @@ const sttStatus = computed(() => voice?.sttStatus.value ?? "idle");
 }
 
 .voice-mic-btn--listening {
-  background-color: #ef4444;
+  background-color: var(--theme-error, #ef4444);
 }
 
 .voice-mic-btn--processing {
-  background-color: #f97316;
+  background-color: var(--theme-warning, #f97316);
 }
 
 .voice-mic-btn--error {
-  background-color: #6b7280;
-  border: 2px solid #ef4444;
+  background-color: var(--theme-text-secondary, #6b7280);
+  border: 2px solid var(--theme-error, #ef4444);
 }
 
 /* 펄스 애니메이션 */

@@ -1,0 +1,120 @@
+/* ====================================
+   POSON Kiosk - Modern Theme
+   ====================================
+   모던 미니멀 디자인 (차분한 블루그레이 계열)
+   깔끔하고 세련된 현대적 느낌
+*/
+
+[data-theme="modern"] {
+  /* ========================================
+     색상 (Colors)
+     ======================================== */
+
+  /* 배경 */
+  --theme-bg: #f8fafc;
+  --theme-bg-secondary: #f1f5f9;
+
+  /* 표면 */
+  --theme-surface: #ffffff;
+  --theme-surface-hover: #f8fafc;
+
+  /* 텍스트 */
+  --theme-text: #0f172a;
+  --theme-text-secondary: #475569;
+  --theme-text-muted: #94a3b8;
+
+  /* 프라이머리 (모던 인디고) */
+  --theme-primary: #4f46e5;
+  --theme-primary-hover: #4338ca;
+  --theme-primary-text: #ffffff;
+
+  /* 액센트 (사이언) */
+  --theme-accent: #06b6d4;
+  --theme-accent-hover: #0891b2;
+
+  /* 테두리 */
+  --theme-border: #e2e8f0;
+  --theme-border-strong: #cbd5e1;
+
+  /* 상태 색상 */
+  --theme-success: #10b981;
+  --theme-error: #ef4444;
+  --theme-warning: #f59e0b;
+  --theme-info: #3b82f6;
+
+  /* ========================================
+     그라데이션 (Gradients)
+     ======================================== */
+
+  --theme-gradient-welcome: linear-gradient(
+    135deg,
+    #0f172a 0%,
+    #1e293b 30%,
+    #334155 60%,
+    #4f46e5 100%
+  );
+
+  --theme-gradient-button: linear-gradient(
+    135deg,
+    var(--theme-primary),
+    var(--theme-accent)
+  );
+
+  --theme-gradient-overlay: linear-gradient(
+    to bottom,
+    rgba(15, 23, 42, 0.7),
+    rgba(15, 23, 42, 0.3),
+    rgba(15, 23, 42, 0.8)
+  );
+
+  /* ========================================
+     그림자 (Shadows)
+     ======================================== */
+
+  --theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --theme-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+
+  /* ========================================
+     폰트 (Typography)
+     ======================================== */
+
+  --theme-font-sans: "Pretendard", "Inter", system-ui, -apple-system, sans-serif;
+  --theme-font-display: "Pretendard", "Inter", system-ui, sans-serif;
+
+  /* ========================================
+     반경 (Border Radius)
+     ======================================== */
+
+  --theme-radius-sm: 6px;
+  --theme-radius-md: 10px;
+  --theme-radius-lg: 16px;
+  --theme-radius-xl: 24px;
+  --theme-radius-full: 9999px;
+
+  /* ========================================
+     터치 피드백 (Touch Feedback)
+     ======================================== */
+
+  --theme-ripple-color: color-mix(in srgb, var(--theme-primary) 25%, transparent);
+  --theme-press-scale: 0.98;
+  --theme-press-duration: 80ms;
+
+  /* ========================================
+     스크롤바 (Scrollbar)
+     ======================================== */
+
+  --theme-scrollbar-track: transparent;
+  --theme-scrollbar-thumb: #cbd5e1;
+  --theme-scrollbar-thumb-hover: #94a3b8;
+
+  /* ========================================
+     추가 커스텀 토큰 (Modern Theme Specific)
+     ======================================== */
+
+  --theme-cream: #f8fafc;
+  --theme-cream-dark: #f1f5f9;
+  --theme-glow-primary: rgba(79, 70, 229, 0.4);
+  --theme-glow-accent: rgba(6, 182, 212, 0.5);
+}

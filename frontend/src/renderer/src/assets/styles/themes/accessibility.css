@@ -1,0 +1,372 @@
+/* ====================================
+   POSON Kiosk - Accessibility Themes
+   ====================================
+   WCAG 2.1 AAA 준수 접근성 테마
+   고대비, 반전대비, 시스템 감지 지원
+*/
+
+/* ========================================
+   고대비 모드 (High Contrast)
+   WCAG AAA: 텍스트/배경 대비율 7:1 이상
+   ======================================== */
+
+[data-contrast="high"],
+[data-theme="high-contrast"] {
+  /* 배경 (순수 검정) */
+  --theme-bg: #000000;
+  --theme-bg-secondary: #0a0a0a;
+
+  /* 표면 */
+  --theme-surface: #000000;
+  --theme-surface-hover: #1a1a1a;
+
+  /* 텍스트 (순수 흰색 - 대비율 21:1) */
+  --theme-text: #ffffff;
+  --theme-text-secondary: #f0f0f0;
+  --theme-text-muted: #cccccc;
+
+  /* 프라이머리 (노란색 - 고대비용) */
+  --theme-primary: #ffff00;
+  --theme-primary-hover: #e6e600;
+  --theme-primary-text: #000000;
+
+  /* 액센트 (시안 - 고대비용) */
+  --theme-accent: #00ffff;
+  --theme-accent-hover: #00e6e6;
+
+  /* 테두리 (밝은 색) */
+  --theme-border: #ffffff;
+  --theme-border-strong: #ffffff;
+
+  /* 상태 색상 (고대비용) */
+  --theme-success: #00ff00;
+  --theme-error: #ff3333;
+  --theme-warning: #ffff00;
+  --theme-info: #00ccff;
+
+  /* 그라데이션 (단순화) */
+  --theme-gradient-welcome: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #333333 100%);
+  --theme-gradient-button: var(--theme-primary);
+  --theme-gradient-overlay: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.95));
+
+  /* 그림자 (비활성화 - 경계선으로 대체) */
+  --theme-shadow-sm: none;
+  --theme-shadow-md: none;
+  --theme-shadow-lg: none;
+  --theme-shadow-xl: none;
+
+  /* 반경 (줄임) */
+  --theme-radius-sm: 2px;
+  --theme-radius-md: 4px;
+  --theme-radius-lg: 8px;
+  --theme-radius-xl: 12px;
+
+  /* 터치 피드백 */
+  --theme-ripple-color: rgba(255, 255, 0, 0.5);
+  --theme-press-scale: 0.98;
+  --theme-press-duration: 50ms;
+
+  /* 스크롤바 */
+  --theme-scrollbar-track: #000000;
+  --theme-scrollbar-thumb: #ffffff;
+  --theme-scrollbar-thumb-hover: #ffff00;
+
+  /* 추가 */
+  --theme-cream: #000000;
+  --theme-cream-dark: #0a0a0a;
+  --theme-glow-primary: rgba(255, 255, 0, 0.7);
+  --theme-glow-accent: rgba(0, 255, 255, 0.7);
+}
+
+/* 고대비 모드 추가 스타일 */
+[data-contrast="high"] *,
+[data-theme="high-contrast"] * {
+  /* 모든 텍스트에 강제 대비 */
+  text-shadow: none !important;
+}
+
+[data-contrast="high"] button,
+[data-contrast="high"] a,
+[data-contrast="high"] input,
+[data-theme="high-contrast"] button,
+[data-theme="high-contrast"] a,
+[data-theme="high-contrast"] input {
+  /* 포커스 링 강화 */
+  outline-offset: 3px !important;
+}
+
+[data-contrast="high"] button:focus-visible,
+[data-contrast="high"] a:focus-visible,
+[data-contrast="high"] input:focus-visible,
+[data-theme="high-contrast"] button:focus-visible,
+[data-theme="high-contrast"] a:focus-visible,
+[data-theme="high-contrast"] input:focus-visible {
+  outline: 3px solid #ffff00 !important;
+}
+
+/* ========================================
+   반전대비 모드 (Inverted Contrast)
+   어두운 배경에 밝은 텍스트
+   ======================================== */
+
+[data-contrast="inverted"],
+[data-theme="inverted"] {
+  /* 배경 (어두운 블루그레이) */
+  --theme-bg: #0f172a;
+  --theme-bg-secondary: #1e293b;
+
+  /* 표면 */
+  --theme-surface: #1e293b;
+  --theme-surface-hover: #334155;
+
+  /* 텍스트 */
+  --theme-text: #f8fafc;
+  --theme-text-secondary: #e2e8f0;
+  --theme-text-muted: #94a3b8;
+
+  /* 프라이머리 (밝은 블루) */
+  --theme-primary: #60a5fa;
+  --theme-primary-hover: #93c5fd;
+  --theme-primary-text: #0f172a;
+
+  /* 액센트 (오렌지) */
+  --theme-accent: #fb923c;
+  --theme-accent-hover: #fdba74;
+
+  /* 테두리 */
+  --theme-border: #475569;
+  --theme-border-strong: #64748b;
+
+  /* 상태 색상 */
+  --theme-success: #4ade80;
+  --theme-error: #f87171;
+  --theme-warning: #fbbf24;
+  --theme-info: #60a5fa;
+
+  /* 그라데이션 */
+  --theme-gradient-welcome: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%);
+  --theme-gradient-button: linear-gradient(135deg, var(--theme-primary), var(--theme-accent));
+  --theme-gradient-overlay: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.9));
+
+  /* 그림자 (어두운 배경용) */
+  --theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+  --theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  --theme-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+
+  /* 반경 */
+  --theme-radius-sm: 4px;
+  --theme-radius-md: 8px;
+  --theme-radius-lg: 16px;
+  --theme-radius-xl: 24px;
+
+  /* 터치 피드백 */
+  --theme-ripple-color: rgba(96, 165, 250, 0.4);
+  --theme-press-scale: 0.97;
+  --theme-press-duration: 100ms;
+
+  /* 스크롤바 */
+  --theme-scrollbar-track: #1e293b;
+  --theme-scrollbar-thumb: #64748b;
+  --theme-scrollbar-thumb-hover: #94a3b8;
+
+  /* 추가 */
+  --theme-cream: #1e293b;
+  --theme-cream-dark: #0f172a;
+  --theme-glow-primary: rgba(96, 165, 250, 0.5);
+  --theme-glow-accent: rgba(251, 146, 60, 0.5);
+}
+
+/* ========================================
+   Windows 고대비 모드 (forced-colors)
+   시스템 고대비 모드 감지 및 지원
+   ======================================== */
+
+@media (forced-colors: active) {
+  /* 버튼 스타일 강제 조정 */
+  .btn-kiosk,
+  .btn-kiosk-primary,
+  .btn-kiosk-secondary,
+  .btn-kiosk-danger,
+  .btn-theme-primary,
+  .btn-theme-accent,
+  .btn-theme-outline {
+    background-color: ButtonFace !important;
+    color: ButtonText !important;
+    border: 2px solid ButtonText !important;
+    forced-color-adjust: none;
+  }
+
+  .btn-kiosk-primary:hover,
+  .btn-theme-primary:hover {
+    background-color: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  /* 카드/표면 스타일 */
+  .card-kiosk,
+  .card-theme {
+    border: 2px solid CanvasText !important;
+    background-color: Canvas !important;
+  }
+
+  /* 입력 필드 */
+  .input-kiosk {
+    border: 2px solid CanvasText !important;
+    background-color: Field !important;
+    color: FieldText !important;
+  }
+
+  .input-kiosk:focus {
+    outline: 3px solid Highlight !important;
+    outline-offset: 2px;
+  }
+
+  /* SVG 아이콘 */
+  svg {
+    fill: currentColor !important;
+  }
+
+  /* 링크 */
+  a {
+    color: LinkText !important;
+  }
+
+  a:visited {
+    color: VisitedText !important;
+  }
+
+  /* 선택된 항목 */
+  [aria-selected="true"],
+  [data-selected="true"],
+  .selected {
+    background-color: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  /* 비활성화된 요소 */
+  [disabled],
+  .disabled {
+    color: GrayText !important;
+    border-color: GrayText !important;
+  }
+}
+
+/* ========================================
+   모션 감소 모드 (Reduced Motion)
+   prefers-reduced-motion 미디어 쿼리 지원
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* 스피너는 느리게 */
+  .loading-spinner {
+    animation-duration: 2s !important;
+  }
+}
+
+/* data-motion 속성으로 수동 제어 */
+[data-motion="reduced"] *,
+[data-motion="reduced"] ::before,
+[data-motion="reduced"] ::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ========================================
+   대비 감소 모드 (Low Contrast)
+   눈의 피로를 줄이는 부드러운 대비
+   ======================================== */
+
+[data-contrast="low"] {
+  /* 배경 (부드러운 그레이) */
+  --theme-bg: #f5f5f5;
+  --theme-bg-secondary: #ebebeb;
+
+  /* 표면 */
+  --theme-surface: #fafafa;
+  --theme-surface-hover: #f5f5f5;
+
+  /* 텍스트 (부드러운 그레이) */
+  --theme-text: #4a4a4a;
+  --theme-text-secondary: #6b6b6b;
+  --theme-text-muted: #8c8c8c;
+
+  /* 프라이머리 (부드러운 버전) */
+  --theme-primary: #a67c6d;
+  --theme-primary-hover: #8f6a5c;
+  --theme-primary-text: #ffffff;
+
+  /* 테두리 */
+  --theme-border: #d9d9d9;
+  --theme-border-strong: #c2c2c2;
+
+  /* 상태 색상 (부드러운 버전) */
+  --theme-success: #7cb97c;
+  --theme-error: #d9817a;
+  --theme-warning: #d9b87a;
+  --theme-info: #7aabd9;
+}
+
+/* ========================================
+   시스템 대비 설정 자동 감지
+   ======================================== */
+
+/* 시스템에서 고대비 선호 시 */
+@media (prefers-contrast: more) {
+  :root:not([data-contrast]) {
+    /* 테마 스토어에서 처리하므로 여기서는 힌트만 제공 */
+  }
+}
+
+/* 시스템에서 저대비 선호 시 */
+@media (prefers-contrast: less) {
+  :root:not([data-contrast]) {
+    /* 테마 스토어에서 처리 */
+  }
+}
+
+/* ========================================
+   포커스 링 강화 (Focus Visible)
+   키보드 탐색 시 명확한 포커스 표시
+   ======================================== */
+
+/* 모든 테마에서 공통 포커스 스타일 */
+:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+/* 고대비 모드에서는 더 강한 포커스 */
+[data-contrast="high"] :focus-visible,
+[data-theme="high-contrast"] :focus-visible {
+  outline: 3px solid #ffff00;
+  outline-offset: 3px;
+}
+
+/* 스킵 링크 스타일 */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--theme-primary);
+  color: var(--theme-primary-text);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--theme-radius-md);
+  z-index: 10000;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}

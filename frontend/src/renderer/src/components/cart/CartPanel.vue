@@ -45,12 +45,12 @@ function itemName(item: CartItem): string {
 </script>
 
 <template>
-  <div class="flex h-full flex-col bg-white">
+  <div class="flex h-full flex-col" style="background: var(--theme-surface, #fff)">
     <!-- Header -->
-    <header class="border-b border-gray-200 px-6 py-4">
-      <h2 class="text-kiosk-xl font-bold text-gray-900">
+    <header class="border-b px-6 py-4" style="border-color: var(--theme-border, #e5e7eb)">
+      <h2 class="text-kiosk-xl font-bold" style="color: var(--theme-text, #111827)">
         {{ t("cart.title") }}
-        <span v-if="cartStore.totalItems > 0" class="text-primary-600">
+        <span v-if="cartStore.totalItems > 0" style="color: var(--theme-primary, #8E3524)">
           ({{ cartStore.totalItems }})
         </span>
       </h2>
@@ -61,7 +61,8 @@ function itemName(item: CartItem): string {
       <!-- Empty Cart -->
       <div
         v-if="cartStore.isEmpty"
-        class="flex h-full flex-col items-center justify-center gap-4 text-gray-400"
+        class="flex h-full flex-col items-center justify-center gap-4"
+        style="color: var(--theme-text-muted, #9ca3af)"
       >
         <svg class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -81,10 +82,11 @@ function itemName(item: CartItem): string {
         <li
           v-for="item in cartStore.items"
           :key="item.id"
-          class="flex gap-4 rounded-xl bg-gray-50 p-4"
+          class="flex gap-4 rounded-xl p-4"
+          style="background: var(--theme-bg-secondary, #f9fafb)"
         >
           <!-- Item Image -->
-          <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200">
+          <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg" style="background: var(--theme-bg-secondary, #e5e7eb)">
             <img
               v-if="item.imageUrl"
               :src="getImageSrc(item.imageUrl)"
@@ -93,7 +95,8 @@ function itemName(item: CartItem): string {
             />
             <div
               v-else
-              class="flex h-full w-full items-center justify-center text-2xl text-gray-400"
+              class="flex h-full w-full items-center justify-center text-2xl"
+              style="color: var(--theme-text-muted, #9ca3af)"
             >
               {{ itemName(item).charAt(0) }}
             </div>
@@ -102,10 +105,10 @@ function itemName(item: CartItem): string {
           <!-- Item Info -->
           <div class="flex flex-1 flex-col justify-between">
             <div>
-              <h3 class="text-kiosk-base font-medium text-gray-900">
+              <h3 class="text-kiosk-base font-medium" style="color: var(--theme-text, #111827)">
                 {{ itemName(item) }}
               </h3>
-              <p class="text-kiosk-sm text-gray-500">
+              <p class="text-kiosk-sm" style="color: var(--theme-text-secondary, #6b7280)">
                 {{ formatPrice(item.price) }}{{ t("common.currency") }}
               </p>
             </div>
@@ -114,7 +117,8 @@ function itemName(item: CartItem): string {
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <button
-                  class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-xl font-bold transition-colors hover:bg-gray-300 active:bg-gray-400"
+                  class="flex h-10 w-10 items-center justify-center rounded-full text-xl font-bold transition-colors"
+                  style="background: var(--theme-bg-secondary, #e5e7eb); color: var(--theme-text, #111827)"
                   @click="decrementQuantity(item.id, item.quantity)"
                 >
                   -
@@ -123,7 +127,8 @@ function itemName(item: CartItem): string {
                   {{ item.quantity }}
                 </span>
                 <button
-                  class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-600 text-xl font-bold text-white transition-colors hover:bg-primary-700 active:bg-primary-800"
+                  class="flex h-10 w-10 items-center justify-center rounded-full text-xl font-bold transition-colors"
+                  style="background: var(--theme-primary, #8E3524); color: var(--theme-primary-text, #fff)"
                   @click="incrementQuantity(item.id, item.quantity)"
                 >
                   +
@@ -132,7 +137,8 @@ function itemName(item: CartItem): string {
 
               <!-- Remove Button -->
               <button
-                class="text-kiosk-sm text-red-500 hover:text-red-600"
+                class="text-kiosk-sm"
+                style="color: var(--theme-error, #ef4444)"
                 @click="removeItem(item.id)"
               >
                 {{ t("cart.delete") }}
@@ -142,7 +148,7 @@ function itemName(item: CartItem): string {
 
           <!-- Item Total -->
           <div class="flex flex-col items-end justify-center">
-            <span class="text-kiosk-lg font-bold text-primary-600">
+            <span class="text-kiosk-lg font-bold" style="color: var(--theme-primary, #8E3524)">
               {{ formatPrice(item.price * item.quantity) }}{{ t("common.currency") }}
             </span>
           </div>
@@ -151,11 +157,11 @@ function itemName(item: CartItem): string {
     </div>
 
     <!-- Footer -->
-    <footer class="border-t border-gray-200 bg-gray-50 p-6">
+    <footer class="border-t p-6" style="border-color: var(--theme-border, #e5e7eb); background: var(--theme-bg-secondary, #f9fafb)">
       <!-- Total -->
       <div class="mb-4 flex items-center justify-between">
-        <span class="text-kiosk-lg text-gray-600">{{ t("cart.total") }}</span>
-        <span class="text-kiosk-2xl font-bold text-primary-600">
+        <span class="text-kiosk-lg" style="color: var(--theme-text-secondary, #4b5563)">{{ t("cart.total") }}</span>
+        <span class="text-kiosk-2xl font-bold" style="color: var(--theme-primary, #8E3524)">
           {{ formatPrice(cartStore.totalAmount) }}
           <span class="text-kiosk-lg font-normal">{{ t("common.currency") }}</span>
         </span>

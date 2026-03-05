@@ -1,0 +1,125 @@
+/* ====================================
+   POSON Kiosk Design Token Reference
+   ====================================
+
+   이 파일은 테마 시스템에서 사용하는 모든 CSS Custom Properties의
+   참조 문서입니다. 각 테마 파일에서 이 변수들을 정의해야 합니다.
+*/
+
+/* ========================================
+   필수 디자인 토큰 (Required Tokens)
+   ======================================== */
+
+/*
+  색상 (Colors)
+  ─────────────────────────────────────────
+  --theme-bg                    페이지 배경
+  --theme-bg-secondary          섹션/카드 외부 배경
+  --theme-surface               카드/모달 내부 배경
+  --theme-surface-hover         호버 상태 배경
+  --theme-text                  주요 텍스트
+  --theme-text-secondary        보조 텍스트
+  --theme-text-muted            비활성/플레이스홀더 텍스트
+  --theme-primary               주요 액션 버튼/링크
+  --theme-primary-hover         주요 액션 호버 상태
+  --theme-primary-text          주요 버튼 내 텍스트
+  --theme-accent                강조색/보조 액션
+  --theme-accent-hover          강조색 호버 상태
+  --theme-border                기본 테두리
+  --theme-border-strong         강조 테두리/포커스 링
+  --theme-success               성공 상태
+  --theme-error                 에러 상태
+  --theme-warning               경고 상태
+  --theme-info                  정보 상태
+
+  그라데이션 (Gradients)
+  ─────────────────────────────────────────
+  --theme-gradient-welcome      웰컴 페이지 배경 그라데이션
+  --theme-gradient-button       버튼 그라데이션 (선택사항)
+  --theme-gradient-overlay      오버레이 그라데이션
+
+  그림자 (Shadows)
+  ─────────────────────────────────────────
+  --theme-shadow-sm             작은 그림자 (4dp)
+  --theme-shadow-md             중간 그림자 (8dp)
+  --theme-shadow-lg             큰 그림자 (16dp)
+  --theme-shadow-xl             매우 큰 그림자 (24dp)
+
+  폰트 (Typography)
+  ─────────────────────────────────────────
+  --theme-font-sans             기본 산세리프 폰트
+  --theme-font-display          디스플레이/타이틀 폰트
+
+  반경 (Border Radius)
+  ─────────────────────────────────────────
+  --theme-radius-sm             작은 반경 (4px)
+  --theme-radius-md             중간 반경 (8px)
+  --theme-radius-lg             큰 반경 (16px)
+  --theme-radius-xl             매우 큰 반경 (24px)
+  --theme-radius-full           완전한 원형 (9999px)
+
+  터치 피드백 (Touch Feedback)
+  ─────────────────────────────────────────
+  --theme-ripple-color          터치 리플 효과 색상
+  --theme-press-scale           터치 시 스케일 (0.97)
+  --theme-press-duration        터치 애니메이션 지속시간 (100ms)
+
+  간격 (Spacing) - 선택사항
+  ─────────────────────────────────────────
+  --theme-spacing-xs            4px
+  --theme-spacing-sm            8px
+  --theme-spacing-md            16px
+  --theme-spacing-lg            24px
+  --theme-spacing-xl            32px
+
+  스크롤바 (Scrollbar)
+  ─────────────────────────────────────────
+  --theme-scrollbar-track       스크롤바 트랙 배경
+  --theme-scrollbar-thumb       스크롤바 썸 색상
+  --theme-scrollbar-thumb-hover 스크롤바 썸 호버 색상
+*/
+
+/* ========================================
+   테마 적용 방법
+   ======================================== */
+
+/*
+  1. data-theme 속성으로 테마 전환
+     <html data-theme="modern">
+
+  2. data-contrast 속성으로 접근성 모드
+     <html data-theme="default" data-contrast="high">
+
+  3. data-motion 속성으로 모션 감소
+     <html data-theme="default" data-motion="reduced">
+
+  4. CSS에서 변수 사용
+     .button {
+       background: var(--theme-primary);
+       color: var(--theme-primary-text);
+     }
+
+  5. Tailwind에서 사용 (tailwind.config.js 설정 후)
+     <button class="bg-theme-primary text-theme-primary-text">
+*/
+
+/* ========================================
+   사용 가능한 테마 목록
+   ======================================== */
+
+/*
+  브랜드 테마 (Brand Themes)
+  ─────────────────────────────────────────
+  - default       현재 POSON 브랜드 (따뜻한 브라운)
+  - modern        모던 미니멀 (차분한 블루그레이)
+  - modern-red    모던 레드 (세련된 레드)
+  - classic       클래식 (전통적 골드/우드)
+  - bootstrap     부트스트랩 스타일 (블루)
+  - material      머티리얼 디자인 (딥 퍼플)
+  - dark          다크 모드
+
+  접근성 테마 (Accessibility Themes)
+  ─────────────────────────────────────────
+  - high-contrast   고대비 모드 (WCAG AAA)
+  - inverted        반전대비 모드
+*/

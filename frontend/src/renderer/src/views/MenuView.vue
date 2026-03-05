@@ -232,7 +232,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex h-full flex-col bg-cream">
+  <div class="flex h-full flex-col" style="background: var(--theme-bg, #FDF9F3)">
     <!-- Screen Reader + TTS aria-live 공지 영역 -->
     <div
       aria-live="polite"
@@ -243,9 +243,10 @@ onMounted(async () => {
     </div>
 
     <!-- Header -->
-    <header class="flex items-center justify-between bg-white px-4 py-3 shadow-sm">
+    <header class="flex items-center justify-between px-4 py-3 shadow-sm" style="background: var(--theme-surface, #fff)">
       <button
-        class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-white"
+        class="flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors"
+        :style="{ borderColor: 'var(--theme-primary, #8E3524)', color: 'var(--theme-primary, #8E3524)' }"
         @click="router.push('/')"
       >
         <svg
@@ -263,7 +264,7 @@ onMounted(async () => {
         </svg>
       </button>
 
-      <h1 class="text-xl font-bold text-gray-900">
+      <h1 class="text-xl font-bold" style="color: var(--theme-text, #111827)">
         {{ settingsStore.get("biz.name") || "POSON Kiosk" }}
       </h1>
 
@@ -287,7 +288,8 @@ onMounted(async () => {
           class="flex h-full items-center justify-center"
         >
           <div
-            class="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary"
+            class="h-10 w-10 animate-spin rounded-full border-4"
+            style="border-color: var(--theme-border, #e2e8f0); border-top-color: var(--theme-primary, #8E3524)"
           />
         </div>
 
@@ -302,7 +304,8 @@ onMounted(async () => {
             role="button"
             :tabindex="isUnavailable(product) ? -1 : 0"
             :aria-label="`${getLocalizedName(product, locale.value)}, ${formatPrice(Number(product.discountPrice || product.sellPrice))}${isUnavailable(product) ? ', ' + (product.status === 'PENDING' ? t('menu.preparing') : t('menu.soldOut')) : ''}`"
-            class="group relative flex flex-col overflow-hidden rounded-2xl bg-rose-50 shadow-sm transition-all"
+            class="group relative flex flex-col overflow-hidden rounded-2xl shadow-sm transition-all"
+            style="background: var(--theme-surface, #fff)"
             :class="[
               isUnavailable(product) ? 'opacity-60' : 'cursor-pointer hover:shadow-lg',
               voiceCommand.highlightedProductId.value === product.id ? 'voice-highlight' : '',
@@ -318,7 +321,7 @@ onMounted(async () => {
             </div>
 
             <!-- Product Image -->
-            <div class="relative aspect-square bg-rose-100/50">
+            <div class="relative aspect-square" style="background: var(--theme-bg-secondary, #f5ede0)">
               <img
                 v-if="product.imageUrl"
                 :src="getImageSrc(product.imageUrl)"
@@ -348,22 +351,23 @@ onMounted(async () => {
 
             <!-- Product Info -->
             <div class="flex flex-1 flex-col p-3">
-              <h3 class="mb-1 line-clamp-1 text-sm font-bold text-gray-900">
+              <h3 class="mb-1 line-clamp-1 text-sm font-bold" style="color: var(--theme-text, #111827)">
                 {{ getLocalizedName(product, locale.value) }}
               </h3>
               <!-- 할인 상품: 원가 취소선 + 할인가 표시 -->
               <template v-if="product.isDiscount && product.discountPrice">
-                <p class="text-xs text-gray-400 line-through">
+                <p class="text-xs line-through" style="color: var(--theme-text-muted, #94a3b8)">
                   {{ formatPrice(product.sellPrice) }}
                 </p>
-                <p class="text-base font-bold text-red-500">
+                <p class="text-base font-bold" style="color: var(--theme-primary, #8E3524)">
                   {{ formatPrice(product.discountPrice) }}
                 </p>
               </template>
               <!-- 일반 상품: 판매가 표시 -->
               <p
                 v-else
-                class="text-base font-bold text-red-500"
+                class="text-base font-bold"
+                style="color: var(--theme-primary, #8E3524)"
               >
                 {{ formatPrice(product.sellPrice) }}
               </p>
@@ -372,7 +376,8 @@ onMounted(async () => {
             <!-- Add Button -->
             <button
               v-if="!isUnavailable(product)"
-              class="flex items-center justify-center gap-1 bg-red-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-600 active:bg-red-700"
+              class="flex items-center justify-center gap-1 py-2.5 text-sm font-medium text-white transition-colors"
+              style="background: var(--theme-primary, #ef4444)"
               @click.stop="handleAddToCart(product)"
             >
               <svg
@@ -405,7 +410,8 @@ onMounted(async () => {
     <Transition name="slide-fade">
       <div
         v-if="showToast"
-        class="fixed right-4 top-16 z-50 flex items-center gap-3 rounded-lg bg-green-500 px-4 py-3 text-white shadow-lg"
+        class="fixed right-4 top-16 z-50 flex items-center gap-3 rounded-lg px-4 py-3 text-white shadow-lg"
+        style="background: var(--theme-success, #22c55e)"
       >
         <svg
           class="h-5 w-5"
