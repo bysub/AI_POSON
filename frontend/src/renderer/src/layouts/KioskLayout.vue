@@ -81,12 +81,17 @@ onUnmounted(() => {
         :aria-label="t('idle.warningTitle')"
         class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60"
       >
-        <div class="mx-8 w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
+        <div
+          class="mx-8 w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl"
+          style="background: var(--theme-surface, #fff)"
+        >
           <div
-            class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100"
+            class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full"
+            style="background: color-mix(in srgb, var(--theme-warning, #f59e0b) 20%, transparent)"
           >
             <svg
-              class="h-10 w-10 text-amber-500"
+              class="h-10 w-10"
+              style="color: var(--theme-warning, #f59e0b)"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -99,14 +104,15 @@ onUnmounted(() => {
               />
             </svg>
           </div>
-          <p class="mb-2 text-xl font-bold text-gray-800">
+          <p class="mb-2 text-xl font-bold" style="color: var(--theme-text, #111827)">
             {{ $t("idle.warningTitle") }}
           </p>
-          <p class="mb-6 text-base text-gray-500">
+          <p class="mb-6 text-base" style="color: var(--theme-text-secondary, #64748b)">
             {{ $t("idle.warningMessage", { seconds: remainingSeconds }) }}
           </p>
           <button
-            class="w-full rounded-2xl bg-red-500 py-4 text-lg font-bold text-white transition-colors hover:bg-red-600 active:bg-red-700"
+            class="w-full rounded-2xl py-4 text-lg font-bold transition-colors"
+            style="background: var(--theme-primary, #8E3524); color: var(--theme-primary-text, #fff)"
             @click="showWarning = false"
           >
             {{ $t("idle.continueButton") }}

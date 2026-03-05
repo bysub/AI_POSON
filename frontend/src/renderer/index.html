@@ -11,9 +11,18 @@
     <script>
       (function () {
         try {
-          // 저장된 테마 복원
+          // 저장된 테마 복원 (VueUse useStorage는 raw string으로 저장)
           var savedTheme = localStorage.getItem("poson-theme");
-          var theme = savedTheme ? JSON.parse(savedTheme) : "default";
+          var theme = savedTheme || "classic";
+          // JSON 파싱된 값일 수 있으므로 따옴표 제거
+          if (theme.charAt(0) === '"') {
+            try { theme = JSON.parse(theme); } catch(e) {}
+          }
+          // "auto" 또는 "light"는 기본 테마로 매핑
+          if (theme === "auto" || theme === "light" || theme === "default") theme = "classic";
+          // 유효한 테마 목록 확인
+          var validThemes = ["classic","modern","modern-red","bootstrap","material","dark"];
+          if (validThemes.indexOf(theme) === -1) theme = "classic";
           document.documentElement.dataset.theme = theme;
 
           // 저장된 대비 모드 복원
@@ -42,7 +51,7 @@
           }
         } catch (e) {
           // 오류 시 기본 테마 적용
-          document.documentElement.dataset.theme = "default";
+          document.documentElement.dataset.theme = "classic";
         }
       })();
     </script>

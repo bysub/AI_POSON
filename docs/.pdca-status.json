@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-27T08:25:00.412Z",
+  "lastUpdated": "2026-03-05T04:21:03.772Z",
   "activeFeatures": [
     "stores",
     "main",
@@ -29,9 +29,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T01:57:26.427Z",
-        "lastUpdated": "2026-02-27T08:00:58.416Z"
+        "lastUpdated": "2026-03-05T04:21:03.772Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\stores\\accessibility.ts"
+      "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\src\\renderer\\src\\stores\\theme.ts"
     },
     "main": {
       "phase": "do",
@@ -55,9 +55,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T02:14:04.804Z",
-        "lastUpdated": "2026-02-27T06:30:58.545Z"
+        "lastUpdated": "2026-03-05T03:21:18.815Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\main.ts"
+      "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\src\\renderer\\src\\App.vue"
     },
     "menu": {
       "phase": "do",
@@ -68,9 +68,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T02:14:43.894Z",
-        "lastUpdated": "2026-02-19T08:38:51.332Z"
+        "lastUpdated": "2026-03-05T03:51:31.873Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\components\\menu\\MenuGrid.vue"
+      "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\src\\renderer\\src\\components\\menu\\OptionModal.vue"
     },
     "kiosk": {
       "phase": "do",
@@ -81,9 +81,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T02:15:02.188Z",
-        "lastUpdated": "2026-02-27T06:30:42.544Z"
+        "lastUpdated": "2026-03-05T04:16:35.040Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\components\\kiosk\\VoiceMicButton.vue"
+      "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\src\\renderer\\src\\components\\kiosk\\TTSReplayButton.vue"
     },
     "admin": {
       "phase": "do",
@@ -107,9 +107,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T02:31:40.565Z",
-        "lastUpdated": "2026-02-19T08:40:21.614Z"
+        "lastUpdated": "2026-03-05T02:52:42.823Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\components\\cart\\CartPanel.vue"
+      "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\src\\renderer\\src\\components\\cart\\CartPanel.vue"
     },
     "frontend": {
       "phase": "do",
@@ -120,9 +120,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T04:52:36.206Z",
-        "lastUpdated": "2026-02-27T06:16:30.031Z"
+        "lastUpdated": "2026-03-05T02:30:02.435Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\electron.vite.config.ts"
+      "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\tailwind.config.js"
     },
     "routes": {
       "phase": "do",
@@ -159,9 +159,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-19T07:51:40.505Z",
-        "lastUpdated": "2026-02-27T07:50:04.757Z"
+        "lastUpdated": "2026-03-05T04:12:27.083Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\composables\\useVoiceCommand.ts"
+      "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\src\\renderer\\src\\composables\\useVoiceCommand.ts"
     },
     "layouts": {
       "phase": "do",
@@ -172,9 +172,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-19T07:53:51.701Z",
-        "lastUpdated": "2026-02-27T06:31:39.543Z"
+        "lastUpdated": "2026-03-05T04:00:49.486Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\layouts\\KioskLayout.vue"
+      "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\src\\renderer\\src\\layouts\\KioskLayout.vue"
     },
     "payment": {
       "phase": "do",
@@ -224,7 +224,7 @@
   "session": {
     "startedAt": "2026-02-12T01:25:30.561Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-27T08:25:00.412Z"
+    "lastActivity": "2026-03-05T04:21:03.772Z"
   },
   "history": [
     {
@@ -3478,6 +3478,558 @@
     {
       "timestamp": "2026-02-27T08:25:00.412Z",
       "feature": "main",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:07:52.385Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:08:42.764Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:08:55.856Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:25:24.029Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:25:30.554Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:26:20.449Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:30:58.530Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:04.897Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:06.265Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:09.455Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:10.813Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:12.159Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:13.446Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:15.066Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:16.189Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:27.314Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:32.895Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:36.954Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:31:50.809Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:00.980Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:02.319Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:03.932Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:18.342Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:20.348Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:22.559Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:22.815Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:24.931Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:43.253Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:45.080Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:45.985Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:47.318Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:32:49.364Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:33:03.716Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:33:06.380Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:33:08.612Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T00:33:10.245Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:29:40.000Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:29:41.208Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:29:46.174Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:30:02.435Z",
+      "feature": "frontend",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:02.601Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:07.670Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:12.924Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:17.530Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:24.911Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:30.502Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:35.552Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:39.776Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:44.327Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:51.090Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:49:55.814Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:50:00.850Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:50:05.073Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:50:09.509Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:50:14.005Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:50:18.870Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:50:24.607Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:50:29.538Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:04.841Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:09.763Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:15.394Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:21.030Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:28.121Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:32.995Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:37.657Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:42.823Z",
+      "feature": "cart",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:48.493Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:53.977Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:52:59.039Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:53:06.206Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:53:12.373Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:53:17.913Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:53:22.557Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:53:28.256Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:53:35.654Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T02:55:41.613Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T03:17:20.553Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T03:21:18.815Z",
+      "feature": "renderer",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T03:51:04.890Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T03:51:21.426Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T03:51:31.873Z",
+      "feature": "menu",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T03:55:46.568Z",
+      "feature": "layouts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:00:49.486Z",
+      "feature": "layouts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:01:48.570Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:01:57.554Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:12:27.083Z",
+      "feature": "composables",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:16:27.608Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:16:35.040Z",
+      "feature": "kiosk",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:20:36.885Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:20:48.902Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:20:57.916Z",
+      "feature": "stores",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-05T04:21:03.772Z",
+      "feature": "stores",
       "phase": "do",
       "action": "updated"
     }

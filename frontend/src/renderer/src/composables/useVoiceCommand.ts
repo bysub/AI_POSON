@@ -523,6 +523,7 @@ export function useVoiceCommand() {
       } else {
         showSubtitle.value = false;
       }
+      stt.status.value = "idle";
       return;
     }
 
@@ -534,6 +535,7 @@ export function useVoiceCommand() {
       subtitleText.value = newTranscript;
       showSubtitle.value = true;
       tts.speak(t("voice.response.lowConfidence"));
+      stt.status.value = "idle";
       setTimeout(() => {
         showSubtitle.value = false;
       }, 3000);
@@ -551,6 +553,9 @@ export function useVoiceCommand() {
     subtitleText.value = result.message;
     showSubtitle.value = true;
     tts.speak(result.message, { fallbackText: result.fallbackMessage });
+
+    // 처리 완료 후 상태를 idle로 복원 (로딩 스피너 제거)
+    stt.status.value = "idle";
 
     setTimeout(() => {
       showSubtitle.value = false;

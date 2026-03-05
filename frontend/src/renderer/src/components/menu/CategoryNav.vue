@@ -78,7 +78,7 @@ const sortedCategories = computed(() =>
 </script>
 
 <template>
-  <aside class="flex w-52 flex-col overflow-y-auto bg-gray-100 p-3">
+  <aside class="flex w-52 flex-col overflow-y-auto p-3" style="background: var(--theme-bg-secondary, #f3f4f6)">
     <nav class="flex flex-col gap-2">
       <button
         v-for="category in sortedCategories"
@@ -86,9 +86,14 @@ const sortedCategories = computed(() =>
         class="flex items-center gap-3 rounded-xl p-4 text-left transition-all duration-200"
         :class="[
           selectedId === category.id
-            ? 'scale-[1.02] bg-primary-600 text-white shadow-lg'
-            : 'bg-white text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-[0.98]',
+            ? 'scale-[1.02] shadow-lg'
+            : 'hover:shadow-md active:scale-[0.98]',
         ]"
+        :style="
+          selectedId === category.id
+            ? { background: 'var(--theme-primary)', color: 'var(--theme-primary-text, #fff)' }
+            : { background: 'var(--theme-surface, #fff)', color: 'var(--theme-text, #1f2937)' }
+        "
         @click="emit('select', category.id)"
       >
         <!-- Preset Icon -->
@@ -307,7 +312,7 @@ const sortedCategories = computed(() =>
         </div>
 
         <!-- Custom Image -->
-        <div v-else class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-200">
+        <div v-else class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg" style="background: var(--theme-bg-secondary, #e5e7eb)">
           <img
             :src="getImageSrc(category.imageUrl)"
             :alt="getCategoryName(category)"

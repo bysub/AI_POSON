@@ -66,20 +66,21 @@ function handleProductClick(product: Product): void {
 </script>
 
 <template>
-  <main class="flex-1 overflow-y-auto bg-gray-50 p-4">
+  <main class="flex-1 overflow-y-auto p-4" style="background: var(--theme-bg-secondary, #f9fafb)">
     <!-- Loading State -->
     <div v-if="isLoading" class="flex h-full items-center justify-center">
       <div class="flex flex-col items-center gap-4">
         <div
-          class="h-12 w-12 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600"
+          class="h-12 w-12 animate-spin rounded-full border-4"
+          style="border-color: var(--theme-border, #e2e8f0); border-top-color: var(--theme-primary, #8E3524)"
         />
-        <span class="text-kiosk-base text-gray-600">{{ t("common.loading") }}</span>
+        <span class="text-kiosk-base" style="color: var(--theme-text-secondary, #6b7280)">{{ t("common.loading") }}</span>
       </div>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="products.length === 0" class="flex h-full items-center justify-center">
-      <p class="text-kiosk-lg text-gray-500">
+      <p class="text-kiosk-lg" style="color: var(--theme-text-muted, #9ca3af)">
         {{ t("menu.empty") }}
       </p>
     </div>
@@ -89,7 +90,8 @@ function handleProductClick(product: Product): void {
       <article
         v-for="product in products"
         :key="product.id"
-        class="group relative overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-200"
+        class="group relative overflow-hidden rounded-2xl shadow-md transition-all duration-200"
+        style="background: var(--theme-surface, #fff)"
         :class="[
           isUnavailable(product)
             ? 'cursor-not-allowed opacity-60'
@@ -98,7 +100,7 @@ function handleProductClick(product: Product): void {
         @click="handleProductClick(product)"
       >
         <!-- Product Image -->
-        <div class="relative aspect-square bg-gray-200">
+        <div class="relative aspect-square" style="background: var(--theme-bg-secondary, #e5e7eb)">
           <img
             v-if="product.imageUrl"
             :src="getImageSrc(product.imageUrl)"
@@ -107,9 +109,10 @@ function handleProductClick(product: Product): void {
           />
           <div
             v-else
-            class="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
+            class="flex h-full w-full items-center justify-center"
+            style="background: var(--theme-bg-secondary, #e5e7eb)"
           >
-            <span class="text-4xl text-gray-400">{{ getProductName(product).charAt(0) }}</span>
+            <span class="text-4xl" style="color: var(--theme-text-muted, #9ca3af)">{{ getProductName(product).charAt(0) }}</span>
           </div>
 
           <!-- Unavailable Overlay (품절/준비중) -->
@@ -128,7 +131,8 @@ function handleProductClick(product: Product): void {
           <!-- Options Badge -->
           <div
             v-if="product.options && product.options.length > 0 && !isUnavailable(product)"
-            class="absolute right-2 top-2 rounded-full bg-primary-600 px-2 py-1 text-xs font-medium text-white"
+            class="absolute right-2 top-2 rounded-full px-2 py-1 text-xs font-medium"
+            style="background: var(--theme-primary, #8E3524); color: var(--theme-primary-text, #fff)"
           >
             {{ t("menu.options") }}
           </div>
@@ -136,11 +140,11 @@ function handleProductClick(product: Product): void {
 
         <!-- Product Info -->
         <div class="p-4">
-          <h3 class="mb-2 line-clamp-2 text-kiosk-base font-medium leading-tight text-gray-900">
+          <h3 class="mb-2 line-clamp-2 text-kiosk-base font-medium leading-tight" style="color: var(--theme-text, #111827)">
             {{ getProductName(product) }}
           </h3>
 
-          <p class="text-kiosk-lg font-bold text-primary-600">
+          <p class="text-kiosk-lg font-bold" style="color: var(--theme-primary, #8E3524)">
             {{ formatPrice(product.sellPrice) }}
             <span class="text-kiosk-sm font-normal">{{ t("common.currency") }}</span>
           </p>
@@ -149,7 +153,8 @@ function handleProductClick(product: Product): void {
         <!-- Quick Add Button (visible on hover, desktop only) -->
         <div
           v-if="!isUnavailable(product)"
-          class="absolute bottom-0 left-0 right-0 translate-y-full bg-primary-600 py-3 text-center text-white transition-transform duration-200 group-hover:translate-y-0"
+          class="absolute bottom-0 left-0 right-0 translate-y-full py-3 text-center transition-transform duration-200 group-hover:translate-y-0"
+          style="background: var(--theme-primary, #8E3524); color: var(--theme-primary-text, #fff)"
         >
           <span class="text-kiosk-base font-medium">{{ t("menu.addToCart") }}</span>
         </div>

@@ -7,13 +7,12 @@
 /* 토큰 레퍼런스 (주석만 포함) */
 @import "./_variables.css";
 
-/* 기본 테마 (필수) */
-@import "./default.css";
+/* 기본 테마 (Classic = 기본) */
+@import "./classic.css";
 
 /* 브랜드 테마 */
 @import "./modern.css";
 @import "./modern-red.css";
-@import "./classic.css";
 @import "./bootstrap.css";
 @import "./material.css";
 @import "./dark.css";

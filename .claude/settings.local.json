@@ -200,18 +200,12 @@
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "context7",
-    "sequential-thinking",
-    "filesystem",
-    "automatalabs-playwright-server",
-    "DeepGraph Vue MCP",
-    "google-ads",
-    "fetch",
     "playwright",
     "supabase",
     "postgresql",
     "mysql"
   ],
   "hooks": {},
-  "prefersReducedMotion": true,  
-  "language": "korean"
+  "language": "korean",
+  "prefersReducedMotion": true
 }

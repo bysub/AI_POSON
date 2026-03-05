@@ -19,10 +19,9 @@ import { computed, ref, watch } from "vue";
 
 // 테마 타입 정의
 export type BrandTheme =
-  | "default"
+  | "classic"
   | "modern"
   | "modern-red"
-  | "classic"
   | "bootstrap"
   | "material"
   | "dark";
@@ -42,11 +41,11 @@ export interface ThemeMeta {
 // 사용 가능한 테마 목록
 export const AVAILABLE_THEMES: ThemeMeta[] = [
   {
-    id: "default",
-    name: "Default",
+    id: "classic",
+    name: "Classic",
     nameKo: "기본",
-    description: "POSON 브랜드 컬러 (따뜻한 브라운)",
-    preview: "linear-gradient(135deg, #8E3524, #C96231)",
+    description: "전통적인 골드/우드 계열 (기본 테마)",
+    preview: "linear-gradient(135deg, #b45309, #d97706)",
   },
   {
     id: "modern",
@@ -61,13 +60,6 @@ export const AVAILABLE_THEMES: ThemeMeta[] = [
     nameKo: "모던 레드",
     description: "세련된 레드 계열",
     preview: "linear-gradient(135deg, #dc2626, #f43f5e)",
-  },
-  {
-    id: "classic",
-    name: "Classic",
-    nameKo: "클래식",
-    description: "전통적인 골드/우드 계열",
-    preview: "linear-gradient(135deg, #b45309, #d97706)",
   },
   {
     id: "bootstrap",
@@ -100,14 +92,16 @@ export const useThemeStore = defineStore("theme", () => {
   // 테마 모드 (data-theme 속성 자동 관리)
   const colorMode = useColorMode({
     attribute: "data-theme",
+    initialValue: "classic" as unknown as "light",
     modes: {
-      default: "default",
+      classic: "classic",
       modern: "modern",
       "modern-red": "modern-red",
-      classic: "classic",
       bootstrap: "bootstrap",
       material: "material",
       dark: "dark",
+      // VueUse auto 모드 해석 시 light/dark → 커스텀 테마 매핑
+      light: "classic",
     },
     storageKey: "poson-theme",
     disableTransition: false,
@@ -219,6 +213,8 @@ export const useThemeStore = defineStore("theme", () => {
    */
   function setTheme(theme: BrandTheme): void {
     colorMode.value = theme;
+    // VueUse의 watch가 flush: "post"라 즉시 반영 안 될 수 있으므로 직접 설정
+    document.documentElement.setAttribute("data-theme", theme);
   }
 
   /**
@@ -274,7 +270,7 @@ export const useThemeStore = defineStore("theme", () => {
    * 테마 및 대비 모드 초기화
    */
   function reset(): void {
-    colorMode.value = "default";
+    colorMode.value = "classic";
     userContrastMode.value = "normal";
     followSystemTheme.value = false;
     followSystemContrast.value = true;

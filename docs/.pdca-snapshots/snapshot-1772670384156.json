@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-02-27T02:11:51.736Z",
+  "timestamp": "2026-03-05T00:26:24.155Z",
   "reason": "compaction",
   "status": {
     "version": "2.0",
-    "lastUpdated": "2026-02-27T01:30:01.337Z",
+    "lastUpdated": "2026-03-05T00:26:20.449Z",
     "activeFeatures": [
       "stores",
       "main",
@@ -32,9 +32,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-12T01:57:26.427Z",
-          "lastUpdated": "2026-02-27T01:25:39.682Z"
+          "lastUpdated": "2026-02-27T08:00:58.416Z"
         },
-        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\stores\\voiceEvent.ts"
+        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\stores\\accessibility.ts"
       },
       "main": {
         "phase": "do",
@@ -45,9 +45,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-12T01:58:22.362Z",
-          "lastUpdated": "2026-02-27T01:29:29.254Z"
+          "lastUpdated": "2026-02-27T08:25:00.412Z"
         },
-        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\main\\stt-whisper.py"
+        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\main\\index.ts"
       },
       "renderer": {
         "phase": "do",
@@ -58,9 +58,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-12T02:14:04.804Z",
-          "lastUpdated": "2026-02-27T01:30:01.337Z"
+          "lastUpdated": "2026-02-27T06:30:58.545Z"
         },
-        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\utils\\productMatcher.ts"
+        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\main.ts"
       },
       "menu": {
         "phase": "do",
@@ -84,9 +84,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-12T02:15:02.188Z",
-          "lastUpdated": "2026-02-27T01:27:58.390Z"
+          "lastUpdated": "2026-03-05T00:26:20.449Z"
         },
-        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\views\\kiosk\\PointSelectView.vue"
+        "lastFile": "C:\\workspaces\\backup\\AI_POSON\\frontend\\src\\renderer\\src\\components\\kiosk\\AccessibilityToggle.vue"
       },
       "admin": {
         "phase": "do",
@@ -97,7 +97,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-12T02:15:47.454Z",
-          "lastUpdated": "2026-02-27T01:09:50.097Z"
+          "lastUpdated": "2026-02-27T02:38:17.608Z"
         },
         "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\views\\admin\\SettingsView.vue"
       },
@@ -123,9 +123,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-12T04:52:36.206Z",
-          "lastUpdated": "2026-02-20T04:36:28.703Z"
+          "lastUpdated": "2026-02-27T06:16:30.031Z"
         },
-        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\tailwind.config.js"
+        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\electron.vite.config.ts"
       },
       "routes": {
         "phase": "do",
@@ -162,7 +162,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-19T07:51:40.505Z",
-          "lastUpdated": "2026-02-27T01:26:05.849Z"
+          "lastUpdated": "2026-02-27T07:50:04.757Z"
         },
         "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\composables\\useVoiceCommand.ts"
       },
@@ -175,7 +175,7 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-19T07:53:51.701Z",
-          "lastUpdated": "2026-02-26T00:32:05.925Z"
+          "lastUpdated": "2026-02-27T06:31:39.543Z"
         },
         "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\layouts\\KioskLayout.vue"
       },
@@ -201,9 +201,9 @@
         "documents": {},
         "timestamps": {
           "started": "2026-02-26T04:19:53.806Z",
-          "lastUpdated": "2026-02-26T05:00:37.649Z"
+          "lastUpdated": "2026-02-27T06:40:30.749Z"
         },
-        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\preload\\index.d.ts"
+        "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\preload\\index.ts"
       },
       "stt-native": {
         "phase": "do",
@@ -227,7 +227,7 @@
     "session": {
       "startedAt": "2026-02-12T01:25:30.561Z",
       "onboardingCompleted": false,
-      "lastActivity": "2026-02-27T01:30:01.337Z"
+      "lastActivity": "2026-03-05T00:26:20.449Z"
     },
     "history": [
       {
@@ -3181,6 +3181,342 @@
       {
         "timestamp": "2026-02-27T01:30:01.337Z",
         "feature": "renderer",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T02:38:17.608Z",
+        "feature": "admin",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T04:17:31.321Z",
+        "feature": "renderer",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T04:32:28.250Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T04:32:36.040Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T04:32:48.327Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T04:33:08.112Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T04:34:28.680Z",
+        "feature": "layouts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T04:36:24.845Z",
+        "feature": "layouts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T04:36:32.228Z",
+        "feature": "layouts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T05:28:11.972Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T05:28:26.843Z",
+        "feature": "layouts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T05:40:13.460Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T05:40:47.108Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T05:41:09.904Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:09:19.868Z",
+        "feature": "renderer",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:09:52.819Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:10:02.929Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:10:08.797Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:16:30.031Z",
+        "feature": "frontend",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:23:41.436Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:24:02.382Z",
+        "feature": "preload",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:24:08.597Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:30:14.161Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:30:42.544Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:30:51.281Z",
+        "feature": "layouts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:30:58.545Z",
+        "feature": "renderer",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:31:07.997Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:31:15.257Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:31:21.127Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:31:31.392Z",
+        "feature": "layouts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:31:39.543Z",
+        "feature": "layouts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:39:05.010Z",
+        "feature": "main",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:40:06.725Z",
+        "feature": "main",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:40:19.744Z",
+        "feature": "preload",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:40:30.749Z",
+        "feature": "preload",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:40:55.363Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T06:41:00.809Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T07:26:35.775Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T07:32:15.207Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T07:41:27.418Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T07:41:46.043Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T07:50:04.757Z",
+        "feature": "composables",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T08:00:46.243Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T08:00:53.958Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T08:00:58.416Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T08:01:04.610Z",
+        "feature": "main",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T08:01:19.057Z",
+        "feature": "main",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T08:20:53.865Z",
+        "feature": "main",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T08:24:51.346Z",
+        "feature": "main",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-27T08:25:00.412Z",
+        "feature": "main",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-05T00:07:52.385Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-05T00:08:42.764Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-05T00:08:55.856Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-05T00:25:24.029Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-05T00:25:30.554Z",
+        "feature": "kiosk",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-05T00:26:20.449Z",
+        "feature": "kiosk",
         "phase": "do",
         "action": "updated"
       }

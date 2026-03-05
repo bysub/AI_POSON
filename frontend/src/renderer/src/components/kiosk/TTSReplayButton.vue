@@ -12,14 +12,9 @@ const tts = useTTS();
   <button
     v-if="a11yStore.ttsEnabled && tts.lastUtterance.value"
     class="fixed bottom-20 left-4 z-[9990] flex items-center gap-2 rounded-full px-4 py-3 shadow-lg transition-colors replay-audio"
-    :class="[
-      a11yStore.isHighContrast
-        ? 'bg-[var(--a11y-surface)] text-[var(--a11y-text)]'
-        : 'bg-white text-gray-800',
-      tts.isSpeaking.value ? 'animate-pulse' : '',
-    ]"
+    :class="[tts.isSpeaking.value ? 'animate-pulse' : '']"
     :aria-label="t('a11y.replay')"
-    style="border: var(--a11y-btn-border)"
+    style="background: var(--theme-surface, #fff); color: var(--theme-text, #1e293b); border: 2px solid var(--theme-primary, #8E3524)"
     @click="tts.replay()"
   >
     <svg

@@ -22,16 +22,17 @@ function getOptionsString(options?: Record<string, unknown>): string {
 </script>
 
 <template>
-  <footer class="flex gap-4 bg-cream p-4">
+  <footer class="flex gap-4 p-4" style="background: var(--theme-bg, #FDF9F3)">
     <!-- Order Summary (Left) -->
-    <div class="flex-1 rounded-2xl border-2 border-red-400 bg-white p-4">
-      <h2 class="mb-3 text-base font-bold text-red-500">
+    <div class="flex-1 rounded-2xl border-2 p-4" style="border-color: var(--theme-primary, #f87171); background: var(--theme-surface, #fff)">
+      <h2 class="mb-3 text-base font-bold" style="color: var(--theme-primary, #ef4444)">
         {{ t("cart.orderSummary") }}
       </h2>
 
       <div
         v-if="cartStore.isEmpty"
-        class="py-4 text-center text-sm text-gray-400"
+        class="py-4 text-center text-sm"
+        style="color: var(--theme-text-muted, #94a3b8)"
       >
         {{ t("cart.empty") }}
       </div>
@@ -43,13 +44,15 @@ function getOptionsString(options?: Record<string, unknown>): string {
         <div
           v-for="item in cartStore.items"
           :key="item.id"
-          class="flex items-center justify-between border-b border-gray-100 pb-2 text-sm"
+          class="flex items-center justify-between border-b pb-2 text-sm"
+          style="border-color: var(--theme-border, #e2e8f0)"
         >
           <div class="cart-store-product-name flex-1">
-            <span class="text-gray-800">{{ getLocalizedName(item, locale) }}</span>
+            <span :style="{ color: 'var(--theme-text, #1e293b)' }">{{ getLocalizedName(item, locale) }}</span>
             <span
               v-if="item.options"
-              class="text-xs text-gray-500"
+              class="text-xs"
+              style="color: var(--theme-text-secondary, #64748b)"
             >
               {{ getOptionsString(item.options) ? " + " + getOptionsString(item.options) : "" }}
             </span>
@@ -58,7 +61,8 @@ function getOptionsString(options?: Record<string, unknown>): string {
           <!-- Quantity Controls -->
           <div class="flex items-center gap-2">
             <button
-              class="product-area-minus flex h-6 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
+              class="product-area-minus flex h-6 w-8 items-center justify-center rounded"
+              style="color: var(--theme-text-secondary, #64748b)"
               @click="cartStore.updateQuantity(item.id, item.quantity - 1)"
             >
               -
@@ -67,19 +71,22 @@ function getOptionsString(options?: Record<string, unknown>): string {
               item.quantity
             }}</span>
             <button
-              class="product-area-plus flex h-6 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
+              class="product-area-plus flex h-6 w-8 items-center justify-center rounded"
+              style="color: var(--theme-text-secondary, #64748b)"
               @click="cartStore.updateQuantity(item.id, item.quantity + 1)"
             >
               +
             </button>
             <button
-              class="product-area-close ml-2 text-gray-400 hover:text-red-500"
+              class="product-area-close ml-2"
+              style="color: var(--theme-text-muted, #94a3b8)"
               @click="cartStore.removeItem(item.id)"
             >
               ✕
             </button>
             <span
-              class="text-order-summany-amount ml-2 mr-2 w-20 text-right text-xs text-gray-500"
+              class="text-order-summany-amount ml-2 mr-2 w-20 text-right text-xs"
+              style="color: var(--theme-text-secondary, #64748b)"
             >
               {{ formatPrice(item.price * item.quantity) }}
             </span>
@@ -90,31 +97,34 @@ function getOptionsString(options?: Record<string, unknown>): string {
 
     <!-- Total & Actions (Right) -->
     <div
-      class="flex w-56 flex-col justify-between rounded-2xl border-2 border-red-400 bg-white p-4"
+      class="flex w-56 flex-col justify-between rounded-2xl border-2 p-4"
+      style="border-color: var(--theme-primary, #f87171); background: var(--theme-surface, #fff)"
     >
       <div class="text-center">
-        <p class="text-sm text-red-500">
+        <p class="text-sm" style="color: var(--theme-primary, #ef4444)">
           {{ t("cart.totalAmount") }} :
           <span class="font-bold">{{ cartStore.totalItems }} {{ t("cart.items") }}</span>
         </p>
-        <p class="text-xs text-gray-400">
+        <p class="text-xs" style="color: var(--theme-text-muted, #94a3b8)">
           {{ t("cart.total").toUpperCase() }}
         </p>
-        <p class="mt-8 text-3xl font-bold text-gray-900">
+        <p class="mt-8 text-3xl font-bold" style="color: var(--theme-text, #111827)">
           {{ formatPrice(cartStore.totalAmount) }}
         </p>
       </div>
 
       <div class="mt-8 space-y-2">
         <button
-          class="w-full rounded-full bg-red-500 py-3 text-sm font-bold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+          class="w-full rounded-full py-3 text-sm font-bold transition-colors disabled:opacity-50"
+          style="background: var(--theme-primary, #ef4444); color: var(--theme-primary-text, #fff)"
           :disabled="cartStore.isEmpty"
           @click="emit('proceed')"
         >
           {{ t("cart.proceedToPayment") }}
         </button>
         <button
-          class="flex w-full items-center justify-center gap-1 py-2 text-sm text-gray-500 hover:text-red-500"
+          class="flex w-full items-center justify-center gap-1 py-2 text-sm"
+          style="color: var(--theme-text-secondary, #64748b)"
           @click="emit('cancel')"
         >
           <svg

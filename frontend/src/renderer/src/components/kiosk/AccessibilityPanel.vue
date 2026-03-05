@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useAccessibilityStore } from "@/stores/accessibility";
+import { useThemeStore, AVAILABLE_THEMES, type BrandTheme } from "@/stores/theme";
 import { useTTS } from "@/composables/useTTS";
 import type { FontScale, ContrastMode, A11yPreset } from "@/stores/accessibility";
 import { onMounted } from "vue";
 
 const { t } = useI18n();
 const a11yStore = useAccessibilityStore();
+const themeStore = useThemeStore();
 const tts = useTTS();
 
 const emit = defineEmits<{
@@ -19,38 +21,20 @@ const fontOptions: { value: FontScale; label: string; preview: string }[] = [
   { value: "extraLarge", label: "a11y.fontExtraLarge", preview: "가" },
 ];
 
-const contrastOptions: { value: ContrastMode; label: string; icon: string }[] = [
-  { value: "default", label: "a11y.contrastDefault", icon: "☀️" },
-  /*
-  { value: "highContrast", label: "a11y.contrastHigh", icon: "🌙" },
-  { value: "invertedContrast", label: "a11y.contrastInverted", icon: "◐" },
-   */
-];
-
 function selectFont(scale: FontScale) {
   a11yStore.setFontScale(scale);
   tts.speak(t(fontOptions.find((o) => o.value === scale)?.label ?? ""));
 }
 
-function selectContrast(mode: ContrastMode) {
-  a11yStore.setContrastMode(mode);
-  tts.speak(t(contrastOptions.find((o) => o.value === mode)?.label ?? ""));
+function selectTheme(theme: BrandTheme) {
+  themeStore.setTheme(theme);
+  const meta = AVAILABLE_THEMES.find((t) => t.id === theme);
+  tts.speak(meta?.nameKo ?? meta?.name ?? "");
 }
 
 function toggleTTS() {
   a11yStore.toggleTTS();
   tts.speak(a11yStore.ttsEnabled ? t("a11y.ttsOn") : t("a11y.ttsOff"), { force: true });
-}
-
-const presetOptions: { value: A11yPreset; label: string; desc: string; icon: string }[] = [
-  { value: "default", label: "a11y.presetDefault", desc: "a11y.presetDefaultDesc", icon: "Aa" },
-  { value: "senior", label: "a11y.presetSenior", desc: "a11y.presetSeniorDesc", icon: "Aa+" },
-  { value: "lowVision", label: "a11y.presetLowVision", desc: "a11y.presetLowVisionDesc", icon: "Aa++" },
-];
-
-function selectPreset(preset: A11yPreset) {
-  a11yStore.applyPreset(preset);
-  tts.speak(t(presetOptions.find((o) => o.value === preset)?.label ?? ""), { force: true });
 }
 
 function handleClose() {
@@ -75,22 +59,16 @@ onMounted(() => {
         aria-modal="true"
         :aria-label="t('a11y.settingsTitle')"
         class="relative z-10 mx-6 w-full max-w-md rounded-3xl p-6 shadow-2xl"
-        :class="
-          a11yStore.isHighContrast
-            ? 'bg-[var(--a11y-surface)] text-[var(--a11y-text)]'
-            : 'bg-white text-gray-900'
-        "
-        style="border: var(--a11y-btn-border)"
+        style="background: var(--theme-surface, #ffffff); color: var(--theme-text, #1e293b)"
       >
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between">
           <h2 class="text-xl font-bold">
-            <span class="mr-2" aria-hidden="true"></span>
             {{ t("a11y.settingsTitle") }}
           </h2>
           <button
-            class="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
-            :class="a11yStore.isHighContrast ? 'hover:bg-[var(--a11y-bg-secondary)]' : ''"
+            class="flex h-10 w-10 items-center justify-center rounded-full transition-colors"
+            style="color: var(--theme-text-secondary, #64748b)"
             :aria-label="$t('common.close')"
             @click="handleClose"
           >
@@ -111,29 +89,6 @@ onMounted(() => {
           </button>
         </div>
 
-        <!-- Quick Presets 
-        <div class="mb-5">
-          <p class="mb-3 text-base font-semibold">{{ t("a11y.presetTitle") }}</p>
-          <div class="grid grid-cols-3 gap-3">
-            <button
-              v-for="opt in presetOptions"
-              :key="opt.value"
-              class="flex flex-col items-center rounded-2xl p-3 transition-all"
-              :class="[
-                a11yStore.isHighContrast
-                  ? 'bg-[var(--a11y-bg-secondary)] text-[var(--a11y-text)]'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-              ]"
-              style="border: var(--a11y-btn-border)"
-              @click="selectPreset(opt.value)"
-            >
-              <span class="mb-1 text-lg font-bold" aria-hidden="true">{{ opt.icon }}</span>
-              <span class="text-sm font-medium">{{ t(opt.label) }}</span>
-              <span class="text-[10px] opacity-60">{{ t(opt.desc) }}</span>
-            </button>
-          </div>
-        </div>
--->
         <!-- Font Scale -->
         <div class="mb-5">
           <p class="mb-3 text-base font-semibold">{{ t("a11y.fontScale") }}</p>
@@ -142,17 +97,12 @@ onMounted(() => {
               v-for="opt in fontOptions"
               :key="opt.value"
               class="flex flex-col items-center rounded-2xl p-3 transition-all"
-              :class="[
+              :style="
                 a11yStore.fontScale === opt.value
-                  ? a11yStore.isHighContrast
-                    ? 'bg-[var(--a11y-primary)] text-[var(--a11y-button-text)]'
-                    : 'bg-primary text-white'
-                  : a11yStore.isHighContrast
-                    ? 'bg-[var(--a11y-bg-secondary)] text-[var(--a11y-text)]'
-                    : 'bg-gray-100 text-gray-700',
-              ]"
+                  ? { background: 'var(--theme-primary, #8E3524)', color: 'var(--theme-primary-text, #fff)' }
+                  : { background: 'var(--theme-bg-secondary, #f3f4f6)', color: 'var(--theme-text, #374151)' }
+              "
               :aria-pressed="a11yStore.fontScale === opt.value"
-              style="border: var(--a11y-btn-border)"
               @click="selectFont(opt.value)"
             >
               <span
@@ -170,29 +120,35 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Contrast Mode -->
+        <!-- Theme Selection (화면 모드) -->
         <div class="mb-5">
           <p class="mb-3 text-base font-semibold">{{ t("a11y.contrastMode") }}</p>
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-4 gap-2">
             <button
-              v-for="opt in contrastOptions"
-              :key="opt.value"
-              class="flex flex-col items-center rounded-2xl p-3 transition-all"
-              :class="[
-                a11yStore.contrastMode === opt.value
-                  ? a11yStore.isHighContrast
-                    ? 'bg-[var(--a11y-primary)] text-[var(--a11y-button-text)]'
-                    : 'bg-primary text-white'
-                  : a11yStore.isHighContrast
-                    ? 'bg-[var(--a11y-bg-secondary)] text-[var(--a11y-text)]'
-                    : 'bg-gray-100 text-gray-700',
-              ]"
-              :aria-pressed="a11yStore.contrastMode === opt.value"
-              style="border: var(--a11y-btn-border)"
-              @click="selectContrast(opt.value)"
+              v-for="theme in AVAILABLE_THEMES"
+              :key="theme.id"
+              class="flex flex-col items-center rounded-2xl p-2 transition-all"
+              :style="
+                themeStore.currentTheme === theme.id
+                  ? {
+                      background: 'var(--theme-bg-secondary, #f9fafb)',
+                      outline: '2px solid var(--theme-primary, #8E3524)',
+                      outlineOffset: '-2px',
+                    }
+                  : {
+                      background: 'var(--theme-bg-secondary, #f3f4f6)',
+                      color: 'var(--theme-text, #374151)',
+                    }
+              "
+              :aria-pressed="themeStore.currentTheme === theme.id"
+              @click="selectTheme(theme.id)"
             >
-              <span class="mb-1 text-2xl" aria-hidden="true">{{ opt.icon }}</span>
-              <span class="text-xs">{{ t(opt.label) }}</span>
+              <span
+                class="mb-1 h-8 w-8 rounded-full border border-gray-200"
+                :style="{ background: theme.preview }"
+                aria-hidden="true"
+              />
+              <span class="text-[11px] font-medium leading-tight">{{ theme.nameKo }}</span>
             </button>
           </div>
         </div>
@@ -202,19 +158,14 @@ onMounted(() => {
           <p class="mb-3 text-base font-semibold">{{ t("a11y.ttsLabel") }}</p>
           <button
             class="flex w-full items-center justify-between rounded-2xl p-4 transition-all"
-            :class="[
+            :style="
               a11yStore.ttsEnabled
-                ? a11yStore.isHighContrast
-                  ? 'bg-[var(--a11y-success)] text-[var(--a11y-button-text)]'
-                  : 'bg-green-500 text-white'
-                : a11yStore.isHighContrast
-                  ? 'bg-[var(--a11y-bg-secondary)] text-[var(--a11y-text)]'
-                  : 'bg-gray-100 text-gray-700',
-            ]"
+                ? { background: 'var(--theme-success, #22c55e)', color: '#fff' }
+                : { background: 'var(--theme-bg-secondary, #f3f4f6)', color: 'var(--theme-text, #374151)' }
+            "
             :aria-pressed="a11yStore.ttsEnabled"
             role="switch"
             :aria-checked="a11yStore.ttsEnabled"
-            style="border: var(--a11y-btn-border)"
             @click="toggleTTS()"
           >
             <span class="text-base font-medium">
@@ -229,12 +180,7 @@ onMounted(() => {
         <!-- Apply/Close Button -->
         <button
           class="w-full rounded-2xl py-4 text-lg font-bold transition-colors"
-          :class="
-            a11yStore.isHighContrast
-              ? 'bg-[var(--a11y-primary)] text-[var(--a11y-button-text)]'
-              : 'bg-primary text-white'
-          "
-          style="border: var(--a11y-btn-border)"
+          style="background: var(--theme-primary, #8E3524); color: var(--theme-primary-text, #fff)"
           @click="handleClose"
         >
           {{ t("a11y.apply") }}

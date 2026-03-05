@@ -26,21 +26,21 @@ export default {
           info: "var(--theme-info)",
         },
 
-        // 기존 하드코딩 색상 (하위 호환성 유지)
-        // TODO: Sprint 4에서 점진적으로 theme.* 로 마이그레이션
+        // primary 팔레트 - 테마 CSS 변수 기반 (테마 변경 시 자동 반영)
+        // 주요 shade(DEFAULT, 500, 600, 700)를 CSS 변수로 → 테마 전환 시 자동 반영
         primary: {
-          DEFAULT: "var(--theme-primary)",
-          50: "#fdf3f1",
-          100: "#fbe6e1",
-          200: "#f8cfc7",
-          300: "#f2aea0",
-          400: "#e8826d",
-          500: "#d95d44",
-          600: "#c64a31",
-          700: "var(--theme-primary)",
-          800: "var(--theme-primary-hover)",
-          900: "#672e25",
-          950: "#38140f",
+          DEFAULT: "var(--theme-primary, #8E3524)",
+          50: "var(--theme-primary-50, #fdf3f1)",
+          100: "var(--theme-primary-100, #fbe6e1)",
+          200: "var(--theme-primary-200, #f8cfc7)",
+          300: "var(--theme-primary-300, #f2aea0)",
+          400: "var(--theme-primary-400, #e8826d)",
+          500: "var(--theme-primary, #8E3524)",
+          600: "var(--theme-primary, #8E3524)",
+          700: "var(--theme-primary, #8E3524)",
+          800: "var(--theme-primary-hover, #7a3125)",
+          900: "var(--theme-primary-900, #672e25)",
+          950: "var(--theme-primary-950, #38140f)",
         },
         accent: {
           DEFAULT: "var(--theme-accent)",
