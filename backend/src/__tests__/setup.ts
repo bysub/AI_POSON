@@ -46,6 +46,7 @@ vi.mock("../utils/cache.js", () => ({
     deletePattern: vi.fn(),
     flushAll: vi.fn(),
   },
+  getRedis: vi.fn(() => null),
   CACHE_KEYS: {
     PRODUCTS: "products",
     CATEGORIES: "categories",

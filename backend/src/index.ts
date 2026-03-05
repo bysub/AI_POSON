@@ -41,13 +41,37 @@ app.use(
   }),
 );
 
-// Rate limiting
+// Rate limiting – global
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 1000, // Limit each IP to 1000 requests per windowMs
     standardHeaders: true,
     legacyHeaders: false,
+  }),
+);
+
+// Rate limiting – auth endpoints (brute-force 방지)
+app.use(
+  "/api/v1/auth",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30, // 15분에 30회 (로그인 시도 제한)
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: "인증 요청이 너무 많습니다. 잠시 후 다시 시도하세요." },
+  }),
+);
+
+// Rate limiting – payment endpoints
+app.use(
+  "/api/v1/payments",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100, // 15분에 100회
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: "결제 요청이 너무 많습니다. 잠시 후 다시 시도하세요." },
   }),
 );
 

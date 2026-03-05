@@ -186,8 +186,12 @@ export function matchProducts(
 
     // 4단계: Levenshtein 유사도 (일본어/중국어: 문자 수 기반이므로 임계값 조정)
     const adjustedThreshold = (locale === "ja" || locale === "zh") ? Math.max(threshold - 0.1, 0.3) : threshold;
-    const distance = levenshtein(normalizedQuery, name);
     const maxLen = Math.max(normalizedQuery.length, name.length);
+    // Early-exit: 길이 차이만으로 threshold 달성 불가능하면 Levenshtein 스킵
+    const lenDiff = Math.abs(normalizedQuery.length - name.length);
+    if (maxLen > 0 && 1 - lenDiff / maxLen < adjustedThreshold) continue;
+
+    const distance = levenshtein(normalizedQuery, name);
     const similarity = 1 - distance / maxLen;
     if (similarity >= adjustedThreshold) {
       results.push({ product, score: similarity, matchType: "fuzzy" });

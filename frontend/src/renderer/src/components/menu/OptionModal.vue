@@ -2,6 +2,7 @@
 import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Product, ProductOption } from "@/types";
+import { formatNumber as formatPrice } from "@/utils/format";
 
 const props = defineProps<{
   product: Product | null;
@@ -71,13 +72,6 @@ const allRequiredSelected = computed(() => {
   if (!props.product?.options) return true;
   return requiredOptions.value.every((option) => selectedOptions.value[option.name]);
 });
-
-/**
- * 가격 포맷팅
- */
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
-}
 
 /**
  * 수량 증가

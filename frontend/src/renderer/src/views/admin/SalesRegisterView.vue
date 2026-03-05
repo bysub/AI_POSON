@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { apiClient } from "@/services/api/client";
 import { showWarningToast, showSuccessToast, showApiError } from "@/utils/AlertUtils";
+import { formatPrice } from "@/utils/format";
 
 interface ProductSearchResult {
   id: number;
@@ -114,10 +115,6 @@ function updateQuantity(index: number, delta: number): void {
 
 function removeItem(index: number): void {
   saleItems.value.splice(index, 1);
-}
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
 }
 
 async function submitSale(): Promise<void> {

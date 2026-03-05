@@ -194,24 +194,23 @@
       "Bash(~/.claude/scripts/context-bar.sh)",
       "Bash(~/bin/jq.exe:*)",
       "Bash(~/.bashrc)",
-      "Bash(source ~/.bashrc)"
+      "Bash(source ~/.bashrc)",
+      "Bash(python3:*)",
+      "Bash(jq:*)",
+      "Bash(/c/ProgramData/chocolatey/bin/jq.exe:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(chmod +x:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "context7",
-    "sequential-thinking",
-    "filesystem",
-    "automatalabs-playwright-server",
-    "DeepGraph Vue MCP",
-    "google-ads",
-    "fetch",
     "playwright",
     "supabase",
     "postgresql",
     "mysql"
   ],
   "hooks": {},
-  "prefersReducedMotion": true,  
-  "language": "korean"
+  "language": "korean",
+  "prefersReducedMotion": true
 }

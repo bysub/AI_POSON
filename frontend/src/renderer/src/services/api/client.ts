@@ -1,5 +1,6 @@
 import type { Product, Category, Order } from "../../types";
 import type { ApiClient } from "../sync/sync-manager";
+import { API_BASE_URL } from "../../config";
 
 /**
  * API 응답 타입
@@ -134,7 +135,7 @@ export class HttpApiClient implements ApiClient {
  */
 export function createApiClient(baseUrl?: string): HttpApiClient {
   return new HttpApiClient({
-    baseUrl: baseUrl ?? import.meta.env.VITE_API_URL ?? "http://localhost:3000",
+    baseUrl: baseUrl ?? API_BASE_URL,
     timeout: 30000,
   });
 }
@@ -142,7 +143,7 @@ export function createApiClient(baseUrl?: string): HttpApiClient {
 /**
  * 기본 API 클라이언트 인스턴스 (axios 호환 인터페이스)
  */
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+const BASE_URL = API_BASE_URL;
 
 /**
  * 저장된 액세스 토큰 가져오기

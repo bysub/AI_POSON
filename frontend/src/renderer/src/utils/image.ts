@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+import { API_BASE_URL } from "@/config";
 
 /**
  * /uploads/ 상대경로를 전체 URL로 변환

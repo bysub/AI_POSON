@@ -24,10 +24,18 @@ const sttError = ref<string | null>(null);
 const isListening = computed(() => status.value === "listening");
 const isSupported = computed(() => !!window.api);
 
-// 데몬 준비 상태 주기적 확인 (최초 1회 + 미준비 시 폴링)
+// 데몬 준비 상태 주기적 확인 (lazy 초기화 — 첫 useSTT() 호출 시 시작)
 let readyCheckTimer: ReturnType<typeof setInterval> | null = null;
 let readyCheckCount = 0;
+let pollingStarted = false;
 const MAX_READY_CHECKS = 90; // 최대 3분 (2초 간격 × 90회)
+
+function stopPolling(): void {
+  if (readyCheckTimer) {
+    clearInterval(readyCheckTimer);
+    readyCheckTimer = null;
+  }
+}
 
 async function checkDaemonReady(): Promise<void> {
   if (!window.api?.stt) return;
@@ -42,17 +50,10 @@ async function checkDaemonReady(): Promise<void> {
 
     if (result.ready) {
       isDaemonReady.value = true;
-      if (readyCheckTimer) {
-        clearInterval(readyCheckTimer);
-        readyCheckTimer = null;
-      }
+      stopPolling();
       console.log(`[STT] Daemon ready (python: ${result.python})`);
     } else if (!result.available || readyCheckCount >= MAX_READY_CHECKS) {
-      // Python/스크립트 없거나 최대 대기 초과 → 폴링 중단
-      if (readyCheckTimer) {
-        clearInterval(readyCheckTimer);
-        readyCheckTimer = null;
-      }
+      stopPolling();
       if (!result.available) {
         console.warn(`[STT] STT 사용 불가: ${result.error ?? "unknown"}`);
       } else {
@@ -64,8 +65,10 @@ async function checkDaemonReady(): Promise<void> {
   }
 }
 
-// 앱 시작 시 준비 상태 확인 시작
-if (typeof window !== "undefined") {
+function startPolling(): void {
+  if (pollingStarted || isDaemonReady.value) return;
+  pollingStarted = true;
+  readyCheckCount = 0;
   checkDaemonReady();
   readyCheckTimer = setInterval(checkDaemonReady, 2000);
 }
@@ -73,6 +76,9 @@ if (typeof window !== "undefined") {
 export function useSTT() {
   const { locale } = useI18n();
   const a11yStore = useAccessibilityStore();
+
+  // Lazy 초기화: 첫 useSTT() 호출 시 데몬 폴링 시작
+  startPolling();
 
   const currentLang = computed(() => LANG_MAP[locale.value] ?? "ko-KR");
 
@@ -141,6 +147,13 @@ export function useSTT() {
     status.value = "idle";
   }
 
+  /** 폴링 타이머 정리 (컴포넌트 unmount 시 호출) */
+  function destroy() {
+    stop();
+    stopPolling();
+    pollingStarted = false;
+  }
+
   return {
     status,
     transcript,
@@ -156,5 +169,6 @@ export function useSTT() {
     start,
     stop,
     reset,
+    destroy,
   };
 }

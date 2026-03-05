@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { formatNumber as formatPrice } from "@/utils/format";
 
 const props = defineProps<{
   amount: number;
@@ -28,13 +29,6 @@ const canComplete = computed(() => receivedAmount.value >= props.amount);
 
 // 빠른 금액 버튼들
 const quickAmounts = [1000, 5000, 10000, 50000];
-
-/**
- * 가격 포맷팅
- */
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
-}
 
 /**
  * 빠른 금액 추가

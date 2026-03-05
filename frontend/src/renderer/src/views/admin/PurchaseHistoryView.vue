@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import type { Purchase, Supplier, PurchaseStatus } from "@/types";
 import { apiClient } from "@/services/api/client";
 import { showApiError, showConfirm } from "@/utils/AlertUtils";
+import { formatPrice } from "@/utils/format";
 
 const purchaseStatusConfig: Record<PurchaseStatus, { label: string; bg: string; text: string }> = {
   DRAFT: { label: "임시저장", bg: "bg-yellow-100", text: "text-yellow-700" },
@@ -220,10 +221,6 @@ async function cancelPurchase(purchase: Purchase): Promise<void> {
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   return d.toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
-}
-
-function formatPrice(price: number | string): string {
-  return new Intl.NumberFormat("ko-KR").format(Number(price)) + "원";
 }
 
 function goToPage(page: number): void {

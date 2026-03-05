@@ -86,6 +86,7 @@
     "summary": "合計",
     "itemCount": "{count}件",
     "totalAmount": "合計金額",
+    "orderType": "店内 / 持ち帰り",
     "dineIn": "店内",
     "takeout": "持ち帰り",
     "table": "テーブル {no}番",

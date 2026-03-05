@@ -6,6 +6,7 @@ import { apiClient } from "@/services/api/client";
 import { showWarningToast, showApiError } from "@/utils/AlertUtils";
 import SupplierFormModal from "@/components/SupplierFormModal.vue";
 import PurchaseProductFormModal from "@/components/PurchaseProductFormModal.vue";
+import { formatPrice } from "@/utils/format";
 
 interface ProductSearchResult {
   id: number;
@@ -174,10 +175,6 @@ async function savePurchase(): Promise<void> {
   } finally {
     isSaving.value = false;
   }
-}
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
 }
 
 // ===== 거래처 등록 모달 (SupplierFormModal 컴포넌트 사용) =====

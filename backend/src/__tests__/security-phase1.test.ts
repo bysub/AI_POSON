@@ -47,15 +47,16 @@ describe("S-6: 개발용 인증 폴백 엄격화", () => {
 
 // ── S-7: 주문 가격 서버 재계산 ──
 describe("S-7: 주문 가격 서버 재계산", () => {
-  it("orders.ts에서 DB 가격으로 총액 계산", async () => {
+  it("order service에서 DB 가격으로 총액 계산", async () => {
     const fs = await import("fs");
-    const ordersSource = fs.readFileSync("src/routes/orders.ts", "utf-8");
+    // Service Layer 추출 후 비즈니스 로직은 order.service.ts에 위치
+    const orderSource = fs.readFileSync("src/services/order.service.ts", "utf-8");
     // 클라이언트 price 직접 사용 패턴이 없어야 함
-    expect(ordersSource).not.toContain("item.price * item.quantity");
+    expect(orderSource).not.toContain("item.price * item.quantity");
     // DB 가격 조회 필드가 포함되어야 함
-    expect(ordersSource).toContain("sellPrice");
-    expect(ordersSource).toContain("discountPrice");
-    expect(ordersSource).toContain("serverPrice");
+    expect(orderSource).toContain("sellPrice");
+    expect(orderSource).toContain("discountPrice");
+    expect(orderSource).toContain("serverPrice");
   });
 });
 
@@ -123,12 +124,13 @@ describe("S-18: accessToken ref 비공개화", () => {
 describe("R-1: 주문번호 Race Condition 해결", () => {
   it("주문번호 생성에 MAX 패턴 사용 (count 대신)", async () => {
     const fs = await import("fs");
-    const ordersSource = fs.readFileSync("src/routes/orders.ts", "utf-8");
+    // Service Layer 추출 후 주문번호 생성 로직은 order.service.ts에 위치
+    const orderSource = fs.readFileSync("src/services/order.service.ts", "utf-8");
     // count 기반 패턴이 사라졌는지 확인
-    expect(ordersSource).not.toContain("orderCount = await tx.order.count");
+    expect(orderSource).not.toContain("orderCount = await tx.order.count");
     // findFirst + orderBy desc 패턴 사용
-    expect(ordersSource).toContain("findFirst");
-    expect(ordersSource).toContain('orderBy: { orderNumber: "desc" }');
+    expect(orderSource).toContain("findFirst");
+    expect(orderSource).toContain('orderBy: { orderNumber: "desc" }');
   });
 });
 

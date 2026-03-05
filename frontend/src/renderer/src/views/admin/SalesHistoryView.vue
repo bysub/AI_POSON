@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
+import { formatPrice } from "@/utils/format";
 
 interface OrderItem {
   id: number;
@@ -127,10 +128,6 @@ async function loadData(): Promise<void> {
 function handleSearch(): void {
   pagination.value.page = 1;
   loadData();
-}
-
-function formatPrice(price: string | number): string {
-  return new Intl.NumberFormat("ko-KR").format(Number(price)) + "원";
 }
 
 function formatDate(dateStr: string): string {

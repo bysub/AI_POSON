@@ -1,488 +1,143 @@
 import { Router } from "express";
-import { v4 as uuidv4 } from "uuid";
-import { Prisma, OrderStatus } from "@prisma/client";
-import type { PrismaClient } from "@prisma/client";
-import { prisma } from "../utils/db.js";
+import { OrderStatus } from "@prisma/client";
+import { z } from "zod";
 import { AppError } from "../middleware/errorHandler.js";
-import { logger } from "../utils/logger.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
-import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { createStockMovement } from "./stock-movements.js";
-
-type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
+import { orderService, OrderError } from "../services/order.service.js";
 
 const router = Router();
 
-// 재고 차감이 필요한 상태 (PAID 이후 상태)
-const STOCK_DEDUCTED_STATUSES: OrderStatus[] = ["PAID", "PREPARING", "COMPLETED"];
+// ─── Zod Schemas ───
+const createOrderSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        productId: z.number().int().positive(),
+        quantity: z.number().int().positive(),
+        options: z.array(z.object({
+          optionId: z.number().int().positive(),
+          quantity: z.number().int().positive().optional(),
+        })).optional(),
+      }),
+    )
+    .min(1, "주문 항목이 필요합니다"),
+  kioskId: z.string().optional(),
+  orderType: z.enum(["DINE_IN", "TAKEOUT"]).optional(),
+  tableNo: z.number().int().positive().optional(),
+  memberId: z.number().int().positive().optional(),
+});
 
-/**
- * 주문 결제완료(PAID) 시 연결된 매입상품 재고 차감
- */
-async function deductStockForOrder(
-  tx: TransactionClient,
-  orderId: string,
-  orderNumber: string,
-): Promise<void> {
-  const items = await tx.orderItem.findMany({
-    where: { orderId },
-    include: {
-      product: {
-        select: { purchaseProductId: true },
-      },
-    },
-  });
+const updateStatusSchema = z.object({
+  status: z.nativeEnum(OrderStatus),
+  paymentType: z.string().optional(),
+  receivedAmount: z.number().positive().optional(),
+});
 
-  for (const item of items) {
-    const ppId = item.product.purchaseProductId;
-    if (!ppId) continue;
-
-    // 재고이동 기록 (stockBefore/After 자동 계산)
-    await createStockMovement(tx, {
-      purchaseProductId: ppId,
-      type: "SALE_OUT",
-      quantity: -item.quantity,
-      orderId,
-      reason: "order_paid",
-      memo: `주문번호: ${orderNumber}`,
-    });
-
-    // 실제 재고 차감
-    await tx.purchaseProduct.update({
-      where: { id: ppId },
-      data: { stock: { decrement: item.quantity } },
-    });
+/** OrderError → AppError 변환 헬퍼 */
+function handleOrderError(err: unknown, next: (err: AppError) => void): void {
+  if (err instanceof OrderError) {
+    next(new AppError(err.statusCode, err.message, err.code));
+  } else {
+    const msg = err instanceof Error ? err.message : String(err);
+    next(new AppError(500, msg, "ORDER_ERROR"));
   }
-
-  logger.info({ orderId, orderNumber }, "Stock deducted for order");
-}
-
-/**
- * 주문 취소 시 차감된 재고 복구
- */
-async function restoreStockForOrder(
-  tx: TransactionClient,
-  orderId: string,
-  orderNumber: string,
-): Promise<void> {
-  const items = await tx.orderItem.findMany({
-    where: { orderId },
-    include: {
-      product: {
-        select: { purchaseProductId: true },
-      },
-    },
-  });
-
-  for (const item of items) {
-    const ppId = item.product.purchaseProductId;
-    if (!ppId) continue;
-
-    // 재고이동 기록 (복구)
-    await createStockMovement(tx, {
-      purchaseProductId: ppId,
-      type: "SALE_CANCEL",
-      quantity: item.quantity,
-      orderId,
-      reason: "order_cancelled",
-      memo: `주문번호: ${orderNumber} 취소`,
-    });
-
-    // 실제 재고 복구
-    await tx.purchaseProduct.update({
-      where: { id: ppId },
-      data: { stock: { increment: item.quantity } },
-    });
-  }
-
-  logger.info({ orderId, orderNumber }, "Stock restored for cancelled order");
 }
 
 // ========== 키오스크용 API ==========
 
-// Create order (키오스크에서 주문 생성)
+// Create order
 router.post("/", asyncHandler(async (req, res, next) => {
-  const { items, kioskId, orderType, tableNo, memberId } = req.body;
-
-  if (!items || !Array.isArray(items) || items.length === 0) {
-    return next(new AppError(400, "Order items are required", "INVALID_ORDER_ITEMS"));
+  const parsed = createOrderSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return next(new AppError(400, parsed.error.errors[0]?.message ?? "잘못된 요청입니다", "VALIDATION_ERROR"));
   }
 
   try {
-    // 상품 존재 및 판매 상태 확인 + 서버 가격 조회 (S-7: 클라이언트 가격 신뢰 방지)
-    const productIds = items.map((item: { productId: number }) => item.productId);
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-      select: { id: true, name: true, status: true, sellPrice: true, isDiscount: true, discountPrice: true },
+    const { items, kioskId, orderType, tableNo, memberId } = parsed.data;
+    const order = await orderService.createOrder({
+      items,
+      kioskId,
+      orderType,
+      tableNo,
+      memberId,
     });
 
-    const productMap = new Map(products.map((p) => [p.id, p]));
-
-    for (const item of items as { productId: number; quantity: number; name: string }[]) {
-      const product = productMap.get(item.productId);
-      if (!product) {
-        return next(
-          new AppError(404, `상품을 찾을 수 없습니다: ${item.name}`, "PRODUCT_NOT_FOUND"),
-        );
-      }
-      if (product.status === "SOLD_OUT") {
-        return next(new AppError(400, `품절된 상품입니다: ${product.name}`, "PRODUCT_SOLD_OUT"));
-      }
-      if (product.status !== "SELLING") {
-        return next(
-          new AppError(400, `판매 중이 아닌 상품입니다: ${product.name}`, "PRODUCT_NOT_AVAILABLE"),
-        );
-      }
-    }
-
-    // 서버에서 DB 가격 기준으로 합계 재계산 (클라이언트 전달 가격 무시)
-    const totalAmount = items.reduce(
-      (sum: number, item: { productId: number; quantity: number }) => {
-        const product = productMap.get(item.productId)!;
-        const unitPrice = product.isDiscount && product.discountPrice != null
-          ? Number(product.discountPrice)
-          : Number(product.sellPrice);
-        return sum + unitPrice * item.quantity;
-      },
-      0,
-    );
-
-    // R-1: 트랜잭션 + serializable 격리 수준으로 주문번호 Race Condition 방지
-    const order = await prisma.$transaction(async (tx) => {
-      // Generate order number (format: YYMMDD-NNNN)
-      const now = new Date();
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const datePrefix = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-
-      // DB 레벨에서 MAX 주문번호 조회 (동시 요청 시 트랜잭션 직렬화)
-      const lastOrder = await tx.order.findFirst({
-        where: { createdAt: { gte: startOfDay } },
-        orderBy: { orderNumber: "desc" },
-        select: { orderNumber: true },
-      });
-
-      let seq = 1;
-      if (lastOrder?.orderNumber) {
-        const parts = lastOrder.orderNumber.split("-");
-        if (parts.length === 2) {
-          seq = parseInt(parts[1], 10) + 1;
-        }
-      }
-      const orderNumber = `${datePrefix}-${String(seq).padStart(4, "0")}`;
-
-      return tx.order.create({
-        data: {
-          id: uuidv4(),
-          orderNumber,
-          kioskId: kioskId ?? null,
-          orderType: orderType ?? null,
-          tableNo: tableNo != null ? parseInt(String(tableNo), 10) : null,
-          memberId: memberId != null ? parseInt(String(memberId), 10) : null,
-          totalAmount,
-          status: "PENDING",
-          items: {
-            create: items.map(
-              (item: {
-                productId: number;
-                name: string;
-                price: number;
-                quantity: number;
-                options?: Prisma.InputJsonValue;
-              }) => {
-                const product = productMap.get(item.productId)!;
-                const serverPrice = product.isDiscount && product.discountPrice != null
-                  ? Number(product.discountPrice)
-                  : Number(product.sellPrice);
-                return {
-                  product: { connect: { id: item.productId } },
-                  name: product.name, // DB 기준 상품명 사용
-                  price: serverPrice,  // DB 기준 가격 사용
-                  quantity: item.quantity,
-                  options: item.options ?? Prisma.JsonNull,
-                };
-              },
-            ),
-          },
-        },
-        include: {
-          items: true,
-        },
-      });
-    });
-
-    // 캐시 무효화
-    await cacheService.del(CACHE_KEYS.PRODUCTS);
-
-    logger.info({ orderId: order.id, orderNumber: order.orderNumber }, "Order created");
-
-    res.status(201).json({
-      success: true,
-      data: order,
-    });
-  } catch (error) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    logger.error({ error, errMsg }, "Failed to create order");
-    return next(new AppError(500, `Failed to create order: ${errMsg}`, "ORDER_CREATE_FAILED"));
+    res.status(201).json({ success: true, data: order });
+  } catch (err) {
+    handleOrderError(err, next);
   }
 }));
 
-// Get order statistics (관리자 대시보드용) - /:id 보다 먼저 정의해야 함
+// Get order statistics - /:id 보다 먼저 정의
 router.get(
   "/stats/summary",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
   asyncHandler(async (req, res) => {
     const { startDate, endDate } = req.query;
-
-    const dateFilter = {
-      ...((startDate || endDate) && {
-        createdAt: {
-          ...(startDate && { gte: new Date(startDate as string) }),
-          ...(endDate && { lte: new Date(endDate as string) }),
-        },
-      }),
-    };
-
-    const [totalOrders, completedOrders, cancelledOrders, totalRevenue, statusCounts] =
-      await Promise.all([
-        prisma.order.count({ where: dateFilter }),
-        prisma.order.count({ where: { ...dateFilter, status: "COMPLETED" } }),
-        prisma.order.count({ where: { ...dateFilter, status: "CANCELLED" } }),
-        prisma.order.aggregate({
-          where: { ...dateFilter, status: { in: ["PAID", "PREPARING", "COMPLETED"] } },
-          _sum: { totalAmount: true },
-        }),
-        prisma.order.groupBy({
-          by: ["status"],
-          where: dateFilter,
-          _count: true,
-        }),
-      ]);
-
-    res.json({
-      success: true,
-      data: {
-        totalOrders,
-        completedOrders,
-        cancelledOrders,
-        pendingOrders: totalOrders - completedOrders - cancelledOrders,
-        totalRevenue: totalRevenue._sum.totalAmount ?? 0,
-        statusBreakdown: statusCounts.reduce(
-          (acc, item) => ({ ...acc, [item.status]: item._count }),
-          {},
-        ),
-      },
+    const data = await orderService.getStatsSummary({
+      startDate: startDate as string | undefined,
+      endDate: endDate as string | undefined,
     });
+    res.json({ success: true, data });
   }),
 );
 
-// Get daily sales report (관리자) - /:id 보다 먼저 정의해야 함
+// Get daily sales report - /:id 보다 먼저 정의
 router.get(
   "/stats/daily",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
   asyncHandler(async (req, res) => {
     const { days = "7" } = req.query;
-    const daysNum = Math.min(parseInt(days as string), 90);
-
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - daysNum);
-    startDate.setHours(0, 0, 0, 0);
-
-    const orders = await prisma.order.findMany({
-      where: {
-        createdAt: { gte: startDate },
-        status: { in: ["PAID", "PREPARING", "COMPLETED"] },
-      },
-      select: {
-        createdAt: true,
-        totalAmount: true,
-      },
-    });
-
-    // 일별 집계
-    const dailyMap = new Map<string, { count: number; revenue: number }>();
-
-    for (let i = 0; i < daysNum; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateKey = date.toISOString().split("T")[0];
-      dailyMap.set(dateKey, { count: 0, revenue: 0 });
-    }
-
-    for (const order of orders) {
-      const dateKey = order.createdAt.toISOString().split("T")[0];
-      const current = dailyMap.get(dateKey);
-      if (current) {
-        current.count++;
-        current.revenue += Number(order.totalAmount);
-      }
-    }
-
-    const dailyStats = Array.from(dailyMap.entries())
-      .map(([date, stats]) => ({ date, ...stats }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    res.json({
-      success: true,
-      data: dailyStats,
-    });
+    const data = await orderService.getDailyStats(parseInt(days as string));
+    res.json({ success: true, data });
   }),
 );
 
 // Get order by ID
 router.get("/:id", asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: {
-      items: true,
-      payments: true,
-    },
-  });
-
+  const order = await orderService.getById(req.params.id);
   if (!order) {
     return next(new AppError(404, "Order not found", "ORDER_NOT_FOUND"));
   }
-
-  res.json({
-    success: true,
-    data: order,
-  });
+  res.json({ success: true, data: order });
 }));
 
 // Update order status (S-8: 인증 필수)
 router.patch("/:id/status", authenticate, asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const { status, paymentType, receivedAmount } = req.body;
-
-  const validStatuses = ["PENDING", "PAID", "PREPARING", "COMPLETED", "CANCELLED"];
-  if (!validStatuses.includes(status)) {
-    return next(new AppError(400, "Invalid status", "INVALID_STATUS"));
+  const parsed = updateStatusSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return next(new AppError(400, parsed.error.errors[0]?.message ?? "잘못된 상태값입니다", "VALIDATION_ERROR"));
   }
 
   try {
-    const existing = await prisma.order.findUnique({ where: { id } });
-    if (!existing) {
-      return next(new AppError(404, "Order not found", "ORDER_NOT_FOUND"));
-    }
-
-    const prevStatus = existing.status as OrderStatus;
-    const newStatus = status as OrderStatus;
-
-    // 동일 상태면 재고 처리 없이 그대로 반환
-    if (prevStatus === newStatus) {
-      return res.json({ success: true, data: existing });
-    }
-
-    const order = await prisma.$transaction(async (tx) => {
-      // PAID로 전환: 재고 차감
-      if (newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
-        await deductStockForOrder(tx, id, existing.orderNumber);
-      }
-
-      // CANCELLED로 전환 (이전에 재고 차감된 상태였다면): 재고 복구
-      if (newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
-        await restoreStockForOrder(tx, id, existing.orderNumber);
-      }
-
-      // PAID 전환 시 paymentType이 전달되면 Payment 레코드 생성
-      if (newStatus === "PAID" && paymentType) {
-        await tx.payment.create({
-          data: {
-            orderId: id,
-            paymentType,
-            amount: existing.totalAmount,
-            receivedAmount: paymentType === "CASH" && receivedAmount ? receivedAmount : null,
-            status: "APPROVED",
-          },
-        });
-      }
-
-      return tx.order.update({
-        where: { id },
-        data: {
-          status: newStatus,
-          ...(newStatus === "COMPLETED" && { completedAt: new Date() }),
-          ...(newStatus === "CANCELLED" && { cancelledAt: new Date() }),
-        },
-      });
-    });
-
-    // 재고 변경 시 캐시 무효화
-    if (
-      (newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) ||
-      (newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus))
-    ) {
-      await cacheService.del(CACHE_KEYS.PURCHASE_PRODUCTS);
-      await cacheService.del(CACHE_KEYS.STOCK_MOVEMENTS);
-    }
-
-    logger.info({ orderId: id, prevStatus, newStatus }, "Order status updated");
-
-    res.json({
-      success: true,
-      data: order,
-    });
-  } catch (error) {
-    logger.error({ error, orderId: id }, "Failed to update order status");
-    return next(new AppError(500, "주문 상태 변경에 실패했습니다", "STATUS_UPDATE_FAILED"));
+    const order = await orderService.updateStatus(req.params.id, parsed.data);
+    res.json({ success: true, data: order });
+  } catch (err) {
+    handleOrderError(err, next);
   }
 }));
 
 // ========== 관리자용 API ==========
 
-// Get all orders (페이지네이션, 관리자)
+// Get all orders (페이지네이션)
 router.get(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER", "STAFF"),
   asyncHandler(async (req, res) => {
     const { page = "1", limit = "20", status, kioskId, startDate, endDate } = req.query;
-
-    const pageNum = parseInt(page as string);
-    const limitNum = Math.min(parseInt(limit as string), 100);
-    const skip = (pageNum - 1) * limitNum;
-
-    const where: Prisma.OrderWhereInput = {
-      ...(status && { status: status as OrderStatus }),
-      ...(kioskId && { kioskId: kioskId as string }),
-      ...((startDate || endDate) && {
-        createdAt: {
-          ...(startDate && { gte: new Date(startDate as string) }),
-          ...(endDate && { lte: new Date(endDate as string) }),
-        },
-      }),
-    };
-
-    const [orders, total] = await Promise.all([
-      prisma.order.findMany({
-        where,
-        include: {
-          items: {
-            include: { product: { select: { id: true, name: true, barcode: true } } },
-          },
-          payments: true,
-        },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limitNum,
-      }),
-      prisma.order.count({ where }),
-    ]);
-
-    res.json({
-      success: true,
-      data: orders,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        totalPages: Math.ceil(total / limitNum),
-      },
+    const result = await orderService.list({
+      page: parseInt(page as string),
+      limit: Math.min(parseInt(limit as string), 100),
+      status: status as OrderStatus | undefined,
+      kioskId: kioskId as string | undefined,
+      startDate: startDate as string | undefined,
+      endDate: endDate as string | undefined,
     });
+    res.json({ success: true, data: result.orders, pagination: result.pagination });
   }),
 );
 
@@ -492,187 +147,42 @@ router.put(
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
   asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
     const { kioskId, status, memo } = req.body;
-
-    const existing = await prisma.order.findUnique({ where: { id } });
-    if (!existing) {
-      return next(new AppError(404, "Order not found", "ORDER_NOT_FOUND"));
-    }
-
-    // 완료/취소된 주문은 수정 불가
-    if (["COMPLETED", "CANCELLED"].includes(existing.status)) {
-      return next(
-        new AppError(400, "완료되거나 취소된 주문은 수정할 수 없습니다", "ORDER_NOT_MODIFIABLE"),
-      );
-    }
-
-    const validStatuses = ["PENDING", "PAID", "PREPARING", "COMPLETED", "CANCELLED"];
-    if (status && !validStatuses.includes(status)) {
-      return next(new AppError(400, "Invalid status", "INVALID_STATUS"));
-    }
-
     try {
-      const prevStatus = existing.status as OrderStatus;
-      const newStatus = (status ?? existing.status) as OrderStatus;
-
-      const order = await prisma.$transaction(async (tx) => {
-        // PAID로 전환: 재고 차감
-        if (status && newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
-          await deductStockForOrder(tx, id, existing.orderNumber);
-        }
-
-        // CANCELLED로 전환 (이전에 재고 차감된 상태였다면): 재고 복구
-        if (status && newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
-          await restoreStockForOrder(tx, id, existing.orderNumber);
-        }
-
-        return tx.order.update({
-          where: { id },
-          data: {
-            ...(kioskId !== undefined && { kioskId }),
-            ...(status !== undefined && { status }),
-            ...(memo !== undefined && { memo }),
-            ...(newStatus === "COMPLETED" && { completedAt: new Date() }),
-            ...(newStatus === "CANCELLED" && { cancelledAt: new Date() }),
-          },
-          include: {
-            items: true,
-            payments: true,
-          },
-        });
-      });
-
-      // 재고 변경 시 캐시 무효화
-      if (
-        status &&
-        ((newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) ||
-          (newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus)))
-      ) {
-        await cacheService.del(CACHE_KEYS.PURCHASE_PRODUCTS);
-        await cacheService.del(CACHE_KEYS.STOCK_MOVEMENTS);
-      }
-
-      logger.info({ orderId: id, updates: { kioskId, status, memo } }, "Order updated");
-
-      res.json({
-        success: true,
-        data: order,
-      });
-    } catch (error) {
-      logger.error({ error, orderId: id }, "Failed to update order");
-      return next(new AppError(500, "주문 수정에 실패했습니다", "ORDER_UPDATE_FAILED"));
+      const order = await orderService.updateOrder(req.params.id, { kioskId, status, memo });
+      res.json({ success: true, data: order });
+    } catch (err) {
+      handleOrderError(err, next);
     }
   }),
 );
 
-// Cancel order (관리자) - 재고 복구 포함
+// Cancel order (관리자)
 router.delete(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
   asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-
-    const existing = await prisma.order.findUnique({
-      where: { id },
-      include: { items: true, payments: true },
-    });
-
-    if (!existing) {
-      return next(new AppError(404, "Order not found", "ORDER_NOT_FOUND"));
-    }
-
-    // 이미 취소된 주문
-    if (existing.status === "CANCELLED") {
-      return next(new AppError(400, "이미 취소된 주문입니다", "ORDER_ALREADY_CANCELLED"));
-    }
-
-    // 완료된 주문은 취소 불가
-    if (existing.status === "COMPLETED") {
-      return next(new AppError(400, "완료된 주문은 취소할 수 없습니다", "ORDER_NOT_CANCELLABLE"));
-    }
-
-    // 결제 완료된 주문은 환불 처리 필요 (경고만)
-    const hasPaidPayment = existing.payments.some((p) => p.status === "APPROVED");
-    if (hasPaidPayment) {
-      logger.warn(
-        { orderId: id },
-        "Cancelling order with approved payment - refund may be required",
-      );
-    }
-
     try {
-      const prevStatus = existing.status as OrderStatus;
-
-      await prisma.$transaction(async (tx) => {
-        // 재고 차감된 상태(PAID, PREPARING)에서 취소 시 재고 복구
-        if (STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
-          await restoreStockForOrder(tx, id, existing.orderNumber);
-        }
-
-        // 주문 취소 처리
-        await tx.order.update({
-          where: { id },
-          data: {
-            status: "CANCELLED",
-            cancelledAt: new Date(),
-          },
-        });
-      });
-
-      // 재고 복구 시 캐시 무효화
-      if (STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
-        await cacheService.del(CACHE_KEYS.PURCHASE_PRODUCTS);
-        await cacheService.del(CACHE_KEYS.STOCK_MOVEMENTS);
-      }
-
-      logger.info({ orderId: id, prevStatus }, "Order cancelled");
-
-      res.json({
-        success: true,
-        message: "주문이 취소되었습니다",
-      });
-    } catch (error) {
-      logger.error({ error, orderId: id }, "Failed to cancel order");
-      return next(new AppError(500, "주문 취소에 실패했습니다", "ORDER_CANCEL_FAILED"));
+      await orderService.cancelOrder(req.params.id);
+      res.json({ success: true, message: "주문이 취소되었습니다" });
+    } catch (err) {
+      handleOrderError(err, next);
     }
   }),
 );
 
-// Payment 레코드 백필 (결제완료 주문 중 Payment 없는 건)
+// Payment 레코드 백필
 router.post(
   "/backfill-payments",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN"),
   asyncHandler(async (_req, res) => {
-    const ordersWithoutPayment = await prisma.order.findMany({
-      where: {
-        status: { in: ["PAID", "PREPARING", "COMPLETED"] },
-        payments: { none: {} },
-      },
-      select: { id: true, totalAmount: true, orderNumber: true },
-    });
-
-    if (ordersWithoutPayment.length === 0) {
-      return res.json({ success: true, message: "백필 대상 없음", count: 0 });
-    }
-
-    const created = await prisma.payment.createMany({
-      data: ordersWithoutPayment.map((order) => ({
-        orderId: order.id,
-        paymentType: "CASH" as const,
-        amount: order.totalAmount,
-        status: "APPROVED" as const,
-      })),
-    });
-
-    logger.info({ count: created.count }, "Payment records backfilled");
-
+    const result = await orderService.backfillPayments();
     res.json({
       success: true,
-      message: `${created.count}건 백필 완료`,
-      count: created.count,
+      message: result.count === 0 ? "백필 대상 없음" : `${result.count}건 백필 완료`,
+      count: result.count,
     });
   }),
 );

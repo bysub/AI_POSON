@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import type { Product } from "@/types";
 import type { SupportedLocale } from "@/stores/locale";
 import { getImageSrc } from "@/utils/image";
+import { formatNumber as formatPrice } from "@/utils/format";
 
 defineProps<{
   products: Product[];
@@ -32,13 +33,6 @@ function getProductName(product: Product): string {
     default:
       return product.name;
   }
-}
-
-/**
- * 가격 포맷팅
- */
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
 }
 
 /**

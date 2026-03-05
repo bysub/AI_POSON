@@ -86,6 +86,7 @@
     "summary": "Total",
     "itemCount": "{count} items",
     "totalAmount": "Total Amount",
+    "orderType": "Dine In / Takeout",
     "dineIn": "Dine In",
     "takeout": "Takeout",
     "table": "Table {no}",

@@ -1,205 +1,91 @@
 import { Router } from "express";
-import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
-import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { categoryService, CategoryError } from "../services/category.service.js";
 
 const router = Router();
 
-// 캐시 TTL (5분)
-const CACHE_TTL = 300;
+function handleCategoryError(err: unknown, next: (err: AppError) => void): void {
+  if (err instanceof CategoryError) {
+    next(new AppError(err.statusCode, err.message, err.code));
+  } else {
+    const msg = err instanceof Error ? err.message : String(err);
+    next(new AppError(500, msg, "CATEGORY_ERROR"));
+  }
+}
 
-// Get all categories (캐싱 적용)
+// Get all categories
 router.get("/", asyncHandler(async (_req, res) => {
-  const categories = await cacheService.getOrSet(
-    CACHE_KEYS.CATEGORIES,
-    async () => {
-      return prisma.category.findMany({
-        where: { isActive: true },
-        orderBy: { sortOrder: "asc" },
-      });
-    },
-    CACHE_TTL,
-  );
-
-  res.json({
-    success: true,
-    data: categories,
-  });
+  const categories = await categoryService.list();
+  res.json({ success: true, data: categories });
 }));
 
-// Get category by ID with products (캐싱 적용)
+// Get category by ID
 router.get("/:id", asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
-
   if (isNaN(id)) {
     return next(new AppError(400, "Invalid category ID", "INVALID_ID"));
   }
 
-  const category = await cacheService.getOrSet(
-    CACHE_KEYS.CATEGORY(id),
-    async () => {
-      return prisma.category.findUnique({
-        where: { id },
-        include: {
-          products: {
-            where: { isActive: true },
-            orderBy: { name: "asc" },
-          },
-        },
-      });
-    },
-    CACHE_TTL,
-  );
-
+  const category = await categoryService.getById(id);
   if (!category) {
     return next(new AppError(404, "Category not found", "CATEGORY_NOT_FOUND"));
   }
-
-  res.json({
-    success: true,
-    data: category,
-  });
+  res.json({ success: true, data: category });
 }));
 
-// ========== 관리자 전용 API ==========
-
-// Create category (관리자)
+// Create category
 router.post(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
   asyncHandler(async (req, res, next) => {
-    const { name, nameEn, nameJa, nameZh, imageUrl, isDiscount, isPopular, sortOrder } = req.body;
-
-    if (!name) {
+    if (!req.body.name) {
       return next(new AppError(400, "카테고리명은 필수입니다", "MISSING_NAME"));
     }
-
-    const category = await prisma.category.create({
-      data: {
-        name,
-        nameEn,
-        nameJa,
-        nameZh,
-        imageUrl,
-        isDiscount: isDiscount ?? false,
-        isPopular: isPopular ?? false,
-        sortOrder: sortOrder ?? 0,
-        isActive: true,
-      },
-    });
-
-    // 캐시 무효화
-    await cacheService.del(CACHE_KEYS.CATEGORIES);
-
-    res.status(201).json({
-      success: true,
-      data: category,
-    });
+    const category = await categoryService.create(req.body);
+    res.status(201).json({ success: true, data: category });
   }),
 );
 
-// Update category (관리자)
+// Update category
 router.patch(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
   asyncHandler(async (req, res, next) => {
     const id = parseInt(req.params.id);
-
     if (isNaN(id)) {
       return next(new AppError(400, "Invalid category ID", "INVALID_ID"));
     }
-
-    const existing = await prisma.category.findUnique({ where: { id } });
-    if (!existing) {
-      return next(new AppError(404, "Category not found", "CATEGORY_NOT_FOUND"));
+    try {
+      const category = await categoryService.update(id, req.body);
+      res.json({ success: true, data: category });
+    } catch (err) {
+      handleCategoryError(err, next);
     }
-
-    const { name, nameEn, nameJa, nameZh, imageUrl, isDiscount, isPopular, sortOrder, isActive } =
-      req.body;
-
-    const category = await prisma.category.update({
-      where: { id },
-      data: {
-        ...(name !== undefined && { name }),
-        ...(nameEn !== undefined && { nameEn }),
-        ...(nameJa !== undefined && { nameJa }),
-        ...(nameZh !== undefined && { nameZh }),
-        ...(imageUrl !== undefined && { imageUrl }),
-        ...(isDiscount !== undefined && { isDiscount }),
-        ...(isPopular !== undefined && { isPopular }),
-        ...(sortOrder !== undefined && { sortOrder }),
-        ...(isActive !== undefined && { isActive }),
-      },
-    });
-
-    // 캐시 무효화
-    await cacheService.del(CACHE_KEYS.CATEGORIES);
-    await cacheService.del(CACHE_KEYS.CATEGORY(id));
-
-    res.json({
-      success: true,
-      data: category,
-    });
   }),
 );
 
-// Delete category (관리자)
+// Delete category
 router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
-
   if (isNaN(id)) {
     return next(new AppError(400, "Invalid category ID", "INVALID_ID"));
   }
-
-  const existing = await prisma.category.findUnique({
-    where: { id },
-    include: { products: { where: { isActive: true }, take: 1 } },
-  });
-
-  if (!existing) {
-    return next(new AppError(404, "Category not found", "CATEGORY_NOT_FOUND"));
+  try {
+    await categoryService.delete(id);
+    res.json({ success: true, message: "카테고리가 삭제되었습니다" });
+  } catch (err) {
+    handleCategoryError(err, next);
   }
-
-  // 연결된 상품이 있으면 삭제 불가
-  if (existing.products.length > 0) {
-    return next(
-      new AppError(
-        400,
-        "카테고리에 연결된 상품이 있어 삭제할 수 없습니다",
-        "CATEGORY_HAS_PRODUCTS",
-      ),
-    );
-  }
-
-  // Soft delete
-  await prisma.category.update({
-    where: { id },
-    data: { isActive: false },
-  });
-
-  // 캐시 무효화
-  await cacheService.del(CACHE_KEYS.CATEGORIES);
-  await cacheService.del(CACHE_KEYS.CATEGORY(id));
-
-  res.json({
-    success: true,
-    message: "카테고리가 삭제되었습니다",
-  });
 }));
 
-// 캐시 무효화 (관리자용)
+// Clear cache
 router.delete("/cache", authenticate, authorize("SUPER_ADMIN", "ADMIN"), asyncHandler(async (_req, res) => {
-  await cacheService.deletePattern("categor*");
-  await cacheService.deletePattern("product*");
-
-  res.json({
-    success: true,
-    message: "캐시가 초기화되었습니다",
-  });
+  await categoryService.clearAllCache();
+  res.json({ success: true, message: "캐시가 초기화되었습니다" });
 }));
 
 export { router as categoriesRouter };
