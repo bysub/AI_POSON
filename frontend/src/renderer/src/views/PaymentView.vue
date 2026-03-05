@@ -9,7 +9,7 @@ import { useVoiceEventStore } from "@/stores/voiceEvent";
 import { useTTS } from "@/composables/useTTS";
 import { showWarningToast, showInfoToast } from "@/utils/AlertUtils";
 import { CardPayment, CashPayment } from "@/components";
-import type { Order, OrderType } from "@/types";
+import type { Order } from "@/types";
 import { getImageSrc } from "@/utils/image";
 import { getLocalizedName } from "@/utils/i18n";
 import { formatPrice, getOptionsString } from "@/utils/format";
@@ -23,11 +23,7 @@ const settingsStore = useSettingsStore();
 const voiceEventStore = useVoiceEventStore();
 const tts = useTTS();
 
-// 이전 화면에서 전달받은 주문 메타데이터
-const orderType = computed(() => (route.query.orderType as OrderType) ?? undefined);
-const tableNo = computed(() =>
-  route.query.tableNo ? parseInt(route.query.tableNo as string, 10) : undefined,
-);
+// memberId는 PointSelectView에서 query로 전달
 const memberId = computed(() =>
   route.query.memberId ? parseInt(route.query.memberId as string, 10) : undefined,
 );
@@ -93,8 +89,8 @@ async function proceedPayment(): Promise<void> {
 
     try {
       const order = await cartStore.submitOrder({
-        orderType: orderType.value,
-        tableNo: tableNo.value,
+        orderType: cartStore.orderType ?? undefined,
+        tableNo: cartStore.tableNo ?? undefined,
         memberId: memberId.value,
       });
       if (order) {
@@ -255,14 +251,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex h-full flex-col overflow-hidden bg-cream">
+  <div
+    class="flex h-full flex-col overflow-hidden"
+    style="background: var(--theme-bg, #FDF9F3)"
+  >
     <!-- Step 1: Order Summary & Payment Selection -->
     <template v-if="currentStep === 'select'">
       <!-- Header -->
       <header class="flex-none px-6 pb-4 pt-6">
         <div class="mx-auto flex max-w-xl items-center justify-between">
           <button
-            class="flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-100 bg-white text-red-500 shadow-sm transition-transform active:scale-95"
+            class="flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm transition-transform active:scale-95"
+            style="border: 2px solid var(--theme-primary, #ef4444); background: var(--theme-surface, #fff); color: var(--theme-primary, #ef4444)"
             @click="goBack"
           >
             <svg
@@ -279,7 +279,10 @@ onUnmounted(() => {
               />
             </svg>
           </button>
-          <h1 class="text-xl font-extrabold tracking-tight text-gray-700">
+          <h1
+            class="text-xl font-extrabold tracking-tight"
+            style="color: var(--theme-text, #1e293b)"
+          >
             {{ t("payment.yourOrder") }}
           </h1>
           <div class="w-12" />
@@ -290,7 +293,10 @@ onUnmounted(() => {
       <main class="flex-1 overflow-y-auto px-6 pb-6">
         <div class="mx-auto flex max-w-xl flex-col gap-5">
           <!-- Order Summary Card -->
-          <section class="rounded-3xl border border-orange-50 bg-white p-5 shadow-sm">
+          <section
+            class="rounded-3xl border p-5 shadow-sm"
+            style="border-color: var(--theme-border, #e2e8f0); background: var(--theme-surface, #fff)"
+          >
             <!-- Cart Items -->
             <div class="flex flex-col gap-4">
               <div
@@ -300,7 +306,10 @@ onUnmounted(() => {
               >
                 <div class="flex gap-3">
                   <!-- Item Image -->
-                  <div class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-orange-50">
+                  <div
+                    class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl"
+                    style="background: var(--theme-bg-secondary, #f5ede0)"
+                  >
                     <img
                       v-if="item.imageUrl"
                       :src="getImageSrc(item.imageUrl)"
@@ -309,71 +318,91 @@ onUnmounted(() => {
                     >
                     <div
                       v-else
-                      class="flex h-full w-full items-center justify-center text-xl text-orange-300"
+                      class="flex h-full w-full items-center justify-center text-xl"
+                      style="color: var(--theme-text-muted, #94a3b8)"
                     >
                       {{ getLocalizedName(item, locale).charAt(0) }}
                     </div>
                   </div>
                   <div>
-                    <h3 class="text-base font-bold leading-tight text-gray-800">
+                    <h3
+                      class="text-base font-bold leading-tight"
+                      style="color: var(--theme-text, #1e293b)"
+                    >
                       {{ getLocalizedName(item, locale) }}
                       <span
                         v-if="item.quantity > 1"
-                        class="text-orange-500"
+                        style="color: var(--theme-primary, #ef4444)"
                       >
                         x{{ item.quantity }}
                       </span>
                     </h3>
                     <p
                       v-if="item.options && getOptionsString(item.options)"
-                      class="mt-0.5 text-xs font-semibold text-orange-600/60"
+                      class="mt-0.5 text-xs font-semibold"
+                      style="color: var(--theme-text-muted, #94a3b8)"
                     >
                       + {{ getOptionsString(item.options) }}
                     </p>
                   </div>
                 </div>
-                <span class="text-base font-bold text-gray-800">
+                <span
+                  class="text-base font-bold"
+                  style="color: var(--theme-text, #1e293b)"
+                >
                   {{ formatPrice(item.price * item.quantity) }}
                 </span>
               </div>
             </div>
 
             <!-- Price Summary -->
-            <div class="mt-6 flex flex-col gap-2 border-t-2 border-dashed border-orange-100 pt-5 price-summary-area">
-              <div class="flex items-center justify-between font-bold text-orange-700/70">
+            <div
+              class="mt-6 flex flex-col gap-2 border-t-2 border-dashed pt-5 price-summary-area"
+              style="border-color: var(--theme-border, #e2e8f0)"
+            >
+              <div
+                class="flex items-center justify-between font-bold"
+                style="color: var(--theme-text-secondary, #64748b)"
+              >
                 <span>{{ t("payment.subtotal") }}</span>
                 <span>{{ formatPrice(subtotal) }}</span>
               </div>
-              <div class="flex items-center justify-between font-bold text-orange-700/70">
+              <div
+                class="flex items-center justify-between font-bold"
+                style="color: var(--theme-text-secondary, #64748b)"
+              >
                 <span>{{ t("payment.tax") }} ({{ Math.round(taxRate * 100) }}%)</span>
                 <span>{{ formatPrice(tax) }}</span>
               </div>
-              <div class="mt-2 flex items-center justify-between text-xl font-black text-gray-800">
-                <span>{{ t("cart.total") }}</span>
-                <span class="text-red-500">{{ formatPrice(total) }}</span>
+              <div class="mt-2 flex items-center justify-between text-xl font-black">
+                <span style="color: var(--theme-text, #1e293b)">{{ t("cart.total") }}</span>
+                <span style="color: var(--theme-primary, #ef4444)">{{ formatPrice(total) }}</span>
               </div>
             </div>
           </section>
 
           <!-- Payment Methods -->
           <section class="flex flex-col gap-3">
-            <h2 class="px-1 text-xs font-black uppercase tracking-widest text-gray-700">
+            <h2
+              class="px-1 text-xs font-black uppercase tracking-widest"
+              style="color: var(--theme-text, #1e293b)"
+            >
               {{ t("payment.paymentMethod") }}
             </h2>
 
             <div class="flex flex-col gap-2.5">
               <!-- Credit Card -->
               <button
-                class="flex items-center gap-4 rounded-2xl border-2 bg-white p-4 shadow-sm transition-all"
-                :class="
-                  selectedMethod === 'card'
-                    ? 'border-red-500'
-                    : 'border-transparent hover:border-red-300'
-                "
+                class="flex items-center gap-4 rounded-2xl border-2 p-4 shadow-sm transition-all"
+                :style="{
+                  background: 'var(--theme-surface, #fff)',
+                  borderColor: selectedMethod === 'card' ? 'var(--theme-primary, #ef4444)' : 'transparent',
+                }"
                 @click="selectPaymentMethod('card')"
               >
                 <div
-                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600"
+                  class="flex h-12 w-12 items-center justify-center rounded-xl"
+                  style="background: var(--theme-bg-secondary, #f3f4f6); color: var(--theme-primary, #ef4444)"
                 >
                   <svg
                     class="h-6 w-6"
@@ -390,15 +419,22 @@ onUnmounted(() => {
                   </svg>
                 </div>
                 <div class="flex-1 text-left">
-                  <span class="block text-base font-bold text-gray-800">{{
+                  <span
+                    class="block text-base font-bold"
+                    style="color: var(--theme-text, #1e293b)"
+                  >{{
                     t("payment.card")
                   }}</span>
-                  <span class="block text-xs font-semibold text-orange-600/50">{{
+                  <span
+                    class="block text-xs font-semibold"
+                    style="color: var(--theme-text-muted, #94a3b8)"
+                  >{{
                     t("payment.cardDesc")
                   }}</span>
                 </div>
                 <svg
-                  class="h-5 w-5 text-orange-200"
+                  class="h-5 w-5"
+                  style="color: var(--theme-text-muted, #94a3b8)"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -414,16 +450,16 @@ onUnmounted(() => {
 
               <!-- Mobile Pay -->
               <button
-                class="flex items-center gap-4 rounded-2xl border-2 bg-white p-4 shadow-sm transition-all"
-                :class="
-                  selectedMethod === 'mobile'
-                    ? 'border-red-500'
-                    : 'border-transparent hover:border-red-300'
-                "
+                class="flex items-center gap-4 rounded-2xl border-2 p-4 shadow-sm transition-all"
+                :style="{
+                  background: 'var(--theme-surface, #fff)',
+                  borderColor: selectedMethod === 'mobile' ? 'var(--theme-primary, #ef4444)' : 'transparent',
+                }"
                 @click="selectPaymentMethod('mobile')"
               >
                 <div
-                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-900 text-white"
+                  class="flex h-12 w-12 items-center justify-center rounded-xl"
+                  style="background: var(--theme-bg-secondary, #f3f4f6); color: var(--theme-primary, #ef4444)"
                 >
                   <svg
                     class="h-6 w-6"
@@ -440,15 +476,22 @@ onUnmounted(() => {
                   </svg>
                 </div>
                 <div class="flex-1 text-left">
-                  <span class="block text-base font-bold text-gray-800">{{
+                  <span
+                    class="block text-base font-bold"
+                    style="color: var(--theme-text, #1e293b)"
+                  >{{
                     t("payment.mobilePay")
                   }}</span>
-                  <span class="block text-xs font-semibold text-orange-600/50">{{
+                  <span
+                    class="block text-xs font-semibold"
+                    style="color: var(--theme-text-muted, #94a3b8)"
+                  >{{
                     t("payment.mobilePayDesc")
                   }}</span>
                 </div>
                 <svg
-                  class="h-5 w-5 text-orange-200"
+                  class="h-5 w-5"
+                  style="color: var(--theme-text-muted, #94a3b8)"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -464,16 +507,16 @@ onUnmounted(() => {
 
               <!-- Cash -->
               <button
-                class="flex items-center gap-4 rounded-2xl border-2 bg-white p-4 shadow-sm transition-all"
-                :class="
-                  selectedMethod === 'cash'
-                    ? 'border-red-500'
-                    : 'border-transparent hover:border-red-300'
-                "
+                class="flex items-center gap-4 rounded-2xl border-2 p-4 shadow-sm transition-all"
+                :style="{
+                  background: 'var(--theme-surface, #fff)',
+                  borderColor: selectedMethod === 'cash' ? 'var(--theme-primary, #ef4444)' : 'transparent',
+                }"
                 @click="selectPaymentMethod('cash')"
               >
                 <div
-                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600"
+                  class="flex h-12 w-12 items-center justify-center rounded-xl"
+                  style="background: var(--theme-bg-secondary, #f3f4f6); color: var(--theme-primary, #ef4444)"
                 >
                   <svg
                     class="h-6 w-6"
@@ -490,15 +533,22 @@ onUnmounted(() => {
                   </svg>
                 </div>
                 <div class="flex-1 text-left">
-                  <span class="block text-base font-bold text-gray-800">{{
+                  <span
+                    class="block text-base font-bold"
+                    style="color: var(--theme-text, #1e293b)"
+                  >{{
                     t("payment.cash")
                   }}</span>
-                  <span class="block text-xs font-semibold text-orange-600/50">{{
+                  <span
+                    class="block text-xs font-semibold"
+                    style="color: var(--theme-text-muted, #94a3b8)"
+                  >{{
                     t("payment.cashDesc")
                   }}</span>
                 </div>
                 <svg
-                  class="h-5 w-5 text-orange-200"
+                  class="h-5 w-5"
+                  style="color: var(--theme-text-muted, #94a3b8)"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -514,16 +564,16 @@ onUnmounted(() => {
 
               <!-- Scanner -->
               <button
-                class="flex items-center gap-4 rounded-2xl border-2 bg-white p-4 shadow-sm transition-all"
-                :class="
-                  selectedMethod === 'scanner'
-                    ? 'border-red-500'
-                    : 'border-transparent hover:border-red-300'
-                "
+                class="flex items-center gap-4 rounded-2xl border-2 p-4 shadow-sm transition-all"
+                :style="{
+                  background: 'var(--theme-surface, #fff)',
+                  borderColor: selectedMethod === 'scanner' ? 'var(--theme-primary, #ef4444)' : 'transparent',
+                }"
                 @click="selectPaymentMethod('scanner')"
               >
                 <div
-                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-400 text-gray-700"
+                  class="flex h-12 w-12 items-center justify-center rounded-xl"
+                  style="background: var(--theme-bg-secondary, #f3f4f6); color: var(--theme-primary, #ef4444)"
                 >
                   <svg
                     class="h-6 w-6"
@@ -540,15 +590,22 @@ onUnmounted(() => {
                   </svg>
                 </div>
                 <div class="flex-1 text-left">
-                  <span class="block text-base font-bold text-gray-800">{{
+                  <span
+                    class="block text-base font-bold"
+                    style="color: var(--theme-text, #1e293b)"
+                  >{{
                     t("payment.scanner")
                   }}</span>
-                  <span class="block text-xs font-semibold text-orange-600/50">{{
+                  <span
+                    class="block text-xs font-semibold"
+                    style="color: var(--theme-text-muted, #94a3b8)"
+                  >{{
                     t("payment.scannerDesc")
                   }}</span>
                 </div>
                 <svg
-                  class="h-5 w-5 text-orange-200"
+                  class="h-5 w-5"
+                  style="color: var(--theme-text-muted, #94a3b8)"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -568,13 +625,15 @@ onUnmounted(() => {
 
       <!-- Footer -->
       <footer
-        class="flex-none border-t border-orange-50 bg-white/80 px-6 pb-8 pt-5 backdrop-blur-md"
+        class="flex-none border-t px-6 pb-8 pt-5 backdrop-blur-md"
+        style="border-color: var(--theme-border, #e2e8f0); background: var(--theme-surface, #fff)"
       >
         <div class="mx-auto max-w-md">
           <!-- 에러 메시지 -->
           <div
             v-if="orderError"
-            class="mb-3 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
+            class="mb-3 flex items-center gap-2 rounded-xl px-4 py-3 text-sm"
+            style="background: color-mix(in srgb, var(--theme-error, #ef4444) 10%, transparent); color: var(--theme-error, #ef4444)"
           >
             <svg
               class="h-5 w-5 flex-shrink-0"
@@ -591,21 +650,23 @@ onUnmounted(() => {
             </svg>
             <span class="flex-1">{{ orderError }}</span>
             <button
-              class="font-bold text-red-400 hover:text-red-600"
+              class="font-bold"
+              style="color: var(--theme-error, #ef4444)"
               @click="orderError = null"
             >
               ✕
             </button>
           </div>
           <button
-            class="flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-red-500 shadow-xl shadow-red-500/30 transition-all hover:bg-red-600 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
+            class="flex h-16 w-full items-center justify-center gap-3 rounded-2xl shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:shadow-none"
+            style="background: var(--theme-primary, #ef4444); color: var(--theme-primary-text, #fff)"
             :disabled="!selectedMethod || orderCreating"
             @click="proceedPayment"
           >
             <!-- 로딩 스피너 -->
             <svg
               v-if="orderCreating"
-              class="h-6 w-6 animate-spin text-white"
+              class="h-6 w-6 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -625,12 +686,12 @@ onUnmounted(() => {
             </svg>
             <span
               v-else
-              class="text-xl font-extrabold uppercase tracking-tight text-white"
+              class="text-xl font-extrabold uppercase tracking-tight"
             >
               {{ t("payment.payNow") }}
             </span>
             <svg
-              class="h-6 w-6 text-white"
+              class="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -644,7 +705,8 @@ onUnmounted(() => {
             </svg>
           </button>
           <p
-            class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-orange-600/40"
+            class="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.15em]"
+            style="color: var(--theme-text-muted, #94a3b8)"
           >
             {{ t("payment.secureCheckout") }}
           </p>

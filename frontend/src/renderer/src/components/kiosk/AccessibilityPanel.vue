@@ -155,9 +155,6 @@ onMounted(() => {
               />
               <span class="text-[11px] font-medium leading-tight">{{ theme.nameKo }}</span>
             </button>
-          </div>
-          <!-- 접근성 테마 -->
-          <div class="grid grid-cols-4 gap-2">
             <button
               v-for="theme in a11yThemes"
               :key="theme.id"
@@ -197,11 +194,7 @@ onMounted(() => {
           <p class="mb-3 text-base font-semibold">{{ t("a11y.ttsLabel") }}</p>
           <button
             class="flex w-full items-center justify-between rounded-2xl p-4 transition-all"
-            :style="
-              a11yStore.ttsEnabled
-                ? { background: 'var(--theme-success, #22c55e)', color: '#fff' }
-                : { background: 'var(--theme-bg-secondary, #f3f4f6)', color: 'var(--theme-text, #374151)' }
-            "
+            style="background: var(--theme-primary, #8E3524);color: var(--theme-primary-text, #fff);"
             :aria-pressed="a11yStore.ttsEnabled"
             role="switch"
             :aria-checked="a11yStore.ttsEnabled"
@@ -216,7 +209,7 @@ onMounted(() => {
           </button>
         </div>
 
-        <!-- Apply/Close Button -->
+        <!-- Apply/Close Button 
         <button
           class="w-full rounded-2xl py-4 text-lg font-bold transition-colors"
           style="background: var(--theme-primary, #8E3524); color: var(--theme-primary-text, #fff)"
@@ -224,6 +217,7 @@ onMounted(() => {
         >
           {{ t("a11y.apply") }}
         </button>
+        -->
       </div>
     </div>
   </Teleport>

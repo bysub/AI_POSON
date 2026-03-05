@@ -17,7 +17,8 @@
     "startOrder": "开始点餐",
     "brandName": "POSON Kiosk",
     "touch": "点击",
-    "toOrder": "开始点餐"
+    "toOrder": "开始点餐",
+    "selectOrderType": "选择用餐方式"
   },
   "language": {
     "title": "请选择语言",
@@ -95,7 +96,9 @@
     "tableInputPlaceholder": "桌号",
     "tableNotFound": "该桌号不存在。",
     "goBack": "返回",
-    "currency": "韩元"
+    "currency": "韩元",
+    "selectTable": "选择桌号",
+    "changeTable": "更改桌号"
   },
   "complete": {
     "title": "订单完成",

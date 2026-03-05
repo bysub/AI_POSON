@@ -4,11 +4,20 @@ import type { CartItem, Product, Order, OrderType } from "@/types";
 import { apiClient } from "@/services/api/client";
 import { useSettingsStore } from "./settings";
 
+function generateId(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+}
+
 export const useCartStore = defineStore("cart", () => {
   const items = ref<CartItem[]>([]);
   const currentOrder = ref<Order | null>(null);
   const isSubmitting = ref(false);
   const orderError = ref<string | null>(null);
+  const orderType = ref<OrderType | null>(null);
+  const tableNo = ref<number | null>(null);
 
   const totalItems = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0));
 
@@ -30,7 +39,7 @@ export const useCartStore = defineStore("cart", () => {
       const effectivePrice =
         product.isDiscount && product.discountPrice ? product.discountPrice : product.sellPrice;
       items.value.push({
-        id: crypto.randomUUID(),
+        id: generateId(),
         productId: product.id,
         name: product.name,
         nameEn: product.nameEn,
@@ -62,10 +71,20 @@ export const useCartStore = defineStore("cart", () => {
     }
   }
 
+  function setOrderType(type: OrderType) {
+    orderType.value = type;
+  }
+
+  function setTableNo(no: number | null) {
+    tableNo.value = no;
+  }
+
   function clear() {
     items.value = [];
     currentOrder.value = null;
     orderError.value = null;
+    orderType.value = null;
+    tableNo.value = null;
   }
 
   /**
@@ -145,6 +164,8 @@ export const useCartStore = defineStore("cart", () => {
     currentOrder,
     isSubmitting,
     orderError,
+    orderType,
+    tableNo,
 
     // Getters
     totalItems,
@@ -155,6 +176,8 @@ export const useCartStore = defineStore("cart", () => {
     addItem,
     updateQuantity,
     removeItem,
+    setOrderType,
+    setTableNo,
     clear,
     submitOrder,
     getOrder,

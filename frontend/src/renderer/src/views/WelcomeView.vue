@@ -6,6 +6,7 @@ import { useLocaleStore, type SupportedLocale } from "../stores/locale";
 import { useCartStore } from "../stores/cart";
 import { useSettingsStore } from "../stores/settings";
 import { useAccessibilityStore } from "../stores/accessibility";
+import { useThemeStore } from "../stores/theme";
 import { useTTS } from "@/composables/useTTS";
 import flagKr from "@/assets/images/flags/kr.svg";
 import flagUs from "@/assets/images/flags/us.svg";
@@ -17,6 +18,7 @@ const cartStore = useCartStore();
 const settingsStore = useSettingsStore();
 const localeStore = useLocaleStore();
 const accessibilityStore = useAccessibilityStore();
+const themeStore = useThemeStore();
 const tts = useTTS();
 
 const { locale, t } = useI18n();
@@ -37,6 +39,8 @@ onMounted(async () => {
   // 접근성 초기화 (관리자 기본값으로 리셋)
   accessibilityStore.initialize();
   accessibilityStore.resetToDefaults();
+  // 테마 초기화 (기본 테마로 리셋)
+  themeStore.reset();
   // TTS 웰컴 안내
   tts.speak(t("a11y.tts.welcome"));
 });
@@ -61,7 +65,9 @@ function selectLanguage(code: SupportedLocale) {
   tts.speak(t("a11y.tts.welcome"));
 }
 
-function startOrder() {
+function startOrder(type: "DINE_IN" | "TAKEOUT") {
+  cartStore.setOrderType(type);
+  tts.speak(t(type === "DINE_IN" ? "a11y.tts.dineIn" : "a11y.tts.takeout"));
   router.push("/menu");
 }
 
@@ -120,45 +126,51 @@ function handleLogoTap() {
       </p>
     </header>
 
-    <!-- 메인: Touch To Order 버튼 -->
+    <!-- 메인: 매장/포장 선택 버튼 -->
     <main
       role="main"
-      :aria-label="t('welcome.touch')"
+      :aria-label="t('welcome.selectOrderType', '주문 유형 선택')"
       class="relative z-10 flex w-full flex-1 items-center justify-center px-8"
     >
-      <button
-        class="group relative flex aspect-square w-full max-w-[280px] flex-col items-center justify-center rounded-full transition-all duration-300 active:scale-95"
-        @click="startOrder"
-      >
-        <!-- 버튼 글로우 효과 -->
-        <div class="absolute inset-0 scale-110 rounded-full bg-theme-primary/30 blur-xl" />
-        <!-- 버튼 배경 -->
-        <div
-          class="absolute inset-0 rounded-full border-[6px] border-white/30 bg-gradient-to-br from-theme-primary via-theme-primary to-theme-accent glow-primary"
-        />
-        <!-- 버튼 콘텐츠 -->
-        <div class="relative z-20 flex flex-col items-center gap-4">
-          <svg
-            class="h-16 w-16 text-white"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.21 0-.59-.34-1.09-.91-1.34z"
-            />
-          </svg>
-          <div class="text-center">
-            <h2
-              class="text-4xl font-bold uppercase leading-none tracking-widest text-white drop-shadow-lg"
-            >
-              {{ t("welcome.touch", "Touch") }}
-            </h2>
-            <p class="mt-2 text-xl font-medium text-white opacity-95 drop-shadow-md">
-              {{ t("welcome.toOrder", "To Order") }}
-            </p>
+      <div class="flex w-full max-w-[420px] gap-5">
+        <!-- 매장 버튼 -->
+        <button
+          class="group relative flex flex-1 flex-col items-center justify-center rounded-[2rem] py-10 transition-all duration-300 active:scale-95"
+          @click="startOrder('DINE_IN')"
+        >
+          <div class="absolute inset-0 scale-105 rounded-[2rem] bg-theme-primary/25 blur-xl" />
+          <div
+            class="absolute inset-0 rounded-[2rem] border-[4px] border-white/30 bg-gradient-to-br from-theme-primary via-theme-primary to-theme-accent glow-primary"
+          />
+          <div class="relative z-20 flex flex-col items-center gap-3">
+            <svg class="h-14 w-14 text-theme-primary-text" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" />
+            </svg>
+            <span class="text-2xl font-extrabold tracking-wide text-theme-primary-text drop-shadow-lg">
+              {{ t("orderConfirm.dineIn") }}
+            </span>
           </div>
-        </div>
-      </button>
+        </button>
+
+        <!-- 포장 버튼 -->
+        <button
+          class="group relative flex flex-1 flex-col items-center justify-center rounded-[2rem] py-10 transition-all duration-300 active:scale-95"
+          @click="startOrder('TAKEOUT')"
+        >
+          <div class="absolute inset-0 scale-105 rounded-[2rem] bg-white/15 blur-xl" />
+          <div
+            class="absolute inset-0 rounded-[2rem] border-[4px] border-white/30 bg-white/20 backdrop-blur-sm"
+          />
+          <div class="relative z-20 flex flex-col items-center gap-3">
+            <svg class="h-14 w-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span class="text-2xl font-extrabold tracking-wide text-white drop-shadow-lg">
+              {{ t("orderConfirm.takeout") }}
+            </span>
+          </div>
+        </button>
+      </div>
     </main>
 
     <!-- 푸터: 언어 선택 -->
@@ -167,7 +179,7 @@ function handleLogoTap() {
         class="flex flex-col gap-5 rounded-[2rem] border border-white/20 bg-black/40 p-5 shadow-2xl backdrop-blur-2xl"
       >
         <div class="flex flex-col items-center gap-1">
-          <p class="text-center text-xs font-bold uppercase tracking-[0.25em] text-cream/80">
+          <p class="text-center text-xs font-bold uppercase tracking-[0.25em] text-white/80">
             {{ t("language.title", "Language Selection") }}
           </p>
           <div class="h-1 w-12 rounded-full bg-theme-accent" />

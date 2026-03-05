@@ -32,10 +32,22 @@ export default defineConfig({
     },
     plugins: [vue()],
     server: {
+      host: true,
+      // Vite proxy: /api, /uploads 요청을 백엔드(localhost:3000)로 전달
+      proxy: {
+        "/api": {
+          target: "http://localhost:3000",
+          changeOrigin: true,
+        },
+        "/uploads": {
+          target: "http://localhost:3000",
+          changeOrigin: true,
+        },
+      },
       // 개발 서버 CSP 완화 (vue-i18n 런타임 컴파일러 지원)
       headers: {
         "Content-Security-Policy":
-          "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' ws://localhost:* http://localhost:*; img-src 'self' data: blob: http://localhost:*;",
+          "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' ws: http:; img-src 'self' data: blob: http:;",
       },
     },
     build: {

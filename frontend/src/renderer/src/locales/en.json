@@ -17,7 +17,8 @@
     "startOrder": "Start Order",
     "brandName": "POSON Kiosk",
     "touch": "Touch",
-    "toOrder": "To Order"
+    "toOrder": "To Order",
+    "selectOrderType": "Select Order Type"
   },
   "language": {
     "title": "Select Language",
@@ -95,7 +96,9 @@
     "tableInputPlaceholder": "Table No.",
     "tableNotFound": "Table not found.",
     "goBack": "Go Back",
-    "currency": "KRW"
+    "currency": "KRW",
+    "selectTable": "Select Table",
+    "changeTable": "Change Table"
   },
   "complete": {
     "title": "Order Complete",

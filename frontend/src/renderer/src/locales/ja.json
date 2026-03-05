@@ -17,7 +17,8 @@
     "startOrder": "注文開始",
     "brandName": "POSON Kiosk",
     "touch": "タッチ",
-    "toOrder": "ご注文へ"
+    "toOrder": "ご注文へ",
+    "selectOrderType": "注文タイプを選択"
   },
   "language": {
     "title": "言語を選択してください",
@@ -95,7 +96,9 @@
     "tableInputPlaceholder": "テーブル番号",
     "tableNotFound": "該当テーブルはありません。",
     "goBack": "戻る",
-    "currency": "ウォン"
+    "currency": "ウォン",
+    "selectTable": "テーブル選択",
+    "changeTable": "テーブル変更"
   },
   "complete": {
     "title": "注文完了",

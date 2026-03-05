@@ -123,7 +123,7 @@ function getOptionsString(options?: Record<string, unknown>): string {
           {{ t("cart.proceedToPayment") }}
         </button>
         <button
-          class="flex w-full items-center justify-center gap-1 py-2 text-sm"
+          class="flex w-full items-center justify-center gap-1 py-2 text-sm area-total-actions-close"
           style="color: var(--theme-text-secondary, #64748b)"
           @click="emit('cancel')"
         >
@@ -166,5 +166,8 @@ function getOptionsString(options?: Record<string, unknown>): string {
 .product-area-close {
   padding: 0.15rem 0.6rem;
   border-radius: 6px;
+}
+.area-total-actions-close{
+  border: 2px solid var(--theme-primary, #fff);
 }
 </style>

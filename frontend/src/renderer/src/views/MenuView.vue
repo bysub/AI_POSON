@@ -243,7 +243,9 @@ onMounted(async () => {
     </div>
 
     <!-- Header -->
-    <header class="flex items-center justify-between px-4 py-3 shadow-sm" style="background: var(--theme-surface, #fff)">
+    <header class="flex items-center justify-between px-4 py-3 shadow-sm" style="background: var(--theme-gradient-welcome);">
+      <div></div>
+      <!--
       <button
         class="flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors"
         :style="{ borderColor: 'var(--theme-primary, #8E3524)', color: 'var(--theme-primary, #8E3524)' }"
@@ -263,8 +265,8 @@ onMounted(async () => {
           />
         </svg>
       </button>
-
-      <h1 class="text-xl font-bold" style="color: var(--theme-text, #111827)">
+      -->
+      <h1 class="text-xl font-bold" style="color: var(--theme-primary-text);">
         {{ settingsStore.get("biz.name") || "POSON Kiosk" }}
       </h1>
 
@@ -348,53 +350,55 @@ onMounted(async () => {
                 </span>
               </div>
             </div>
-
+            
             <!-- Product Info -->
-            <div class="flex flex-1 flex-col p-3">
-              <h3 class="mb-1 line-clamp-1 text-sm font-bold" style="color: var(--theme-text, #111827)">
-                {{ getLocalizedName(product, locale.value) }}
-              </h3>
-              <!-- 할인 상품: 원가 취소선 + 할인가 표시 -->
-              <template v-if="product.isDiscount && product.discountPrice">
-                <p class="text-xs line-through" style="color: var(--theme-text-muted, #94a3b8)">
+            <div class="flex h-full flex-col area-product-infomation" >
+              <div class="flex flex-1 flex-col p-3" >
+                <h3 class="mb-1 line-clamp-1 text-sm font-bold" style="color: var(--theme-text, #111827)">
+                  {{ getLocalizedName(product, locale.value) }}
+                </h3>
+                <!-- 할인 상품: 원가 취소선 + 할인가 표시 -->
+                <template v-if="product.isDiscount && product.discountPrice">
+                  <p class="text-xs line-through" style="color: var(--theme-text-muted, #94a3b8)">
+                    {{ formatPrice(product.sellPrice) }}
+                  </p>
+                  <p class="text-base font-bold" style="color: var(--theme-primary, #8E3524)">
+                    {{ formatPrice(product.discountPrice) }}
+                  </p>
+                </template>
+                <!-- 일반 상품: 판매가 표시 -->
+                <p
+                  v-else
+                  class="text-base font-bold"
+                  style="color: var(--theme-primary, #8E3524)"
+                >
                   {{ formatPrice(product.sellPrice) }}
                 </p>
-                <p class="text-base font-bold" style="color: var(--theme-primary, #8E3524)">
-                  {{ formatPrice(product.discountPrice) }}
-                </p>
-              </template>
-              <!-- 일반 상품: 판매가 표시 -->
-              <p
-                v-else
-                class="text-base font-bold"
-                style="color: var(--theme-primary, #8E3524)"
+              </div>
+              <!-- Add Button -->
+              <button
+                v-if="!isUnavailable(product)"
+                class="flex items-center justify-center gap-1 py-2.5 text-sm font-medium transition-colors"
+                style="background: var(--theme-primary, #ef4444); color: var(--theme-primary-text, #fff)"
+                @click.stop="handleAddToCart(product)"
               >
-                {{ formatPrice(product.sellPrice) }}
-              </p>
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                {{ t("menu.addToCart") }}
+              </button>
+            
             </div>
-
-            <!-- Add Button -->
-            <button
-              v-if="!isUnavailable(product)"
-              class="flex items-center justify-center gap-1 py-2.5 text-sm font-medium text-white transition-colors"
-              style="background: var(--theme-primary, #ef4444)"
-              @click.stop="handleAddToCart(product)"
-            >
-              <svg
-                class="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              {{ t("menu.addToCart") }}
-            </button>
           </article>
         </div>
       </main>
@@ -483,9 +487,21 @@ onMounted(async () => {
   padding: 0.5em;
 }
 .border-add-area {
-  border: 2px solid #fff;
+  border: 2px solid var(--theme-primary, #fff);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
+}
+.area-product-infomation{
+  height: 8rem;
+  border-left: 2px solid var(--theme-primary, #fff);
+  border-right: 2px solid var(--theme-primary, #fff);
+  border-bottom: 2px solid var(--theme-primary, #fff);
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+}
+.area-product-infomation button{
+  border-bottom-left-radius: 0.9rem;
+  border-bottom-right-radius: 0.9rem;
 }
 .voice-highlight {
   outline: 3px solid #22c55e;

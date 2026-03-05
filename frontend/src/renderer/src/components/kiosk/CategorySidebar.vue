@@ -51,7 +51,7 @@ function handleSelect(categoryId: number) {
 </script>
 
 <template>
-  <aside class="flex w-28 flex-col items-center gap-2 overflow-y-auto py-4 shadow-sm" style="background: var(--theme-surface, #fff)">
+  <aside class="flex w-28 flex-col items-center gap-2 overflow-y-auto py-4 shadow-sm" style="background: var(--theme-gradient-welcome);">
     <button
       v-for="category in categories"
       :key="category.id"
@@ -207,7 +207,7 @@ function handleSelect(categoryId: number) {
           class="h-full w-full border-2 border-white object-cover"
         >
       </div>
-      <span class="text-center text-[14px] font-medium leading-tight">
+      <span class="text-center text-[14px] font-medium leading-tight text-white" >
         {{ getLocalizedName(category, locale) }}
       </span>
     </button>

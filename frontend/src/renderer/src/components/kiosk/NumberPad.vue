@@ -55,7 +55,8 @@ function confirm() {
   <div class="flex w-80 flex-col items-center gap-4">
     <!-- Display -->
     <div
-      class="w-full rounded-xl border-2 border-gray-200 bg-amber-50 px-4 py-3 text-center text-2xl font-bold tracking-wider text-gray-800"
+      class="w-full rounded-xl border-2 px-4 py-3 text-center text-2xl font-bold tracking-wider"
+      style="border-color: var(--theme-border, #e2e8f0); background: var(--theme-bg-secondary, #fffbeb); color: var(--theme-text, #1e293b)"
     >
       {{ displayValue || placeholder }}
     </div>
@@ -65,7 +66,8 @@ function confirm() {
       <button
         v-for="n in ['1', '2', '3', '4', '5', '6', '7', '8', '9']"
         :key="n"
-        class="flex h-14 items-center justify-center rounded-xl bg-red-400 text-xl font-bold text-white transition-colors hover:bg-red-500 active:bg-red-600"
+        class="flex h-14 items-center justify-center rounded-xl text-xl font-bold transition-colors"
+        style="background: var(--theme-primary, #ef4444); color: var(--theme-primary-text, #fff)"
         @click="pressKey(n)"
       >
         {{ n }}
@@ -73,7 +75,8 @@ function confirm() {
 
       <!-- Bottom row -->
       <button
-        class="flex h-14 items-center justify-center rounded-xl bg-gray-200 text-lg font-bold text-gray-600 transition-colors hover:bg-gray-300"
+        class="flex h-14 items-center justify-center rounded-xl transition-colors"
+        style="background: var(--theme-bg-secondary, #e5e7eb); color: var(--theme-text-secondary, #64748b)"
         @click="backspace"
       >
         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,13 +89,15 @@ function confirm() {
         </svg>
       </button>
       <button
-        class="flex h-14 items-center justify-center rounded-xl bg-red-400 text-xl font-bold text-white transition-colors hover:bg-red-500 active:bg-red-600"
+        class="flex h-14 items-center justify-center rounded-xl text-xl font-bold transition-colors"
+        style="background: var(--theme-primary, #ef4444); color: var(--theme-primary-text, #fff)"
         @click="pressKey('0')"
       >
         0
       </button>
       <button
-        class="flex h-14 items-center justify-center rounded-xl bg-gray-200 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-300"
+        class="flex h-14 items-center justify-center rounded-xl text-sm font-bold transition-colors"
+        style="background: var(--theme-bg-secondary, #e5e7eb); color: var(--theme-text-secondary, #64748b)"
         @click="clearAll"
       >
         {{ t("numberPad.clear") }}
@@ -101,7 +106,8 @@ function confirm() {
 
     <!-- Confirm button -->
     <button
-      class="w-full rounded-xl bg-amber-400 py-3 text-lg font-bold text-gray-800 transition-colors hover:bg-amber-500 disabled:opacity-40"
+      class="w-full rounded-xl py-3 text-lg font-bold transition-colors disabled:opacity-40"
+      style="background: var(--theme-accent, #f59e0b); color: var(--theme-primary-text, #fff)"
       :disabled="value.length === 0"
       @click="confirm"
     >
