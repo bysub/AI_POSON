@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onUnmounted } from "vue";
 import { useVoiceCommand } from "@/composables/useVoiceCommand";
 import { useSTT } from "@/composables/useSTT";
 import { useAccessibilityStore } from "@/stores/accessibility";
@@ -20,6 +20,10 @@ try {
   setupError.value = e instanceof Error ? e.message : String(e);
   console.error("[VoiceMicButton] Setup failed:", e);
 }
+
+onUnmounted(() => {
+  stt?.destroy();
+});
 
 const isSupported = computed(() => voice?.isSupported.value ?? false);
 const isListening = computed(() => voice?.isListening.value ?? false);

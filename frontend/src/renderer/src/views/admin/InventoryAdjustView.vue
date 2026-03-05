@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { apiClient } from "@/services/api/client";
 import { showWarningToast, showSuccessToast, showApiError, showConfirm } from "@/utils/AlertUtils";
+import { formatPrice } from "@/utils/format";
 
 interface PurchaseProductResult {
   id: number;
@@ -111,10 +112,6 @@ function updateAfterStock(index: number): void {
 
 function removeItem(index: number): void {
   adjustItems.value.splice(index, 1);
-}
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
 }
 
 // 조정이 필요한 항목만 (adjustQty !== 0)

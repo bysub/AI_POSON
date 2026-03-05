@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+import { API_BASE_URL } from "@/config";
 
 export const useNetworkStore = defineStore("network", () => {
   const isOnline = ref(navigator.onLine);

@@ -16,7 +16,12 @@
     "layouts",
     "payment",
     "preload",
-    "stt-native"
+    "stt-native",
+    "scripts",
+    "backend",
+    "__tests__",
+    "config",
+    "api"
   ],
   "primaryFeature": "kiosk-voice-ordering",
   "features": {
@@ -42,7 +47,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T01:58:22.362Z",
-        "lastUpdated": "2026-02-27T08:25:00.412Z"
+        "lastUpdated": "2026-03-04T09:23:56.943Z"
       },
       "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\main\\index.ts"
     },
@@ -94,7 +99,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T02:15:47.454Z",
-        "lastUpdated": "2026-02-27T02:38:17.608Z"
+        "lastUpdated": "2026-03-04T07:50:35.142Z"
       },
       "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\views\\admin\\SettingsView.vue"
     },
@@ -133,9 +138,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-12T05:08:53.133Z",
-        "lastUpdated": "2026-02-19T05:40:56.876Z"
+        "lastUpdated": "2026-03-04T09:13:40.977Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\backend\\src\\routes\\orders.ts"
+      "lastFile": "C:\\workspaces\\AI_POSON\\backend\\src\\routes\\admins.ts"
     },
     ".doc": {
       "phase": "do",
@@ -185,9 +190,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-19T08:36:55.065Z",
-        "lastUpdated": "2026-02-19T08:37:20.893Z"
+        "lastUpdated": "2026-03-04T04:32:02.447Z"
       },
-      "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\renderer\\src\\components\\payment\\CashPayment.vue"
+      "lastFile": "C:/workspaces/AI_POSON/frontend/src/renderer/src/components/payment/CardPayment.vue"
     },
     "preload": {
       "phase": "do",
@@ -214,6 +219,71 @@
         "lastUpdated": "2026-02-26T06:00:28.106Z"
       },
       "lastFile": "C:\\workspaces\\AI_POSON\\frontend\\src\\main\\stt-native\\Program.cs"
+    },
+    "scripts": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-03T02:16:56.533Z",
+        "lastUpdated": "2026-03-03T02:17:48.939Z"
+      },
+      "lastFile": "C:/Users/bysub/.claude/scripts/context-bar.sh"
+    },
+    "backend": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-04T01:42:33.427Z",
+        "lastUpdated": "2026-03-04T09:13:21.711Z"
+      },
+      "lastFile": "C:\\workspaces\\AI_POSON\\backend\\src\\services\\admin.service.ts"
+    },
+    "__tests__": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-04T01:42:49.862Z",
+        "lastUpdated": "2026-03-04T09:21:23.541Z"
+      },
+      "lastFile": "C:\\workspaces\\AI_POSON\\backend\\src\\__tests__\\payment.service.test.ts"
+    },
+    "config": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-04T02:29:43.822Z",
+        "lastUpdated": "2026-03-04T02:29:43.822Z"
+      },
+      "lastFile": "C:\\workspaces\\AI_POSON\\backend\\src\\config\\index.ts"
+    },
+    "api": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-04T04:32:19.385Z",
+        "lastUpdated": "2026-03-04T04:32:36.448Z"
+      },
+      "lastFile": "C:/workspaces/AI_POSON/frontend/src/renderer/src/services/api/client.ts"
     }
   },
   "pipeline": {

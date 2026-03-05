@@ -136,21 +136,31 @@ export class CacheService {
   }
 
   /**
-   * 패턴에 맞는 키 삭제
+   * 패턴에 맞는 키 삭제 (SCAN 사용 - non-blocking)
    */
   async deletePattern(pattern: string): Promise<number> {
     if (!this.redis) return 0;
 
     try {
-      const keys = await this.redis.keys(this.makeKey(pattern));
+      let totalDeleted = 0;
+      let cursor = "0";
+      const matchPattern = this.makeKey(pattern);
 
-      if (keys.length === 0) return 0;
+      do {
+        const [newCursor, keys] = await this.redis.scan(
+          cursor, "MATCH", matchPattern, "COUNT", "100",
+        );
+        if (keys.length > 0) {
+          totalDeleted += await this.redis.del(...keys);
+        }
+        cursor = newCursor;
+      } while (cursor !== "0");
 
-      const deleted = await this.redis.del(...keys);
+      if (totalDeleted > 0) {
+        logger.info({ pattern, count: totalDeleted }, "Cache: Pattern deleted");
+      }
 
-      logger.info({ pattern, count: deleted }, "Cache: Pattern deleted");
-
-      return deleted;
+      return totalDeleted;
     } catch (error) {
       logger.warn({ pattern, error }, "Cache: Delete pattern failed");
       return 0;
@@ -202,18 +212,26 @@ export class CacheService {
   }
 
   /**
-   * 전체 캐시 초기화 (개발용)
+   * 전체 캐시 초기화 (SCAN 사용 - non-blocking)
    */
   async flushAll(): Promise<void> {
     if (!this.redis) return;
 
-    const keys = await this.redis.keys(`${this.prefix}*`);
+    let totalDeleted = 0;
+    let cursor = "0";
+    const matchPattern = `${this.prefix}*`;
 
-    if (keys.length > 0) {
-      await this.redis.del(...keys);
-    }
+    do {
+      const [newCursor, keys] = await this.redis.scan(
+        cursor, "MATCH", matchPattern, "COUNT", "100",
+      );
+      if (keys.length > 0) {
+        totalDeleted += await this.redis.del(...keys);
+      }
+      cursor = newCursor;
+    } while (cursor !== "0");
 
-    logger.info({ count: keys.length }, "Cache: Flushed all");
+    logger.info({ count: totalDeleted }, "Cache: Flushed all");
   }
 }
 

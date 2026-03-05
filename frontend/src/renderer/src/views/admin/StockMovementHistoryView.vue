@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import type { StockMovement, StockMovementType } from "@/types";
 import { apiClient } from "@/services/api/client";
+import { formatPrice } from "@/utils/format";
 
 const route = useRoute();
 
@@ -184,10 +185,6 @@ async function openOrderDetail(orderId: string): Promise<void> {
 
 function closeOrderDetail(): void {
   orderDetail.value = null;
-}
-
-function formatPrice(price: number | string): string {
-  return new Intl.NumberFormat("ko-KR").format(Number(price)) + "원";
 }
 
 function getStatusLabel(status: string): string {

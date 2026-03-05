@@ -4,6 +4,7 @@ import type { PurchaseProduct, TaxType } from "@/types";
 import { apiClient } from "@/services/api/client";
 import { showConfirm } from "@/utils/AlertUtils";
 import PurchaseProductFormModal from "@/components/PurchaseProductFormModal.vue";
+import { formatNumber as formatPrice } from "@/utils/format";
 
 const taxTypeConfig: Record<TaxType, { label: string; bg: string; text: string }> = {
   TAXABLE: { label: "과세", bg: "bg-blue-100", text: "text-blue-700" },
@@ -157,10 +158,6 @@ async function deleteProduct(product: PurchaseProduct): Promise<void> {
   } catch (err) {
     console.error("Failed to delete product:", err);
   }
-}
-
-function formatPrice(price: number | string): string {
-  return new Intl.NumberFormat("ko-KR").format(Number(price));
 }
 
 function calcMargin(sell: number, cost: number): string {

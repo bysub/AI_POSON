@@ -1,8 +1,15 @@
 /**
- * 가격 포맷팅
+ * 숫자 포맷팅 (통화 기호 없음)
  */
-export function formatPrice(price: number): string {
-  return "\u20A9" + new Intl.NumberFormat("ko-KR").format(price);
+export function formatNumber(price: number | string): string {
+  return new Intl.NumberFormat("ko-KR").format(Number(price));
+}
+
+/**
+ * 가격 포맷팅 (₩ 포함)
+ */
+export function formatPrice(price: number | string): string {
+  return "\u20A9" + new Intl.NumberFormat("ko-KR").format(Number(price));
 }
 
 /**

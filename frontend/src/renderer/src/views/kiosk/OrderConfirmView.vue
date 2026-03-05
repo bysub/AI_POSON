@@ -246,7 +246,7 @@ onUnmounted(() => {
         </div>
 
         <!-- 매장/포장 선택 -->
-        <div class="flex justify-center gap-4 px-6 py-4">
+        <div role="radiogroup" :aria-label="t('orderConfirm.orderType')" class="flex justify-center gap-4 px-6 py-4">
           <button
             class="flex items-center gap-2 rounded-full border-2 px-8 py-3 text-lg font-bold transition-all"
             :class="

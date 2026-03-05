@@ -125,9 +125,8 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   return {
-    // State
+    // State (S-18: accessToken/refreshToken ref 비공개 — getter만 노출)
     admin,
-    accessToken,
     isLoading,
     error,
 

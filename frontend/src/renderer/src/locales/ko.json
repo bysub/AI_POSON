@@ -86,6 +86,7 @@
     "summary": "합계",
     "itemCount": "{count}건",
     "totalAmount": "총 금액",
+    "orderType": "매장/포장 선택",
     "dineIn": "매장",
     "takeout": "포장",
     "table": "테이블 {no}번",

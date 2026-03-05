@@ -3,6 +3,7 @@ import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
@@ -11,7 +12,7 @@ const CACHE_TTL = 300;
 // ========== 대분류 ==========
 
 // 대분류 목록
-router.get("/large", authenticate, async (_req, res) => {
+router.get("/large", authenticate, asyncHandler(async (_req, res) => {
   const data = await cacheService.getOrSet(
     CACHE_KEYS.BRANCHES_LARGE,
     async () => {
@@ -24,14 +25,14 @@ router.get("/large", authenticate, async (_req, res) => {
   );
 
   res.json({ success: true, data });
-});
+}));
 
 // 대분류 저장 (upsert)
 router.post(
   "/large",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { lCode, lName } = req.body;
 
     if (!lCode || !lName) {
@@ -53,7 +54,7 @@ router.post(
     await invalidateBranchCache();
 
     res.json({ success: true, data });
-  },
+  }),
 );
 
 // 대분류 삭제
@@ -61,7 +62,7 @@ router.delete(
   "/large/:lCode",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { lCode } = req.params;
 
     const existing = await prisma.lBranch.findUnique({
@@ -81,13 +82,13 @@ router.delete(
     await invalidateBranchCache();
 
     res.json({ success: true, message: "대분류가 삭제되었습니다" });
-  },
+  }),
 );
 
 // ========== 중분류 ==========
 
 // 중분류 목록
-router.get("/medium", authenticate, async (req, res, next) => {
+router.get("/medium", authenticate, asyncHandler(async (req, res, next) => {
   const lCode = req.query.lCode as string;
 
   if (!lCode) {
@@ -107,14 +108,14 @@ router.get("/medium", authenticate, async (req, res, next) => {
   );
 
   res.json({ success: true, data });
-});
+}));
 
 // 중분류 저장 (upsert)
 router.post(
   "/medium",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { lCode, mCode, mName } = req.body;
 
     if (!lCode || !mCode || !mName) {
@@ -144,7 +145,7 @@ router.post(
     await invalidateBranchCache(lCode);
 
     res.json({ success: true, data });
-  },
+  }),
 );
 
 // 중분류 삭제
@@ -152,7 +153,7 @@ router.delete(
   "/medium/:lCode/:mCode",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { lCode, mCode } = req.params;
 
     const existing = await prisma.mBranch.findUnique({
@@ -172,13 +173,13 @@ router.delete(
     await invalidateBranchCache(lCode);
 
     res.json({ success: true, message: "중분류가 삭제되었습니다" });
-  },
+  }),
 );
 
 // ========== 소분류 ==========
 
 // 소분류 목록
-router.get("/small", authenticate, async (req, res, next) => {
+router.get("/small", authenticate, asyncHandler(async (req, res, next) => {
   const lCode = req.query.lCode as string;
   const mCode = req.query.mCode as string;
 
@@ -200,14 +201,14 @@ router.get("/small", authenticate, async (req, res, next) => {
   );
 
   res.json({ success: true, data });
-});
+}));
 
 // 소분류 저장 (upsert)
 router.post(
   "/small",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { lCode, mCode, sCode, sName, profitRate } = req.body;
 
     if (!lCode || !mCode || !sCode || !sName) {
@@ -242,7 +243,7 @@ router.post(
     await invalidateBranchCache(lCode, mCode);
 
     res.json({ success: true, data });
-  },
+  }),
 );
 
 // 소분류 삭제
@@ -250,7 +251,7 @@ router.delete(
   "/small/:lCode/:mCode/:sCode",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { lCode, mCode, sCode } = req.params;
 
     const existing = await prisma.sBranch.findUnique({
@@ -267,13 +268,13 @@ router.delete(
     await invalidateBranchCache(lCode, mCode);
 
     res.json({ success: true, message: "소분류가 삭제되었습니다" });
-  },
+  }),
 );
 
 // ========== 분류코드 명칭 일괄 조회 ==========
 
 // POST /resolve — [{lCode, mCode?, sCode?}] → 명칭 포함 응답
-router.post("/resolve", authenticate, async (req, res) => {
+router.post("/resolve", authenticate, asyncHandler(async (req, res) => {
   const items: { lCode: string; mCode?: string; sCode?: string }[] = req.body;
   if (!Array.isArray(items) || items.length === 0) {
     return res.json({ success: true, data: [] });
@@ -326,7 +327,7 @@ router.post("/resolve", authenticate, async (req, res) => {
   }));
 
   res.json({ success: true, data: result });
-});
+}));
 
 // ========== 캐시 관리 ==========
 

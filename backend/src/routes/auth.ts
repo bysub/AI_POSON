@@ -4,6 +4,7 @@ import { authService } from "../services/auth.service.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 import type { AuthenticatedRequest } from "../types/auth.js";
 import { logger } from "../utils/logger.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
@@ -22,7 +23,7 @@ const refreshSchema = z.object({
  * POST /api/v1/auth/login
  * 관리자 로그인
  */
-router.post("/login", async (req, res) => {
+router.post("/login", asyncHandler(async (req, res) => {
   try {
     const validationResult = loginSchema.safeParse(req.body);
 
@@ -64,13 +65,13 @@ router.post("/login", async (req, res) => {
       },
     });
   }
-});
+}));
 
 /**
  * POST /api/v1/auth/refresh
  * 토큰 갱신
  */
-router.post("/refresh", async (req, res) => {
+router.post("/refresh", asyncHandler(async (req, res) => {
   try {
     const validationResult = refreshSchema.safeParse(req.body);
 
@@ -111,13 +112,13 @@ router.post("/refresh", async (req, res) => {
       },
     });
   }
-});
+}));
 
 /**
  * POST /api/v1/auth/logout
  * 로그아웃
  */
-router.post("/logout", async (req, res) => {
+router.post("/logout", asyncHandler(async (req, res) => {
   try {
     const { refreshToken } = req.body;
 
@@ -140,7 +141,7 @@ router.post("/logout", async (req, res) => {
       },
     });
   }
-});
+}));
 
 /**
  * GET /api/v1/auth/me

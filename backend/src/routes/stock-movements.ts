@@ -3,6 +3,7 @@ import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import type { PrismaClient } from "@prisma/client";
 
 const router = Router();
@@ -75,7 +76,7 @@ router.post(
   "/adjust",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { items, reason, memo } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -145,11 +146,11 @@ router.post(
       }
       throw err;
     }
-  },
+  }),
 );
 
 // 조정번호로 조정 이력 조회
-router.get("/adjustment/:code", authenticate, async (req, res, next) => {
+router.get("/adjustment/:code", authenticate, asyncHandler(async (req, res, next) => {
   const { code } = req.params;
 
   const movements = await prisma.stockMovement.findMany({
@@ -177,10 +178,10 @@ router.get("/adjustment/:code", authenticate, async (req, res, next) => {
       items: movements,
     },
   });
-});
+}));
 
 // 이력 목록 (필터: productId, type, startDate, endDate + 페이지네이션)
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, asyncHandler(async (req, res) => {
   const { productId, type, startDate, endDate, page = "1", limit = "50" } = req.query;
 
   const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
@@ -233,10 +234,10 @@ router.get("/", authenticate, async (req, res) => {
       totalPages: Math.ceil(total / limitNum),
     },
   });
-});
+}));
 
 // 특정 상품 이력
-router.get("/product/:productId", authenticate, async (req, res, next) => {
+router.get("/product/:productId", authenticate, asyncHandler(async (req, res, next) => {
   const productId = parseInt(req.params.productId, 10);
 
   if (isNaN(productId)) {
@@ -258,6 +259,6 @@ router.get("/product/:productId", authenticate, async (req, res, next) => {
     success: true,
     data: movements,
   });
-});
+}));
 
 export { router as stockMovementsRouter };

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
+import { formatNumber as formatPrice } from "@/utils/format";
 
 defineProps<{
   amount: number;
@@ -22,13 +23,6 @@ const errorMessage = ref("");
 const countdown = ref(60);
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
-
-/**
- * 가격 포맷팅
- */
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
-}
 
 /**
  * 카운트다운 시작

@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { config } from "../config/index.js";
 import { prisma } from "../utils/db.js";
 import { logger } from "../utils/logger.js";
+import { getRedis } from "../utils/cache.js";
 import type {
   AdminRole,
   AdminUser,
@@ -12,8 +13,10 @@ import type {
   TokenPair,
 } from "../types/auth.js";
 
-// 인메모리 리프레시 토큰 저장소 (프로덕션에서는 Redis 사용)
-const refreshTokenStore = new Map<string, { userId: string; expiresAt: Date }>();
+// S-2: Redis 기반 리프레시 토큰 저장소 (Redis 미연결 시 in-memory 폴백)
+const REFRESH_TOKEN_PREFIX = "rt:";
+const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60; // 7일 (초)
+const memoryFallback = new Map<string, { userId: string; expiresAt: Date }>();
 
 /**
  * 인증 서비스
@@ -25,11 +28,11 @@ export class AuthService {
   private readonly refreshTokenExpiry: string;
 
   constructor() {
-    this.accessTokenSecret = config.jwt?.accessSecret ?? "access-secret-key-change-in-production";
-    this.refreshTokenSecret =
-      config.jwt?.refreshSecret ?? "refresh-secret-key-change-in-production";
-    this.accessTokenExpiry = config.jwt?.accessExpiry ?? "15m";
-    this.refreshTokenExpiry = config.jwt?.refreshExpiry ?? "7d";
+    // S-1/S-17: config에서 이미 검증됨. 이중 폴백 제거
+    this.accessTokenSecret = config.jwt.accessSecret;
+    this.refreshTokenSecret = config.jwt.refreshSecret;
+    this.accessTokenExpiry = config.jwt.accessExpiry;
+    this.refreshTokenExpiry = config.jwt.refreshExpiry;
   }
 
   /**
@@ -63,7 +66,7 @@ export class AuthService {
     });
 
     // 리프레시 토큰 저장
-    this.storeRefreshToken(tokens.refreshToken, admin.id);
+    await this.storeRefreshToken(tokens.refreshToken, admin.id);
 
     // 마지막 로그인 시간 업데이트
     this.updateLastLogin(admin.id);
@@ -89,17 +92,11 @@ export class AuthService {
       // 리프레시 토큰 검증
       const payload = jwt.verify(refreshToken, this.refreshTokenSecret) as JwtPayload;
 
-      // 저장된 토큰 확인
-      const storedToken = refreshTokenStore.get(refreshToken);
+      // S-2: Redis에서 저장된 토큰 확인
+      const storedUserId = await this.getStoredRefreshToken(refreshToken);
 
-      if (!storedToken || storedToken.userId !== payload.sub) {
+      if (!storedUserId || storedUserId !== payload.sub) {
         logger.warn({ userId: payload.sub }, "Refresh token not found or mismatch");
-        return null;
-      }
-
-      if (storedToken.expiresAt < new Date()) {
-        refreshTokenStore.delete(refreshToken);
-        logger.warn({ userId: payload.sub }, "Refresh token expired");
         return null;
       }
 
@@ -111,7 +108,7 @@ export class AuthService {
       }
 
       // 기존 리프레시 토큰 삭제
-      refreshTokenStore.delete(refreshToken);
+      await this.deleteRefreshToken(refreshToken);
 
       // 새 토큰 쌍 생성
       const tokens = this.generateTokenPair({
@@ -121,7 +118,7 @@ export class AuthService {
       });
 
       // 새 리프레시 토큰 저장
-      this.storeRefreshToken(tokens.refreshToken, admin.id);
+      await this.storeRefreshToken(tokens.refreshToken, admin.id);
 
       logger.info({ userId: admin.id }, "Token refreshed");
 
@@ -136,7 +133,7 @@ export class AuthService {
    * 로그아웃
    */
   async logout(refreshToken: string): Promise<void> {
-    refreshTokenStore.delete(refreshToken);
+    await this.deleteRefreshToken(refreshToken);
     logger.info("Logout successful");
   }
 
@@ -193,13 +190,57 @@ export class AuthService {
   }
 
   /**
-   * 리프레시 토큰 저장
+   * 리프레시 토큰 저장 (S-2: Redis 우선, 폴백 in-memory)
    */
-  private storeRefreshToken(token: string, userId: string): void {
+  private async storeRefreshToken(token: string, userId: string): Promise<void> {
+    const redis = getRedis();
+    if (redis) {
+      try {
+        await redis.set(`${REFRESH_TOKEN_PREFIX}${token}`, userId, "EX", REFRESH_TOKEN_TTL);
+        return;
+      } catch (err) {
+        logger.warn({ err }, "Redis store refresh token failed, using memory fallback");
+      }
+    }
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7일
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    memoryFallback.set(token, { userId, expiresAt });
+  }
 
-    refreshTokenStore.set(token, { userId, expiresAt });
+  /**
+   * 리프레시 토큰 조회
+   */
+  private async getStoredRefreshToken(token: string): Promise<string | null> {
+    const redis = getRedis();
+    if (redis) {
+      try {
+        return await redis.get(`${REFRESH_TOKEN_PREFIX}${token}`);
+      } catch (err) {
+        logger.warn({ err }, "Redis get refresh token failed, using memory fallback");
+      }
+    }
+    const stored = memoryFallback.get(token);
+    if (!stored) return null;
+    if (stored.expiresAt < new Date()) {
+      memoryFallback.delete(token);
+      return null;
+    }
+    return stored.userId;
+  }
+
+  /**
+   * 리프레시 토큰 삭제
+   */
+  private async deleteRefreshToken(token: string): Promise<void> {
+    const redis = getRedis();
+    if (redis) {
+      try {
+        await redis.del(`${REFRESH_TOKEN_PREFIX}${token}`);
+      } catch (err) {
+        logger.warn({ err }, "Redis delete refresh token failed");
+      }
+    }
+    memoryFallback.delete(token);
   }
 
   /**
@@ -253,9 +294,9 @@ export class AuthService {
         };
       }
 
-      // 개발용 폴백 (DB에 관리자가 없을 때)
-      // 비밀번호: admin123
-      if (username === "admin" && process.env.NODE_ENV !== "production") {
+      // S-6: 개발용 폴백 (development 환경 + DB에 관리자 미존재 시만)
+      if (username === "admin" && config.env === "development") {
+        logger.warn("[DEV FALLBACK] DB에 admin 계정 없음 — 개발용 하드코딩 인증 사용");
         return {
           id: "dev-admin-001",
           username: "admin",
@@ -266,9 +307,10 @@ export class AuthService {
 
       return null;
     } catch (error) {
-      logger.warn({ error, username }, "Admin lookup failed, using fallback");
-      // DB 연결 실패 시 개발용 폴백
-      if (username === "admin" && process.env.NODE_ENV !== "production") {
+      logger.warn({ error, username }, "Admin lookup failed");
+      // S-6: DB 연결 실패 시 개발 환경에서만 폴백
+      if (username === "admin" && config.env === "development") {
+        logger.warn("[DEV FALLBACK] DB 연결 실패 — 개발용 하드코딩 인증 사용");
         return {
           id: "dev-admin-001",
           username: "admin",
@@ -304,23 +346,15 @@ export class AuthService {
         };
       }
 
-      // 개발용 폴백
-      if (id === "dev-admin-001" && process.env.NODE_ENV !== "production") {
-        return {
-          id: "dev-admin-001",
-          username: "admin",
-          role: "ADMIN",
-        };
+      // S-6: 개발 환경에서만 폴백
+      if (id === "dev-admin-001" && config.env === "development") {
+        return { id: "dev-admin-001", username: "admin", role: "ADMIN" };
       }
 
       return null;
     } catch {
-      if (id === "dev-admin-001" && process.env.NODE_ENV !== "production") {
-        return {
-          id: "dev-admin-001",
-          username: "admin",
-          role: "ADMIN",
-        };
+      if (id === "dev-admin-001" && config.env === "development") {
+        return { id: "dev-admin-001", username: "admin", role: "ADMIN" };
       }
       return null;
     }

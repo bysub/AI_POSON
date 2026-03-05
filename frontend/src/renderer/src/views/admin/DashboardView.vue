@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { apiClient } from "@/services/api/client";
+import { formatPrice } from "@/utils/format";
 
 interface DashboardStats {
   totalProducts: number;
@@ -42,10 +43,6 @@ async function loadStats(): Promise<void> {
   } finally {
     isLoading.value = false;
   }
-}
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW" }).format(price);
 }
 
 onMounted(() => {

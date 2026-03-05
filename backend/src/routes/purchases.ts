@@ -1,519 +1,132 @@
 import { Router } from "express";
-import { prisma } from "../utils/db.js";
 import { AppError } from "../middleware/errorHandler.js";
-import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { authenticate, authorize } from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { purchaseService, PurchaseError } from "../services/purchase.service.js";
 
 const router = Router();
 
-// 매입 코드 자동생성 (P20260206-001 형식)
-async function generatePurchaseCode(): Promise<string> {
-  const today = new Date();
-  const dateStr =
-    today.getFullYear().toString() +
-    String(today.getMonth() + 1).padStart(2, "0") +
-    String(today.getDate()).padStart(2, "0");
-  const prefix = `P${dateStr}`;
-
-  const latest = await prisma.purchase.findFirst({
-    where: { purchaseCode: { startsWith: prefix } },
-    orderBy: { purchaseCode: "desc" },
-    select: { purchaseCode: true },
-  });
-
-  if (!latest) return `${prefix}-001`;
-
-  const seq = parseInt(latest.purchaseCode.split("-")[1], 10);
-  return `${prefix}-${String(seq + 1).padStart(3, "0")}`;
+function handlePurchaseError(err: unknown, next: (err: AppError) => void): void {
+  if (err instanceof PurchaseError) {
+    next(new AppError(err.statusCode, err.message, err.code));
+  } else {
+    const msg = err instanceof Error ? err.message : String(err);
+    next(new AppError(500, msg, "PURCHASE_ERROR"));
+  }
 }
 
 // Get all purchases (필터/페이지네이션)
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, asyncHandler(async (req, res) => {
   const { page = "1", limit = "20", supplierId, status, startDate, endDate, search } = req.query;
-
-  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
-  const skip = (pageNum - 1) * limitNum;
-
-  const where: Record<string, unknown> = {};
-
-  if (supplierId) {
-    where.supplierId = parseInt(supplierId as string, 10);
-  }
-
-  if (status) {
-    where.status = status as string;
-  }
-
-  if (startDate || endDate) {
-    where.purchaseDate = {
-      ...(startDate ? { gte: new Date(startDate as string) } : {}),
-      ...(endDate ? { lte: new Date(endDate as string) } : {}),
-    };
-  }
-
-  if (search) {
-    where.OR = [
-      { purchaseCode: { contains: search as string, mode: "insensitive" } },
-      { supplier: { name: { contains: search as string, mode: "insensitive" } } },
-      { memo: { contains: search as string, mode: "insensitive" } },
-    ];
-  }
-
-  const [purchases, total] = await Promise.all([
-    prisma.purchase.findMany({
-      where,
-      include: {
-        supplier: {
-          select: { id: true, code: true, name: true, type: true },
-        },
-        _count: { select: { items: true } },
-      },
-      orderBy: { purchaseDate: "desc" },
-      skip,
-      take: limitNum,
-    }),
-    prisma.purchase.count({ where }),
-  ]);
-
-  res.json({
-    success: true,
-    data: purchases,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-    },
+  const result = await purchaseService.list({
+    page: parseInt(page as string, 10),
+    limit: parseInt(limit as string, 10),
+    supplierId: supplierId as string | undefined,
+    status: status as string | undefined,
+    startDate: startDate as string | undefined,
+    endDate: endDate as string | undefined,
+    search: search as string | undefined,
   });
-});
+  res.json({ success: true, data: result.purchases, pagination: result.pagination });
+}));
 
 // 통계 API (/:id 보다 먼저 선언)
-router.get("/stats/summary", authenticate, async (req, res) => {
+router.get("/stats/summary", authenticate, asyncHandler(async (req, res) => {
   const { startDate, endDate } = req.query;
-
-  const where: Record<string, unknown> = {
-    status: { not: "CANCELLED" },
-  };
-
-  if (startDate || endDate) {
-    where.purchaseDate = {
-      ...(startDate ? { gte: new Date(startDate as string) } : {}),
-      ...(endDate ? { lte: new Date(endDate as string) } : {}),
-    };
-  }
-
-  const [totalResult, count] = await Promise.all([
-    prisma.purchase.aggregate({
-      where,
-      _sum: { totalAmount: true, taxAmount: true },
-    }),
-    prisma.purchase.count({ where }),
-  ]);
-
-  res.json({
-    success: true,
-    data: {
-      totalAmount: totalResult._sum.totalAmount ?? 0,
-      taxAmount: totalResult._sum.taxAmount ?? 0,
-      count,
-    },
+  const data = await purchaseService.getStatsSummary({
+    startDate: startDate as string | undefined,
+    endDate: endDate as string | undefined,
   });
-});
+  res.json({ success: true, data });
+}));
 
-// Get purchase by ID (상세 조회)
-router.get("/:id", authenticate, async (req, res, next) => {
+// Get purchase by ID
+router.get("/:id", authenticate, asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);
-
   if (isNaN(id)) {
     return next(new AppError(400, "Invalid purchase ID", "INVALID_ID"));
   }
-
-  const purchase = await prisma.purchase.findUnique({
-    where: { id },
-    include: {
-      supplier: {
-        select: { id: true, code: true, name: true, type: true },
-      },
-      items: {
-        include: {
-          purchaseProduct: {
-            select: { id: true, barcode: true, name: true, sellPrice: true, costPrice: true },
-          },
-        },
-        orderBy: { id: "asc" },
-      },
-    },
-  });
-
+  const purchase = await purchaseService.getById(id);
   if (!purchase) {
     return next(new AppError(404, "매입 내역을 찾을 수 없습니다", "PURCHASE_NOT_FOUND"));
   }
+  res.json({ success: true, data: purchase });
+}));
 
-  res.json({
-    success: true,
-    data: purchase,
-  });
-});
-
-// Create purchase (매입 등록)
+// Create purchase
 router.post(
   "/",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { supplierId, purchaseDate, items, memo, taxIncluded = true } = req.body;
-
     if (!supplierId || !items || !Array.isArray(items) || items.length === 0) {
       return next(new AppError(400, "거래처와 매입 상품은 필수입니다", "MISSING_FIELDS"));
     }
-
-    // 거래처 존재 확인
-    const supplier = await prisma.supplier.findUnique({
-      where: { id: parseInt(supplierId, 10) },
-    });
-    if (!supplier) {
-      return next(new AppError(404, "거래처를 찾을 수 없습니다", "SUPPLIER_NOT_FOUND"));
-    }
-
-    // 매입상품 존재 확인
-    const purchaseProductIds = items.map(
-      (item: { purchaseProductId: number }) => item.purchaseProductId,
-    );
-    const purchaseProducts = await prisma.purchaseProduct.findMany({
-      where: { id: { in: purchaseProductIds } },
-      select: { id: true },
-    });
-    const existingIds = new Set(purchaseProducts.map((p) => p.id));
-    const missingIds = purchaseProductIds.filter((id: number) => !existingIds.has(id));
-    if (missingIds.length > 0) {
-      return next(
-        new AppError(
-          404,
-          `존재하지 않는 매입상품이 포함되어 있습니다 (ID: ${missingIds.join(", ")})`,
-          "PURCHASE_PRODUCT_NOT_FOUND",
-        ),
-      );
-    }
-
-    const purchaseCode = await generatePurchaseCode();
-
-    // 합계 계산
-    let totalAmount = 0;
-    const purchaseItems = items.map(
-      (item: {
-        purchaseProductId: number;
-        quantity: number;
-        unitPrice: number;
-        sellPrice: number;
-      }) => {
-        const amount = item.quantity * item.unitPrice;
-        totalAmount += amount;
-        return {
-          purchaseProductId: item.purchaseProductId,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          sellPrice: item.sellPrice ?? 0,
-          amount,
-        };
-      },
-    );
-
-    // 부가세 계산: 포함이면 totalAmount/11, 별도면 totalAmount*0.1
-    const taxAmount = taxIncluded ? Math.round(totalAmount / 11) : Math.round(totalAmount * 0.1);
-
-    const purchase = await prisma.$transaction(async (tx) => {
-      const created = await tx.purchase.create({
-        data: {
-          purchaseCode,
-          supplierId: parseInt(supplierId, 10),
-          purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
-          totalAmount,
-          taxAmount,
-          taxIncluded: !!taxIncluded,
-          status: "CONFIRMED",
-          memo: memo || null,
-          createdBy: (req as unknown as { user: { username: string } }).user?.username ?? null,
-          items: {
-            create: purchaseItems,
-          },
-        },
-        include: {
-          supplier: {
-            select: { id: true, code: true, name: true, type: true },
-          },
-          items: {
-            include: {
-              purchaseProduct: {
-                select: { id: true, barcode: true, name: true, sellPrice: true, costPrice: true },
-              },
-            },
-          },
-        },
+    try {
+      const username = (req as unknown as { user: { username: string } }).user?.username ?? null;
+      const purchase = await purchaseService.create({
+        supplierId: parseInt(supplierId, 10),
+        purchaseDate,
+        items,
+        memo,
+        taxIncluded: !!taxIncluded,
+        createdBy: username,
       });
-
-      // 매입 확정 시 재고 증가 + 이동 기록
-      for (const item of purchaseItems) {
-        const product = await tx.purchaseProduct.findUniqueOrThrow({
-          where: { id: item.purchaseProductId },
-          select: { stock: true },
-        });
-        const stockBefore = product.stock;
-
-        await tx.purchaseProduct.update({
-          where: { id: item.purchaseProductId },
-          data: { stock: { increment: item.quantity } },
-        });
-
-        await tx.stockMovement.create({
-          data: {
-            purchaseProductId: item.purchaseProductId,
-            type: "PURCHASE_IN",
-            quantity: item.quantity,
-            stockBefore,
-            stockAfter: stockBefore + item.quantity,
-            purchaseId: created.id,
-            createdBy: (req as unknown as { user: { username: string } }).user?.username ?? null,
-          },
-        });
-      }
-
-      return created;
-    });
-
-    await invalidatePurchaseCache();
-
-    res.status(201).json({
-      success: true,
-      data: purchase,
-    });
-  },
+      res.status(201).json({ success: true, data: purchase });
+    } catch (err) {
+      handlePurchaseError(err, next);
+    }
+  }),
 );
 
-// Update purchase (매입 수정 - DRAFT 상태만)
+// Update purchase
 router.patch(
   "/:id",
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
-  async (req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const id = parseInt(req.params.id);
-
     if (isNaN(id)) {
       return next(new AppError(400, "Invalid purchase ID", "INVALID_ID"));
     }
-
-    const existing = await prisma.purchase.findUnique({ where: { id } });
-    if (!existing) {
-      return next(new AppError(404, "매입 내역을 찾을 수 없습니다", "PURCHASE_NOT_FOUND"));
-    }
-
-    if (existing.status === "CANCELLED") {
-      return next(new AppError(400, "취소된 매입은 수정할 수 없습니다", "PURCHASE_CANCELLED"));
-    }
-
-    const { supplierId, purchaseDate, items, memo, status, taxIncluded } = req.body;
-
-    const updateData: Record<string, unknown> = {};
-    if (supplierId !== undefined) updateData.supplierId = parseInt(supplierId, 10);
-    if (purchaseDate !== undefined) updateData.purchaseDate = new Date(purchaseDate);
-    if (memo !== undefined) updateData.memo = memo || null;
-    if (status !== undefined) updateData.status = status;
-    if (taxIncluded !== undefined) updateData.taxIncluded = !!taxIncluded;
-
-    // 상품 항목 업데이트 (재고 연동)
-    if (items && Array.isArray(items)) {
-      // 기존 항목 조회 (재고 원복용)
-      const oldItems = await prisma.purchaseItem.findMany({
-        where: { purchaseId: id },
-        select: { purchaseProductId: true, quantity: true },
-      });
-
-      let totalAmount = 0;
-      const purchaseItems = items.map(
-        (item: {
-          purchaseProductId: number;
-          quantity: number;
-          unitPrice: number;
-          sellPrice: number;
-        }) => {
-          const amount = item.quantity * item.unitPrice;
-          totalAmount += amount;
-          return {
-            purchaseId: id,
-            purchaseProductId: item.purchaseProductId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            sellPrice: item.sellPrice ?? 0,
-            amount,
-          };
-        },
-      );
-
-      updateData.totalAmount = totalAmount;
-      const isTaxIncluded = taxIncluded !== undefined ? !!taxIncluded : existing.taxIncluded;
-      updateData.taxAmount = isTaxIncluded
-        ? Math.round(totalAmount / 11)
-        : Math.round(totalAmount * 0.1);
-
+    try {
       const username = (req as unknown as { user: { username: string } }).user?.username ?? null;
-
-      await prisma.$transaction(async (tx) => {
-        // 기존 항목 재고 차감 + PURCHASE_CANCEL 이동 기록
-        for (const old of oldItems) {
-          const product = await tx.purchaseProduct.findUniqueOrThrow({
-            where: { id: old.purchaseProductId },
-            select: { stock: true },
-          });
-          const stockBefore = product.stock;
-
-          await tx.purchaseProduct.update({
-            where: { id: old.purchaseProductId },
-            data: { stock: { decrement: old.quantity } },
-          });
-
-          await tx.stockMovement.create({
-            data: {
-              purchaseProductId: old.purchaseProductId,
-              type: "PURCHASE_CANCEL",
-              quantity: -old.quantity,
-              stockBefore,
-              stockAfter: stockBefore - old.quantity,
-              purchaseId: id,
-              createdBy: username,
-            },
-          });
-        }
-
-        // 기존 항목 삭제 → 새 항목 생성
-        await tx.purchaseItem.deleteMany({ where: { purchaseId: id } });
-        await tx.purchaseItem.createMany({ data: purchaseItems });
-
-        // 새 항목 재고 증가 + PURCHASE_IN 이동 기록
-        for (const item of purchaseItems) {
-          const product = await tx.purchaseProduct.findUniqueOrThrow({
-            where: { id: item.purchaseProductId },
-            select: { stock: true },
-          });
-          const stockBefore = product.stock;
-
-          await tx.purchaseProduct.update({
-            where: { id: item.purchaseProductId },
-            data: { stock: { increment: item.quantity } },
-          });
-
-          await tx.stockMovement.create({
-            data: {
-              purchaseProductId: item.purchaseProductId,
-              type: "PURCHASE_IN",
-              quantity: item.quantity,
-              stockBefore,
-              stockAfter: stockBefore + item.quantity,
-              purchaseId: id,
-              createdBy: username,
-            },
-          });
-        }
+      const { supplierId, purchaseDate, items, memo, status, taxIncluded } = req.body;
+      const purchase = await purchaseService.update(id, {
+        supplierId: supplierId !== undefined ? parseInt(supplierId, 10) : undefined,
+        purchaseDate,
+        items,
+        memo,
+        status,
+        taxIncluded,
+        createdBy: username,
       });
+      res.json({ success: true, data: purchase });
+    } catch (err) {
+      handlePurchaseError(err, next);
     }
-
-    const purchase = await prisma.purchase.update({
-      where: { id },
-      data: updateData,
-      include: {
-        supplier: {
-          select: { id: true, code: true, name: true, type: true },
-        },
-        items: {
-          include: {
-            purchaseProduct: {
-              select: { id: true, barcode: true, name: true, sellPrice: true, costPrice: true },
-            },
-          },
-        },
-      },
-    });
-
-    await invalidatePurchaseCache(id);
-
-    res.json({
-      success: true,
-      data: purchase,
-    });
-  },
+  }),
 );
 
-// Cancel purchase (매입 취소)
-router.delete("/:id", authenticate, authorize("SUPER_ADMIN", "ADMIN"), async (req, res, next) => {
-  const id = parseInt(req.params.id);
-
-  if (isNaN(id)) {
-    return next(new AppError(400, "Invalid purchase ID", "INVALID_ID"));
-  }
-
-  const existing = await prisma.purchase.findUnique({ where: { id } });
-  if (!existing) {
-    return next(new AppError(404, "매입 내역을 찾을 수 없습니다", "PURCHASE_NOT_FOUND"));
-  }
-
-  if (existing.status === "CANCELLED") {
-    return next(new AppError(400, "이미 취소된 매입입니다", "PURCHASE_ALREADY_CANCELLED"));
-  }
-
-  // 매입 취소 시 재고 차감 (트랜잭션)
-  const purchaseItems = await prisma.purchaseItem.findMany({
-    where: { purchaseId: id },
-    select: { purchaseProductId: true, quantity: true },
-  });
-
-  const username = (req as unknown as { user: { username: string } }).user?.username ?? null;
-
-  await prisma.$transaction(async (tx) => {
-    await tx.purchase.update({
-      where: { id },
-      data: { status: "CANCELLED" },
-    });
-
-    for (const item of purchaseItems) {
-      const product = await tx.purchaseProduct.findUniqueOrThrow({
-        where: { id: item.purchaseProductId },
-        select: { stock: true },
-      });
-      const stockBefore = product.stock;
-
-      await tx.purchaseProduct.update({
-        where: { id: item.purchaseProductId },
-        data: { stock: { decrement: item.quantity } },
-      });
-
-      await tx.stockMovement.create({
-        data: {
-          purchaseProductId: item.purchaseProductId,
-          type: "PURCHASE_CANCEL",
-          quantity: -item.quantity,
-          stockBefore,
-          stockAfter: stockBefore - item.quantity,
-          purchaseId: id,
-          createdBy: username,
-        },
-      });
+// Cancel purchase
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("SUPER_ADMIN", "ADMIN"),
+  asyncHandler(async (req, res, next) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return next(new AppError(400, "Invalid purchase ID", "INVALID_ID"));
     }
-  });
-
-  await invalidatePurchaseCache(id);
-
-  res.json({
-    success: true,
-    message: "매입이 취소되었습니다",
-  });
-});
-
-// ========== 캐시 관리 ==========
-
-async function invalidatePurchaseCache(id?: number): Promise<void> {
-  await cacheService.del(CACHE_KEYS.PURCHASES);
-  if (id) {
-    await cacheService.del(CACHE_KEYS.PURCHASE(id));
-  }
-}
+    try {
+      const username = (req as unknown as { user: { username: string } }).user?.username ?? null;
+      await purchaseService.cancel(id, username);
+      res.json({ success: true, message: "매입이 취소되었습니다" });
+    } catch (err) {
+      handlePurchaseError(err, next);
+    }
+  }),
+);
 
 export { router as purchasesRouter };

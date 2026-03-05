@@ -3,6 +3,8 @@ import { z } from "zod";
 import { createPaymentService } from "../services/payment/index.js";
 import { logger } from "../utils/logger.js";
 import { prisma } from "../utils/db.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 const paymentService = createPaymentService();
@@ -66,7 +68,7 @@ const refundRequestSchema = z.object({
  * POST /api/v1/payments
  * 결제 처리
  */
-router.post("/", async (req, res) => {
+router.post("/", authenticate, asyncHandler(async (req, res) => {
   try {
     const validationResult = paymentRequestSchema.safeParse(req.body);
 
@@ -168,13 +170,13 @@ router.post("/", async (req, res) => {
       },
     });
   }
-});
+}));
 
 /**
  * POST /api/v1/payments/:transactionId/cancel
  * 결제 취소
  */
-router.post("/:transactionId/cancel", async (req, res) => {
+router.post("/:transactionId/cancel", authenticate, asyncHandler(async (req, res) => {
   try {
     const { transactionId } = req.params;
     const { vanCode } = req.body;
@@ -227,13 +229,13 @@ router.post("/:transactionId/cancel", async (req, res) => {
       },
     });
   }
-});
+}));
 
 /**
  * POST /api/v1/payments/refund
  * 환불 처리
  */
-router.post("/refund", async (req, res) => {
+router.post("/refund", authenticate, asyncHandler(async (req, res) => {
   try {
     const validationResult = refundRequestSchema.safeParse(req.body);
 
@@ -285,13 +287,13 @@ router.post("/refund", async (req, res) => {
       },
     });
   }
-});
+}));
 
 /**
  * GET /api/v1/payments/:transactionId
  * 거래 상태 조회
  */
-router.get("/:transactionId", async (req, res) => {
+router.get("/:transactionId", authenticate, asyncHandler(async (req, res) => {
   try {
     const { transactionId } = req.params;
     const vanCode = req.query.vanCode as string;
@@ -329,13 +331,13 @@ router.get("/:transactionId", async (req, res) => {
       },
     });
   }
-});
+}));
 
 /**
  * GET /api/v1/payments/health/van
  * VAN 상태 확인
  */
-router.get("/health/van", async (_req, res) => {
+router.get("/health/van", asyncHandler(async (_req, res) => {
   try {
     const health = await paymentService.checkVanHealth();
     const circuitStatus = paymentService.getCircuitBreakerStatus();
@@ -361,6 +363,6 @@ router.get("/health/van", async (_req, res) => {
       },
     });
   }
-});
+}));
 
 export { router as paymentsRouter };

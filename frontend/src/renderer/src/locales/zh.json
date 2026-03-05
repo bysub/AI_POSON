@@ -86,6 +86,7 @@
     "summary": "合计",
     "itemCount": "{count}件",
     "totalAmount": "总金额",
+    "orderType": "堂食 / 外带",
     "dineIn": "堂食",
     "takeout": "外带",
     "table": "桌号 {no}",

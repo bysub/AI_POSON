@@ -4,6 +4,7 @@ import type { PurchaseProduct, TaxType } from "@/types";
 import { apiClient } from "@/services/api/client";
 import { showApiError } from "@/utils/AlertUtils";
 import BranchSelectModal from "@/components/BranchSelectModal.vue";
+import { formatNumber as formatPrice } from "@/utils/format";
 
 const props = defineProps<{
   visible: boolean;
@@ -231,10 +232,6 @@ function validateForm(): boolean {
   if (!hasUsage) errors.usage = "사용 설정을 최소 1개 이상 선택해주세요";
   formErrors.value = errors;
   return Object.keys(errors).length === 0;
-}
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
 }
 
 async function save(): Promise<void> {

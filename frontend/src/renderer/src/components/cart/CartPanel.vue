@@ -4,6 +4,7 @@ import { useCartStore } from "@/stores/cart";
 import { getImageSrc } from "@/utils/image";
 import { getLocalizedName } from "@/utils/i18n";
 import type { CartItem } from "@/types";
+import { formatNumber as formatPrice } from "@/utils/format";
 
 const { locale, t } = useI18n();
 const cartStore = useCartStore();
@@ -16,13 +17,6 @@ const emit = defineEmits<{
   checkout: [];
   continueShopping: [];
 }>();
-
-/**
- * 가격 포맷팅
- */
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("ko-KR").format(price);
-}
 
 /**
  * 수량 증가
