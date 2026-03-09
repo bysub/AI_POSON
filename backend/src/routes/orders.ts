@@ -30,7 +30,10 @@ const createOrderSchema = z.object({
 
 const updateStatusSchema = z.object({
   status: z.nativeEnum(OrderStatus),
-  paymentType: z.string().optional(),
+  paymentType: z.enum(["CARD", "CASH", "SIMPLE_PAY", "POINT", "MIXED"]).optional(),
+  paymentMethod: z.string().max(30).optional(),
+  approvalNumber: z.string().max(50).optional(),
+  transactionId: z.string().max(100).optional(),
   receivedAmount: z.number().positive().optional(),
 });
 
@@ -90,8 +93,49 @@ router.get(
   authenticate,
   authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
   asyncHandler(async (req, res) => {
-    const { days = "7" } = req.query;
-    const data = await orderService.getDailyStats(parseInt(days as string));
+    const { days = "7", startDate, endDate } = req.query;
+    const data = await orderService.getDailyStats({
+      days: parseInt(days as string),
+      startDate: startDate as string | undefined,
+      endDate: endDate as string | undefined,
+    });
+    res.json({ success: true, data });
+  }),
+);
+
+// Get hourly sales report - /:id 보다 먼저 정의
+router.get(
+  "/stats/hourly",
+  authenticate,
+  authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
+  asyncHandler(async (req, res, next) => {
+    const { startDate, endDate } = req.query;
+    if (!startDate || !endDate) {
+      return next(new AppError(400, "startDate, endDate는 필수입니다", "VALIDATION_ERROR"));
+    }
+    const data = await orderService.getHourlyStats({
+      startDate: startDate as string,
+      endDate: endDate as string,
+    });
+    res.json({ success: true, data });
+  }),
+);
+
+// Get product sales stats - /:id 보다 먼저 정의
+router.get(
+  "/stats/products",
+  authenticate,
+  authorize("SUPER_ADMIN", "ADMIN", "MANAGER"),
+  asyncHandler(async (req, res, next) => {
+    const { startDate, endDate, limit = "10" } = req.query;
+    if (!startDate || !endDate) {
+      return next(new AppError(400, "startDate, endDate는 필수입니다", "VALIDATION_ERROR"));
+    }
+    const data = await orderService.getProductStats({
+      startDate: startDate as string,
+      endDate: endDate as string,
+      limit: parseInt(limit as string),
+    });
     res.json({ success: true, data });
   }),
 );
@@ -103,6 +147,30 @@ router.get("/:id", asyncHandler(async (req, res, next) => {
     return next(new AppError(404, "Order not found", "ORDER_NOT_FOUND"));
   }
   res.json({ success: true, data: order });
+}));
+
+// 포인트 사용 (분할 결제 1단계)
+router.post("/:id/use-points", authenticate, asyncHandler(async (req, res, next) => {
+  const { pointAmount, memberId } = req.body;
+  if (!pointAmount || !memberId) {
+    return next(new AppError(400, "pointAmount, memberId는 필수입니다", "VALIDATION_ERROR"));
+  }
+  try {
+    const result = await orderService.usePoints(req.params.id, memberId, pointAmount);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    handleOrderError(err, next);
+  }
+}));
+
+// 포인트 사용 취소 (분할 결제 실패 시 즉시 환수)
+router.delete("/:id/use-points", authenticate, asyncHandler(async (req, res, next) => {
+  try {
+    const result = await orderService.cancelUsePoints(req.params.id);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    handleOrderError(err, next);
+  }
 }));
 
 // Update order status (S-8: 인증 필수)

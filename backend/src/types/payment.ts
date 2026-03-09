@@ -12,18 +12,29 @@ export type VanCode =
   | "SPC"
   | "FDIK";
 
-// 결제 상태
+// 결제 상태 (Prisma PaymentStatus enum과 동기화)
 export type PaymentStatus =
   | "PENDING"
-  | "AUTHORIZED"
-  | "CAPTURED"
+  | "APPROVED"
   | "CANCELLED"
   | "REFUNDED"
-  | "PARTIAL_REF"
   | "FAILED";
 
-// 결제 유형
-export type PaymentType = "CARD" | "CASH" | "MIXED";
+// 결제 유형 (Prisma PaymentType enum과 동기화)
+export type PaymentType = "CARD" | "CASH" | "SIMPLE_PAY" | "POINT" | "MIXED";
+
+// 결제 수단 상세 구분
+export type PaymentMethodCode =
+  | "CARD"
+  | "MOBILE_PAY"
+  | "APPLE_PAY"
+  | "FOREIGN_CARD"
+  | "PAYCO"
+  | "WECHAT_PAY"
+  | "ALIPAY"
+  | "STORE_POINT"
+  | "CASH"
+  | "SCANNER";
 
 // 결제 요청
 export interface PaymentRequest {

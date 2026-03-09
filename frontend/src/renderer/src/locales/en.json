@@ -9,7 +9,8 @@
     "back": "Back",
     "next": "Next",
     "close": "Close",
-    "currency": "KRW"
+    "currency": "KRW",
+    "won": ""
   },
   "welcome": {
     "title": "Welcome",
@@ -52,7 +53,7 @@
   "payment": {
     "title": "Payment",
     "yourOrder": "Your Order",
-    "selectMethod": "Select payment method",
+    "selectMethod": "Please select a payment method.",
     "paymentMethod": "Payment Method",
     "card": "Credit Card",
     "cardDesc": "Visa, Mastercard, AMEX",
@@ -62,6 +63,18 @@
     "mobilePayDesc": "Apple Pay, Google Pay",
     "scanner": "Kiosk Scanner",
     "scannerDesc": "Points, Coupons, QR Code",
+    "applePay": "Apple Pay",
+    "applePayDesc": "Apple Pay",
+    "foreignCard": "Local / Foreign Card",
+    "foreignCardDesc": "Foreign-issued cards, local currency",
+    "payco": "PAYCO",
+    "paycoDesc": "PAYCO Payment",
+    "wechatPay": "WeChat Pay",
+    "wechatPayDesc": "WeChat Pay",
+    "alipay": "Alipay",
+    "alipayDesc": "Alipay Payment",
+    "storePoint": "Store Points",
+    "storePointDesc": "Use accumulated points",
     "processing": "Processing payment...",
     "insertCard": "Please insert or tap your card",
     "enterCash": "Please insert cash",
@@ -74,7 +87,24 @@
     "secureCheckout": "Secure Checkout · Encrypted Payment",
     "offline": "Offline",
     "orderCreateFailed": "Failed to create order",
-    "scannerNotReady": "Scanner payment is coming soon"
+    "scannerNotReady": "Scanner payment is coming soon",
+    "point": {
+      "loading": "Loading point information...",
+      "loadError": "Unable to load point information",
+      "memberSuffix": "",
+      "currentBalance": "Current Points",
+      "orderAmount": "Order Amount",
+      "pointDeduct": "Points Used",
+      "remainingAmount": "Remaining Balance",
+      "payFull": "Pay with Points",
+      "paySplit": "Use {point}P + Pay {remaining} more",
+      "otherMethod": "Choose Another Method",
+      "insufficient": "Insufficient points",
+      "minRequired": "Minimum {min}P required",
+      "payError": "Point payment failed",
+      "splitError": "Point deduction failed",
+      "loginRequired": "Member login required for point payment"
+    }
   },
   "orderConfirm": {
     "headerTitle": "Please check your order.",
@@ -109,7 +139,10 @@
     "printingReceipt": "Printing...",
     "returnToHome": "Return to Home",
     "autoReset": "This screen will automatically reset in {seconds} seconds",
-    "approvalNumber": "Approval Number"
+    "approvalNumber": "Approval Number",
+    "earnedPoints": "Points Earned",
+    "remainingPoints": "Remaining Points",
+    "gradeUp": "Grade UP!"
   },
   "point": {
     "purchaseInProgress": "Purchase in progress",
@@ -143,7 +176,9 @@
     "completed": "Payment completed",
     "timeout": "Payment timed out.",
     "timeoutShort": "Payment Timeout",
-    "declined": "Card declined. Please try another card."
+    "declined": "Card declined. Please try another card.",
+    "tapNfc": "Please tap your phone on the reader",
+    "insertForeignCard": "Please insert or tap your foreign card"
   },
   "cashPayment": {
     "amount": "Payment Amount",
@@ -245,5 +280,30 @@
       "idleWarning": "The screen will reset in {seconds} seconds.",
       "settingsOpened": "Accessibility settings screen."
     }
+  },
+  "stats": {
+    "totalSales": "Total Sales",
+    "orderCount": "Order Count",
+    "avgOrderAmount": "Average Order Amount",
+    "dailyAvg": "Daily Average Sales",
+    "totalPurchase": "Total Purchases",
+    "purchaseCount": "Purchase Count",
+    "avgPurchase": "Average Purchase Amount",
+    "noData": "No data available for the selected period",
+    "refresh": "Refresh",
+    "search": "Search",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "dailyTrend": "Daily Sales Trend",
+    "hourlyTrend": "Hourly Sales",
+    "orderStatusRatio": "Order Status Ratio",
+    "bestSellers": "Best Sellers TOP 10",
+    "categoryRatio": "Sales by Category",
+    "purchaseTrend": "Purchase Trend",
+    "supplierRatio": "Purchases by Supplier",
+    "salesAmount": "Sales Amount",
+    "purchaseAmount": "Purchase Amount",
+    "quantity": "Quantity Sold"
   }
 }

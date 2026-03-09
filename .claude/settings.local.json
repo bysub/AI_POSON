@@ -199,7 +199,12 @@
       "Bash(jq:*)",
       "Bash(/c/ProgramData/chocolatey/bin/jq.exe:*)",
       "Bash(cmd.exe:*)",
-      "Bash(chmod +x:*)"
+      "Bash(chmod +x:*)",
+      "Bash(/tmp/summary.txt:*)",
+      "Read(//tmp/**)",
+      "Bash(npx prisma:*)",
+      "Bash(xxd:*)",
+      "Bash(rm:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

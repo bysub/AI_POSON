@@ -137,15 +137,18 @@ model Order {
   tableNo     Int?        @map("table_no")
   memberId    Int?        @map("member_id")
   totalAmount Decimal     @map("total_amount") @db.Decimal(18, 2)
+  pointUsed   Int?        @default(0) @map("point_used")
   status      OrderStatus @default(PENDING)
   memo        String?     @db.Text
   createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
   completedAt DateTime?   @map("completed_at")
   cancelledAt DateTime?   @map("cancelled_at")
   member         Member?         @relation(fields: [memberId], references: [id])
   items          OrderItem[]
   payments       Payment[]
   stockMovements StockMovement[]
+  pointHistories PointHistory[]
 
   @@index([orderNumber])
   @@index([createdAt])
@@ -189,6 +192,7 @@ model Payment {
   vanCode        String?       @map("van_code") @db.VarChar(20)
   approvalNumber String?       @map("approval_number") @db.VarChar(50)
   transactionId  String?       @map("transaction_id") @db.VarChar(100)
+  paymentMethod  String?       @map("payment_method") @db.VarChar(30)
   errorCode      String?       @map("error_code") @db.VarChar(20)
   errorMessage   String?       @map("error_message") @db.VarChar(500)
   createdAt      DateTime      @default(now()) @map("created_at")
@@ -202,6 +206,8 @@ model Payment {
 enum PaymentType {
   CARD
   CASH
+  SIMPLE_PAY
+  POINT
   MIXED
 }
 
@@ -215,16 +221,19 @@ enum PaymentStatus {
 
 // 회원
 model Member {
-  id        Int         @id @default(autoincrement())
-  code      String      @unique @db.VarChar(20)
-  name      String      @db.VarChar(100)
-  phone     String      @db.VarChar(20)
-  points    Int         @default(0)
-  grade     MemberGrade @default(NORMAL)
-  isActive  Boolean     @default(true) @map("is_active")
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-  orders    Order[]
+  id            Int         @id @default(autoincrement())
+  code          String      @unique @db.VarChar(20)
+  name          String      @db.VarChar(100)
+  phone         String      @db.VarChar(20)
+  points        Int         @default(0)
+  totalEarned   Int         @default(0) @map("total_earned")
+  totalPurchase Int         @default(0) @map("total_purchase")
+  grade         MemberGrade @default(NORMAL)
+  isActive      Boolean     @default(true) @map("is_active")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  orders         Order[]
+  pointHistories PointHistory[]
 
   @@index([phone])
   @@map("members")
@@ -235,6 +244,33 @@ enum MemberGrade {
   SILVER
   GOLD
   VIP
+}
+
+// 포인트 이력
+model PointHistory {
+  id          Int       @id @default(autoincrement())
+  memberId    Int       @map("member_id")
+  type        PointType
+  amount      Int
+  balance     Int
+  orderId     String?   @map("order_id")
+  description String?   @db.VarChar(200)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  member      Member    @relation(fields: [memberId], references: [id])
+  order       Order?    @relation(fields: [orderId], references: [id])
+
+  @@index([memberId])
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("point_histories")
+}
+
+enum PointType {
+  EARN
+  USE
+  CANCEL
+  EXPIRE
+  ADJUST
 }
 
 // 관리자

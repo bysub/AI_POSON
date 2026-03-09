@@ -69,6 +69,17 @@ export const defaultSaleConfig: SettingsRecord = {
 
 // ─── 결제 정책 (ASIS: [Other] 카드/결제 + [Card] 공통 + [SuSu]) ───
 export const defaultPaymentConfig: SettingsRecord = {
+  // 결제 수단 on/off (Part 1)
+  cardEnabled: "1",
+  mobileEnabled: "1",
+  cashEnabled: "1",
+  scannerEnabled: "1",
+  applePayEnabled: "0",
+  foreignCardEnabled: "0",
+  paycoEnabled: "0",
+  wechatPayEnabled: "0",
+  alipayEnabled: "0",
+  storePointEnabled: "0",
   // 카드 결제 공통
   minCardPrice: "0",
   offCardCheck: "1",
@@ -119,6 +130,42 @@ export const defaultPointConfig: SettingsRecord = {
   noBillMessage: "0",
   noBillSound: "0",
   noBillCusPoint: "0",
+  // ── 포인트 적립 설정 ──
+  pointEarnEnabled: "0",
+  pointEarnType: "rate",
+  pointEarnRate: "1",
+  pointEarnFixed: "100",
+  pointEarnUnit: "1000",
+  pointEarnRound: "floor",
+  pointMinEarn: "1",
+  pointMinPurchase: "1000",
+  pointAutoEarn: "1",
+  // 등급별 차등 적립
+  pointGradeEnabled: "0",
+  pointGradeNormalRate: "1",
+  pointGradeSilverRate: "2",
+  pointGradeGoldRate: "3",
+  pointGradeVipRate: "5",
+  // 결제 수단별 적립
+  pointCardEarnEnabled: "1",
+  pointCashEarnEnabled: "1",
+  // ── 포인트 사용 설정 ──
+  pointUseEnabled: "0",
+  pointUseMinBalance: "1000",
+  pointUseMaxRate: "100",
+  pointUseSplitEnabled: "1",
+  pointUseSplitMethod: "card",
+  // ── 등급 변경 기준 ──
+  gradeAutoEnabled: "0",
+  gradeCriteria: "totalPoints",
+  gradeSilverThreshold: "10000",
+  gradeGoldThreshold: "50000",
+  gradeVipThreshold: "100000",
+  gradePeriod: "all",
+  gradeDownEnabled: "0",
+  // ── 포인트 만료 (향후) ──
+  pointExpireEnabled: "0",
+  pointExpireMonths: "12",
   // 고객 UI (키오스크)
   selfSoundGuide: "1",
   selfCusNum4: "1",
@@ -197,6 +244,19 @@ export const saleToggles: ToggleItem[] = [
   { key: "gridFix", title: "그리드 고정", desc: "테이블 컬럼 너비 고정" },
 ];
 
+export const paymentMethodToggles: ToggleItem[] = [
+  { key: "cardEnabled", title: "카드 결제", desc: "신용/체크카드 결제 허용" },
+  { key: "mobileEnabled", title: "간편결제", desc: "삼성페이, 카카오페이 등 모바일 결제" },
+  { key: "cashEnabled", title: "현금 결제", desc: "현금 결제 허용" },
+  { key: "scannerEnabled", title: "바코드/QR", desc: "바코드 또는 QR 스캔 결제" },
+  { key: "applePayEnabled", title: "애플페이", desc: "Apple Pay 결제 허용" },
+  { key: "foreignCardEnabled", title: "해외카드", desc: "해외 발급 카드 결제 허용" },
+  { key: "paycoEnabled", title: "페이코", desc: "PAYCO 결제 허용" },
+  { key: "wechatPayEnabled", title: "위챗페이", desc: "WeChat Pay 결제 허용" },
+  { key: "alipayEnabled", title: "알리페이", desc: "Alipay 결제 허용" },
+  { key: "storePointEnabled", title: "매장 포인트", desc: "매장 포인트 결제 허용" },
+];
+
 export const paymentToggles: ToggleItem[] = [
   { key: "offCardCheck", title: "오프라인 카드 결제", desc: "서버 미연결 시 카드 결제 허용" },
   { key: "offCardKeyUse", title: "오프라인 카드 키", desc: "오프라인 카드 키 사용" },
@@ -227,12 +287,30 @@ export const printToggles: ToggleItem[] = [
 ];
 
 export const pointToggles: ToggleItem[] = [
-  { key: "salePoint", title: "판매 포인트", desc: "판매 시 포인트 적립" },
+  { key: "salePoint", title: "판매 포인트 (레거시)", desc: "POS 판매 시 포인트 적립 (레거시)" },
   { key: "memberAddScreen", title: "회원 추가 화면", desc: "판매 시 회원 등록 화면" },
   { key: "gradeMemo", title: "등급 메모", desc: "회원 등급 메모 표시" },
   { key: "noBillMessage", title: "무영수증 메시지", desc: "무영수증 시 메시지 표시" },
   { key: "noBillSound", title: "무영수증 소리", desc: "무영수증 시 효과음" },
   { key: "noBillCusPoint", title: "무영수증 포인트", desc: "무영수증 시 포인트 적용" },
+];
+
+export const pointEarnToggles: ToggleItem[] = [
+  { key: "pointEarnEnabled", title: "포인트 적립", desc: "결제 완료 시 포인트 자동 적립" },
+  { key: "pointAutoEarn", title: "자동 적립 (키오스크)", desc: "키오스크에서 자동 포인트 적립" },
+  { key: "pointCardEarnEnabled", title: "카드 결제 적립", desc: "카드 결제 시 포인트 적립" },
+  { key: "pointCashEarnEnabled", title: "현금 결제 적립", desc: "현금 결제 시 포인트 적립" },
+  { key: "pointGradeEnabled", title: "등급별 차등 적립", desc: "회원 등급별 다른 적립률 적용" },
+];
+
+export const pointUseToggles: ToggleItem[] = [
+  { key: "pointUseEnabled", title: "포인트 사용", desc: "포인트로 결제 기능 활성화" },
+  { key: "pointUseSplitEnabled", title: "분할 결제 허용", desc: "포인트 + 카드/현금 분할 결제" },
+];
+
+export const gradeToggles: ToggleItem[] = [
+  { key: "gradeAutoEnabled", title: "자동 등급 변경", desc: "기준 충족 시 등급 자동 승급" },
+  { key: "gradeDownEnabled", title: "등급 하향 허용", desc: "기준 미달 시 등급 강등 허용" },
 ];
 
 export const selfUIToggles: ToggleItem[] = [

@@ -155,7 +155,7 @@ onUnmounted(() => {
     style="background: linear-gradient(to bottom, var(--theme-primary, #f87171), var(--theme-primary-hover, #ef4444))"
   >
     <!-- Top bar -->
-    <header class="flex items-center justify-between px-4 py-3">
+    <header class="flex items-center justify-between px-6 pb-2 pt-6">
       <span
         class="text-sm"
         style="color: var(--theme-primary-text, #fff); opacity: 0.8"
@@ -166,11 +166,13 @@ onUnmounted(() => {
       >POSON Kiosk</span>
     </header>
 
-    <!-- Main Content -->
-    <main
-      class="flex flex-1 flex-col"
+    <!-- Main + Footer wrapper (카드 스타일) -->
+    <div
+      class="mx-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-3xl"
       style="background: var(--theme-surface, #fff)"
     >
+    <!-- Main Content -->
+    <main class="flex flex-1 flex-col overflow-hidden">
       <!-- Step: 포인트 적립/사용 선택 -->
       <template v-if="currentStep === 'select'">
         <div class="flex flex-1 flex-col items-center justify-center px-8">
@@ -351,15 +353,14 @@ onUnmounted(() => {
 
     <!-- Footer -->
     <footer
-      class="flex gap-4 px-6 pb-6 pt-2"
-      style="background: var(--theme-surface, #fff)"
+      class="flex gap-4 px-6 pb-10 pt-2"
     >
       <button
         class="flex-1 rounded-xl border-2 py-4 text-base font-bold transition-colors"
         style="background: var(--theme-bg-secondary, #f3f4f6); color: var(--theme-text-secondary, #64748b); border-color: var(--theme-primary, #ef4444)"
         @click="goBack"
       >
-        {{ currentStep === "select" ? t("common.cancel") : t("common.back") }}
+        {{ t("orderConfirm.goBack") }}
       </button>
       <template v-if="currentStep === 'phone-input'">
         <button
@@ -381,6 +382,7 @@ onUnmounted(() => {
         </button>
       </template>
     </footer>
+    </div>
   </div>
 </template>
 <style>

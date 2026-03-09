@@ -174,6 +174,24 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/admin/StatsProductsView.vue"),
         meta: { title: "상품통계", requiresAuth: true },
       },
+      {
+        path: "stats/profit",
+        name: "AdminStatsProfit",
+        component: () => import("@/views/admin/StatsProfitView.vue"),
+        meta: { title: "손익분석", requiresAuth: true },
+      },
+      {
+        path: "stats/payment",
+        name: "AdminStatsPayment",
+        component: () => import("@/views/admin/StatsPaymentView.vue"),
+        meta: { title: "결제수단 통계", requiresAuth: true },
+      },
+      {
+        path: "stats/member",
+        name: "AdminStatsMember",
+        component: () => import("@/views/admin/StatsMemberView.vue"),
+        meta: { title: "회원/포인트 통계", requiresAuth: true },
+      },
 
       // 설정
       {

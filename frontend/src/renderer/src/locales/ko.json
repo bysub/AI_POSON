@@ -9,7 +9,8 @@
     "back": "뒤로",
     "next": "다음",
     "close": "닫기",
-    "currency": "원"
+    "currency": "원",
+    "won": "원"
   },
   "welcome": {
     "title": "환영합니다",
@@ -52,7 +53,7 @@
   "payment": {
     "title": "결제",
     "yourOrder": "주문 내역",
-    "selectMethod": "결제 수단을 선택하세요",
+    "selectMethod": "결제수단을 선택해주세요.",
     "paymentMethod": "결제 수단",
     "card": "카드 결제",
     "cardDesc": "신용카드, 체크카드",
@@ -62,6 +63,18 @@
     "mobilePayDesc": "삼성페이, 카카오페이",
     "scanner": "바코드/QR",
     "scannerDesc": "포인트, 쿠폰, QR코드",
+    "applePay": "애플페이",
+    "applePayDesc": "Apple Pay",
+    "foreignCard": "지역·해외 카드",
+    "foreignCardDesc": "해외 발급 카드, 지역화폐",
+    "payco": "페이코",
+    "paycoDesc": "PAYCO 결제",
+    "wechatPay": "위쳇페이",
+    "wechatPayDesc": "WeChat Pay",
+    "alipay": "알리페이",
+    "alipayDesc": "Alipay 결제",
+    "storePoint": "매장 포인트",
+    "storePointDesc": "적립 포인트 사용",
     "processing": "결제 처리 중...",
     "insertCard": "카드를 삽입하거나 터치해주세요",
     "enterCash": "현금을 투입해주세요",
@@ -74,7 +87,24 @@
     "secureCheckout": "안전한 결제 · 암호화된 거래",
     "offline": "오프라인",
     "orderCreateFailed": "주문 생성에 실패했습니다",
-    "scannerNotReady": "스캐너 결제는 준비 중입니다"
+    "scannerNotReady": "스캐너 결제는 준비 중입니다",
+    "point": {
+      "loading": "포인트 정보를 불러오는 중...",
+      "loadError": "포인트 정보를 불러올 수 없습니다",
+      "memberSuffix": "님",
+      "currentBalance": "보유 포인트",
+      "orderAmount": "결제 금액",
+      "pointDeduct": "포인트 차감",
+      "remainingAmount": "잔액 결제",
+      "payFull": "포인트 전액 결제",
+      "paySplit": "{point}P 사용 + {remaining}원 추가 결제",
+      "otherMethod": "다른 결제 수단 선택",
+      "insufficient": "포인트가 부족합니다",
+      "minRequired": "최소 {min}P 이상 보유 시 사용 가능",
+      "payError": "포인트 결제에 실패했습니다",
+      "splitError": "포인트 차감에 실패했습니다",
+      "loginRequired": "포인트 결제는 회원 인증이 필요합니다"
+    }
   },
   "orderConfirm": {
     "headerTitle": "구매내역을 확인해주세요.",
@@ -109,7 +139,10 @@
     "printingReceipt": "영수증 출력 중...",
     "returnToHome": "처음으로",
     "autoReset": "{seconds}초 후 자동으로 초기화됩니다",
-    "approvalNumber": "승인번호"
+    "approvalNumber": "승인번호",
+    "earnedPoints": "적립 포인트",
+    "remainingPoints": "잔여 포인트",
+    "gradeUp": "등급 UP!"
   },
   "point": {
     "purchaseInProgress": "구매 진행 중",
@@ -143,7 +176,9 @@
     "completed": "결제가 완료되었습니다",
     "timeout": "결제 시간이 초과되었습니다.",
     "timeoutShort": "결제 시간 초과",
-    "declined": "카드가 거부되었습니다. 다른 카드를 사용해주세요."
+    "declined": "카드가 거부되었습니다. 다른 카드를 사용해주세요.",
+    "tapNfc": "리더기에 휴대폰을 터치해주세요",
+    "insertForeignCard": "해외카드를 삽입하거나 터치해주세요"
   },
   "cashPayment": {
     "amount": "결제 금액",
@@ -245,5 +280,30 @@
       "idleWarning": "화면을 터치하지 않으면 {seconds}초 후 처음으로 돌아갑니다.",
       "settingsOpened": "접근성 설정 화면입니다."
     }
+  },
+  "stats": {
+    "totalSales": "총 매출액",
+    "orderCount": "주문 건수",
+    "avgOrderAmount": "평균 주문 금액",
+    "dailyAvg": "일평균 매출",
+    "totalPurchase": "총 매입액",
+    "purchaseCount": "매입 건수",
+    "avgPurchase": "평균 매입 단가",
+    "noData": "해당 기간의 데이터가 없습니다",
+    "refresh": "새로고침",
+    "search": "조회",
+    "weekly": "주간",
+    "monthly": "월간",
+    "yearly": "연간",
+    "dailyTrend": "일별 매출 추이",
+    "hourlyTrend": "시간대별 매출",
+    "orderStatusRatio": "주문 상태 비율",
+    "bestSellers": "베스트셀러 TOP 10",
+    "categoryRatio": "카테고리별 매출 비율",
+    "purchaseTrend": "기간별 매입 추이",
+    "supplierRatio": "거래처별 매입 비율",
+    "salesAmount": "매출액",
+    "purchaseAmount": "매입액",
+    "quantity": "판매수량"
   }
 }

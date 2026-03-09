@@ -15,6 +15,7 @@ import { devicesRouter } from "./devices.js";
 import { adminsRouter } from "./admins.js";
 import { membersRouter } from "./members.js";
 import { stockMovementsRouter } from "./stock-movements.js";
+import { statsRouter } from "./stats.js";
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use("/v1/devices", devicesRouter);
 router.use("/v1/admins", adminsRouter);
 router.use("/v1/members", membersRouter);
 router.use("/v1/stock-movements", stockMovementsRouter);
+router.use("/v1/stats", statsRouter);
 
 export { router as apiRouter };

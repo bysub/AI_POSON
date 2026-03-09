@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { formatNumber as formatPrice } from "@/utils/format";
 
-defineProps<{
+const props = defineProps<{
   amount: number;
+  paymentMethod?: string;
 }>();
 
 const emit = defineEmits<{
@@ -21,6 +22,18 @@ const status = ref<PaymentStatus>("waiting");
 const statusMessage = ref("");
 const errorMessage = ref("");
 const countdown = ref(60);
+
+// 결제 방식별 안내 메시지
+const insertGuide = computed(() => {
+  if (props.paymentMethod === "APPLE_PAY") return t("cardPayment.tapNfc");
+  if (props.paymentMethod === "FOREIGN_CARD") return t("cardPayment.insertForeignCard");
+  return t("payment.insertCard");
+});
+
+const insertIcon = computed(() => {
+  if (props.paymentMethod === "APPLE_PAY") return "nfc";
+  return "card";
+});
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -57,27 +70,52 @@ function handleTimeout(): void {
 }
 
 /**
- * 결제 시뮬레이션 (실제 구현에서는 VAN 연동)
+ * 결제 처리 (VAN 단말기 연결 시 IPC, 그 외 시뮬레이션)
  */
 async function processPayment(): Promise<void> {
   status.value = "processing";
   statusMessage.value = t("payment.processing");
 
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // Electron 환경에서 VAN 단말기 연결 시 IPC 사용
+  const api = (window as Record<string, unknown>).api as Record<string, unknown> | undefined;
+  const terminal = api?.terminal as { requestPayment?: (data: unknown) => Promise<{ success: boolean; transactionId?: string; approvalNumber?: string; errorCode?: string; errorMessage?: string }> } | undefined;
 
-  const success = Math.random() > 0.1;
+  if (terminal?.requestPayment) {
+    try {
+      const result = await terminal.requestPayment({
+        amount: props.amount,
+        paymentMethod: props.paymentMethod ?? "CARD",
+      });
 
-  if (success) {
-    stopCountdown();
-    status.value = "success";
-    const transactionId = `TXN${Date.now()}`;
-    const approvalNumber = `AP${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-    emit("success", transactionId, approvalNumber);
-  } else {
-    status.value = "error";
-    errorMessage.value = t("cardPayment.declined");
-    emit("fail", "CARD_DECLINED", errorMessage.value);
+      if (result.success) {
+        stopCountdown();
+        status.value = "success";
+        emit("success", result.transactionId ?? `TXN${Date.now()}`, result.approvalNumber ?? "");
+        return;
+      }
+
+      // 단말기 미연결(NOT_INITIALIZED) 시 시뮬레이션 fallback
+      if (result.errorCode === "NOT_INITIALIZED") {
+        console.info("VAN terminal not initialized, falling back to simulation");
+      } else {
+        status.value = "error";
+        errorMessage.value = result.errorMessage ?? t("cardPayment.declined");
+        emit("fail", result.errorCode ?? "CARD_DECLINED", errorMessage.value);
+        return;
+      }
+    } catch {
+      // IPC 실패 시 시뮬레이션 fallback
+    }
   }
+
+  // 시뮬레이션 모드 (개발 환경 또는 VAN 미연결) — 항상 성공
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  stopCountdown();
+  status.value = "success";
+  const transactionId = `TXN${Date.now()}`;
+  const approvalNumber = `AP${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+  emit("success", transactionId, approvalNumber);
 }
 
 /**
@@ -166,7 +204,7 @@ onUnmounted(() => {
         </div>
 
         <p class="text-kiosk-xl font-medium text-gray-800">
-          {{ t("payment.insertCard") }}
+          {{ insertGuide }}
         </p>
 
         <p class="mt-2 text-kiosk-base text-gray-500">

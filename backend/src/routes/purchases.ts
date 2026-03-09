@@ -40,6 +40,46 @@ router.get("/stats/summary", authenticate, asyncHandler(async (req, res) => {
   res.json({ success: true, data });
 }));
 
+// 일별 매입 통계
+router.get("/stats/daily", authenticate, asyncHandler(async (req, res, next) => {
+  const { startDate, endDate } = req.query;
+  if (!startDate || !endDate) {
+    return next(new AppError(400, "startDate, endDate는 필수입니다", "VALIDATION_ERROR"));
+  }
+  const data = await purchaseService.getDailyStats({
+    startDate: startDate as string,
+    endDate: endDate as string,
+  });
+  res.json({ success: true, data });
+}));
+
+// 거래처별 매입 통계
+router.get("/stats/by-supplier", authenticate, asyncHandler(async (req, res, next) => {
+  const { startDate, endDate } = req.query;
+  if (!startDate || !endDate) {
+    return next(new AppError(400, "startDate, endDate는 필수입니다", "VALIDATION_ERROR"));
+  }
+  const data = await purchaseService.getBySupplierStats({
+    startDate: startDate as string,
+    endDate: endDate as string,
+  });
+  res.json({ success: true, data });
+}));
+
+// 상품별 매입 통계
+router.get("/stats/by-product", authenticate, asyncHandler(async (req, res, next) => {
+  const { startDate, endDate, limit } = req.query;
+  if (!startDate || !endDate) {
+    return next(new AppError(400, "startDate, endDate는 필수입니다", "VALIDATION_ERROR"));
+  }
+  const data = await purchaseService.getByProductStats({
+    startDate: startDate as string,
+    endDate: endDate as string,
+    limit: limit ? parseInt(limit as string, 10) : undefined,
+  });
+  res.json({ success: true, data });
+}));
+
 // Get purchase by ID
 router.get("/:id", authenticate, asyncHandler(async (req, res, next) => {
   const id = parseInt(req.params.id);

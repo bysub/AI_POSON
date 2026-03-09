@@ -20,6 +20,13 @@ const approvalNumber = computed(() => routeState.approvalNumber ?? "");
 const changeAmount = computed(() => {
   return routeState.change ? parseInt(routeState.change, 10) : 0;
 });
+const earnedPoints = computed(() => {
+  return routeState.earnedPoints ? parseInt(routeState.earnedPoints, 10) : 0;
+});
+const newBalance = computed(() => {
+  return routeState.newBalance ? parseInt(routeState.newBalance, 10) : 0;
+});
+const gradeChanged = computed(() => routeState.gradeChanged === "1");
 
 // 주문 번호 (서버에서 받은 것 또는 임시 생성)
 const orderNumber = computed(() => {
@@ -169,6 +176,35 @@ onUnmounted(() => {
           style="color: var(--theme-primary, #ef4444)"
         >
           {{ formatPrice(changeAmount) }}
+        </p>
+      </div>
+
+      <!-- Point Earned -->
+      <div
+        v-if="earnedPoints > 0"
+        class="mb-4 rounded-xl px-6 py-3 shadow-sm"
+        style="background: color-mix(in srgb, var(--theme-surface, #fff) 80%, transparent)"
+      >
+        <p
+          class="text-xs font-medium"
+          style="color: var(--theme-text-muted, #94a3b8)"
+        >
+          {{ t("complete.earnedPoints") }}
+        </p>
+        <p
+          class="text-lg font-bold"
+          style="color: var(--theme-primary, #ef4444)"
+        >
+          +{{ earnedPoints.toLocaleString() }}P
+        </p>
+        <p
+          class="text-xs"
+          style="color: var(--theme-text-secondary, #64748b)"
+        >
+          {{ t("complete.remainingPoints") }}: {{ newBalance.toLocaleString() }}P
+          <span v-if="gradeChanged" class="ml-1 font-bold" style="color: var(--theme-primary, #ef4444)">
+            {{ t("complete.gradeUp") }}
+          </span>
         </p>
       </div>
 

@@ -15,9 +15,13 @@ import {
   defaultSystemConfig,
   defaultAccessibilityConfig,
   saleToggles,
+  paymentMethodToggles,
   paymentToggles,
   printToggles,
   pointToggles,
+  pointEarnToggles,
+  pointUseToggles,
+  gradeToggles,
   selfUIToggles,
   systemToggles,
   accessibilityToggles,
@@ -346,6 +350,18 @@ onMounted(() => {
           ASIS: INI [Other] 카드/결제 + [Card] 공통 + [SuSu] (전 기기 공유)
         </p>
 
+        <!-- 결제 수단 on/off -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          결제 수단 활성화
+        </h4>
+        <div class="mb-6">
+          <ToggleGrid
+            :items="paymentMethodToggles"
+            :config="paymentConfig"
+            @toggle="(k) => toggleValue(paymentConfig, k)"
+          />
+        </div>
+
         <!-- 카드 결제 -->
         <h4 class="mb-3 text-sm font-semibold text-slate-600">
           카드/결제 정책
@@ -506,6 +522,248 @@ onMounted(() => {
             :config="pointConfig"
             @toggle="(k) => toggleValue(pointConfig, k)"
           />
+        </div>
+
+        <!-- 포인트 적립 설정 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          포인트 적립 설정
+        </h4>
+        <div class="mb-4">
+          <ToggleGrid
+            :items="pointEarnToggles"
+            :config="pointConfig"
+            @toggle="(k) => toggleValue(pointConfig, k)"
+          />
+        </div>
+        <div class="mb-6 grid gap-5 md:grid-cols-3">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">적립 방식</label>
+            <select
+              v-model="pointConfig.pointEarnType"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="rate">비율 (%)</option>
+              <option value="fixed">정액</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">적립 비율 (%)</label>
+            <input
+              v-model="pointConfig.pointEarnRate"
+              type="number"
+              min="0"
+              max="100"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">정액 적립 (P)</label>
+            <input
+              v-model="pointConfig.pointEarnFixed"
+              type="number"
+              min="0"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">적립 기준 단위 (원)</label>
+            <input
+              v-model="pointConfig.pointEarnUnit"
+              type="number"
+              min="1"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+            <p class="mt-1 text-xs text-slate-400">N원 단위로 절사 후 적립 계산</p>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">적립 절사 방식</label>
+            <select
+              v-model="pointConfig.pointEarnRound"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="floor">내림</option>
+              <option value="round">반올림</option>
+              <option value="ceil">올림</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">최소 적립 포인트</label>
+            <input
+              v-model="pointConfig.pointMinEarn"
+              type="number"
+              min="0"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">적립 최소 결제금액 (원)</label>
+            <input
+              v-model="pointConfig.pointMinPurchase"
+              type="number"
+              min="0"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+        </div>
+
+        <!-- 등급별 차등 적립률 -->
+        <div
+          v-if="pointConfig.pointGradeEnabled === '1'"
+          class="mb-6"
+        >
+          <h4 class="mb-3 text-sm font-semibold text-slate-600">등급별 적립률 (%)</h4>
+          <div class="grid gap-5 md:grid-cols-4">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">일반</label>
+              <input
+                v-model="pointConfig.pointGradeNormalRate"
+                type="number"
+                min="0"
+                max="100"
+                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">실버</label>
+              <input
+                v-model="pointConfig.pointGradeSilverRate"
+                type="number"
+                min="0"
+                max="100"
+                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">골드</label>
+              <input
+                v-model="pointConfig.pointGradeGoldRate"
+                type="number"
+                min="0"
+                max="100"
+                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">VIP</label>
+              <input
+                v-model="pointConfig.pointGradeVipRate"
+                type="number"
+                min="0"
+                max="100"
+                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- 포인트 사용 설정 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          포인트 사용 설정
+        </h4>
+        <div class="mb-4">
+          <ToggleGrid
+            :items="pointUseToggles"
+            :config="pointConfig"
+            @toggle="(k) => toggleValue(pointConfig, k)"
+          />
+        </div>
+        <div class="mb-6 grid gap-5 md:grid-cols-3">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">최소 사용 포인트</label>
+            <input
+              v-model="pointConfig.pointUseMinBalance"
+              type="number"
+              min="0"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">최대 사용 비율 (%)</label>
+            <input
+              v-model="pointConfig.pointUseMaxRate"
+              type="number"
+              min="0"
+              max="100"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+            <p class="mt-1 text-xs text-slate-400">결제 금액의 N%까지 사용 가능</p>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">잔액 결제 수단</label>
+            <select
+              v-model="pointConfig.pointUseSplitMethod"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="card">카드</option>
+              <option value="cash">현금</option>
+              <option value="select">고객 선택</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 등급 자동 변경 설정 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          등급 변경 기준
+        </h4>
+        <div class="mb-4">
+          <ToggleGrid
+            :items="gradeToggles"
+            :config="pointConfig"
+            @toggle="(k) => toggleValue(pointConfig, k)"
+          />
+        </div>
+        <div
+          v-if="pointConfig.gradeAutoEnabled === '1'"
+          class="mb-6 grid gap-5 md:grid-cols-3"
+        >
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">등급 기준</label>
+            <select
+              v-model="pointConfig.gradeCriteria"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="totalPoints">누적 포인트</option>
+              <option value="totalPurchase">누적 구매액</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">실버 기준</label>
+            <input
+              v-model="pointConfig.gradeSilverThreshold"
+              type="number"
+              min="0"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">골드 기준</label>
+            <input
+              v-model="pointConfig.gradeGoldThreshold"
+              type="number"
+              min="0"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">VIP 기준</label>
+            <input
+              v-model="pointConfig.gradeVipThreshold"
+              type="number"
+              min="0"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">산정 기간</label>
+            <select
+              v-model="pointConfig.gradePeriod"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="all">전체 기간</option>
+              <option value="year">최근 1년</option>
+              <option value="month6">최근 6개월</option>
+            </select>
+          </div>
         </div>
 
         <!-- 고객 UI (키오스크) -->

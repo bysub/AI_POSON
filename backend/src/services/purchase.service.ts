@@ -165,6 +165,118 @@ export class PurchaseService {
     };
   }
 
+  /** 일별 매입 집계 */
+  async getDailyStats(filters: { startDate: string; endDate: string }) {
+    const start = new Date(`${filters.startDate}T00:00:00+09:00`);
+    const end = new Date(`${filters.endDate}T23:59:59.999+09:00`);
+
+    const purchases = await prisma.purchase.findMany({
+      where: {
+        status: { not: "CANCELLED" },
+        purchaseDate: { gte: start, lte: end },
+      },
+      select: { purchaseDate: true, totalAmount: true },
+    });
+
+    // KST 기준 날짜 키 생성 (UTC → KST +9h)
+    const toKstDateKey = (d: Date) => {
+      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      return kst.toISOString().split("T")[0];
+    };
+
+    const dailyMap = new Map<string, { count: number; totalAmount: number }>();
+    const cursorDate = new Date(`${filters.startDate}T00:00:00+09:00`);
+    const endDate = new Date(`${filters.endDate}T00:00:00+09:00`);
+    while (cursorDate <= endDate) {
+      dailyMap.set(toKstDateKey(cursorDate), { count: 0, totalAmount: 0 });
+      cursorDate.setDate(cursorDate.getDate() + 1);
+    }
+
+    for (const p of purchases) {
+      const dateKey = toKstDateKey(p.purchaseDate);
+      const current = dailyMap.get(dateKey);
+      if (current) {
+        current.count++;
+        current.totalAmount += Number(p.totalAmount);
+      }
+    }
+
+    return Array.from(dailyMap.entries())
+      .map(([date, stats]) => ({ date, ...stats }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  /** 거래처별 매입 집계 */
+  async getBySupplierStats(filters: { startDate: string; endDate: string }) {
+    const start = new Date(`${filters.startDate}T00:00:00+09:00`);
+    const end = new Date(`${filters.endDate}T23:59:59.999+09:00`);
+
+    const result = await prisma.purchase.groupBy({
+      by: ["supplierId"],
+      where: {
+        status: { not: "CANCELLED" },
+        purchaseDate: { gte: start, lte: end },
+      },
+      _count: true,
+      _sum: { totalAmount: true },
+    });
+
+    // 거래처명 매핑
+    const supplierIds = result.map((r) => r.supplierId);
+    const suppliers = await prisma.supplier.findMany({
+      where: { id: { in: supplierIds } },
+      select: { id: true, name: true },
+    });
+    const supplierMap = new Map(suppliers.map((s) => [s.id, s.name]));
+
+    return result
+      .map((r) => ({
+        supplierId: r.supplierId,
+        supplierName: supplierMap.get(r.supplierId) ?? "-",
+        count: r._count,
+        totalAmount: Number(r._sum.totalAmount ?? 0),
+      }))
+      .sort((a, b) => b.totalAmount - a.totalAmount);
+  }
+
+  /** 상품별 매입 통계 */
+  async getByProductStats(filters: { startDate: string; endDate: string; limit?: number }) {
+    const start = new Date(`${filters.startDate}T00:00:00+09:00`);
+    const end = new Date(`${filters.endDate}T23:59:59.999+09:00`);
+    const limit = filters.limit ?? 20;
+
+    const result = await prisma.purchaseItem.groupBy({
+      by: ["purchaseProductId"],
+      where: {
+        purchase: {
+          status: { not: "CANCELLED" },
+          purchaseDate: { gte: start, lte: end },
+        },
+      },
+      _sum: { quantity: true, amount: true },
+      _count: true,
+    });
+
+    const productIds = result.map((r) => r.purchaseProductId);
+    const products = await prisma.purchaseProduct.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, name: true, barcode: true },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    return result
+      .map((r) => ({
+        purchaseProductId: r.purchaseProductId,
+        productName: productMap.get(r.purchaseProductId)?.name ?? "-",
+        barcode: productMap.get(r.purchaseProductId)?.barcode ?? "-",
+        totalQuantity: r._sum.quantity ?? 0,
+        totalAmount: Number(r._sum.amount ?? 0),
+        count: r._count,
+      }))
+      .sort((a, b) => b.totalAmount - a.totalAmount)
+      .slice(0, limit);
+  }
+
   /** 매입 상세 조회 */
   async getById(id: number) {
     return prisma.purchase.findUnique({

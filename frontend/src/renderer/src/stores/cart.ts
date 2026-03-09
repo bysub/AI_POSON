@@ -105,13 +105,26 @@ export const useCartStore = defineStore("cart", () => {
     orderError.value = null;
 
     try {
-      const orderItems = items.value.map((item) => ({
-        productId: item.productId,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        options: item.options ?? null,
-      }));
+      const orderItems = items.value.map((item) => {
+        // options를 백엔드 형식으로 변환: { key: { id, name, price } } → [{ optionId, quantity }]
+        let optionsArray: { optionId: number; quantity?: number }[] | undefined;
+        if (item.options && typeof item.options === "object") {
+          const entries = Object.values(item.options) as { id?: number; quantity?: number }[];
+          optionsArray = entries
+            .filter((opt) => opt && typeof opt.id === "number")
+            .map((opt) => ({
+              optionId: opt.id!,
+              ...(opt.quantity != null && opt.quantity > 1 ? { quantity: opt.quantity } : {}),
+            }));
+          if (optionsArray.length === 0) optionsArray = undefined;
+        }
+
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+          options: optionsArray,
+        };
+      });
 
       const settingsStore = useSettingsStore();
       const resolvedKioskId = (params?.kioskId ?? settingsStore.deviceId) || "KIOSK-001";
@@ -119,9 +132,9 @@ export const useCartStore = defineStore("cart", () => {
       const response = await apiClient.post<{ success: boolean; data: Order }>("/api/v1/orders", {
         items: orderItems,
         kioskId: resolvedKioskId,
-        orderType: params?.orderType ?? null,
-        tableNo: params?.tableNo ?? null,
-        memberId: params?.memberId ?? null,
+        orderType: params?.orderType ?? undefined,
+        tableNo: params?.tableNo ?? undefined,
+        memberId: params?.memberId ?? undefined,
       });
 
       if (response.data.success) {

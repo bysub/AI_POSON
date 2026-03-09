@@ -14,9 +14,30 @@ interface Member {
   createdAt: string;
 }
 
+interface PointHistory {
+  id: number;
+  type: string;
+  amount: number;
+  balance: number;
+  orderId: string | null;
+  description: string | null;
+  createdAt: string;
+}
+
 const members = ref<Member[]>([]);
 const isLoading = ref(false);
 const searchQuery = ref("");
+
+// 포인트 이력 모달
+const showPointModal = ref(false);
+const pointMember = ref<Member | null>(null);
+const pointHistories = ref<PointHistory[]>([]);
+const pointLoading = ref(false);
+
+// 포인트 조정
+const adjustAmount = ref(0);
+const adjustDesc = ref("");
+const adjusting = ref(false);
 
 // 모달
 const showModal = ref(false);
@@ -102,8 +123,64 @@ async function deleteMember(m: Member): Promise<void> {
   }
 }
 
+const pointTypeLabels: Record<string, string> = {
+  EARN: "적립",
+  USE: "사용",
+  CANCEL: "취소",
+  EXPIRE: "만료",
+  ADJUST: "조정",
+};
+const pointTypeColors: Record<string, string> = {
+  EARN: "text-green-600",
+  USE: "text-red-600",
+  CANCEL: "text-orange-600",
+  EXPIRE: "text-slate-400",
+  ADJUST: "text-indigo-600",
+};
+
+async function openPointHistory(m: Member): Promise<void> {
+  pointMember.value = m;
+  showPointModal.value = true;
+  pointLoading.value = true;
+  adjustAmount.value = 0;
+  adjustDesc.value = "";
+  try {
+    const res = await apiClient.get<{ success: boolean; data: PointHistory[] }>(
+      `/api/v1/members/${m.id}/point-histories`,
+    );
+    if (res.data.success) pointHistories.value = res.data.data;
+  } catch {
+    pointHistories.value = [];
+  } finally {
+    pointLoading.value = false;
+  }
+}
+
+async function adjustPoints(): Promise<void> {
+  if (!pointMember.value || adjustAmount.value === 0) return;
+  adjusting.value = true;
+  try {
+    await apiClient.post(`/api/v1/members/${pointMember.value.id}/points/adjust`, {
+      amount: adjustAmount.value,
+      description: adjustDesc.value,
+    });
+    adjustAmount.value = 0;
+    adjustDesc.value = "";
+    await openPointHistory(pointMember.value);
+    await loadMembers();
+  } catch (err: unknown) {
+    showApiError(err, "포인트 조정에 실패했습니다");
+  } finally {
+    adjusting.value = false;
+  }
+}
+
 function formatNumber(n: number): string {
   return n.toLocaleString("ko-KR");
+}
+
+function formatDate(d: string): string {
+  return new Date(d).toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
 onMounted(() => loadMembers());
@@ -233,6 +310,15 @@ onMounted(() => loadMembers());
             <td class="px-5 py-3 text-center">
               <div class="flex items-center justify-center gap-1">
                 <button
+                  class="rounded-lg p-1.5 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600"
+                  title="포인트 이력"
+                  @click="openPointHistory(m)"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+                <button
                   class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-indigo-600"
                   @click="openEditModal(m)"
                 >
@@ -342,6 +428,97 @@ onMounted(() => loadMembers());
             @click="saveMember"
           >
             {{ isEditing ? "수정" : "등록" }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Point History Modal -->
+    <div
+      v-if="showPointModal && pointMember"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      @click.self="showPointModal = false"
+    >
+      <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-slate-800">
+            {{ pointMember.name }} - 포인트 이력
+          </h3>
+          <span class="text-lg font-bold text-indigo-600">
+            {{ formatNumber(pointMember.points) }}P
+          </span>
+        </div>
+
+        <!-- 포인트 조정 -->
+        <div class="mb-4 flex items-end gap-2 rounded-xl bg-slate-50 p-3">
+          <div class="flex-1">
+            <label class="mb-1 block text-xs font-medium text-slate-600">조정 포인트</label>
+            <input
+              v-model.number="adjustAmount"
+              type="number"
+              placeholder="+적립 / -차감"
+              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+            />
+          </div>
+          <div class="flex-1">
+            <label class="mb-1 block text-xs font-medium text-slate-600">사유</label>
+            <input
+              v-model="adjustDesc"
+              type="text"
+              placeholder="조정 사유"
+              class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+            />
+          </div>
+          <button
+            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            :disabled="adjustAmount === 0 || adjusting"
+            @click="adjustPoints"
+          >
+            적용
+          </button>
+        </div>
+
+        <!-- 이력 리스트 -->
+        <div v-if="pointLoading" class="flex justify-center py-8">
+          <div class="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+        </div>
+        <div v-else-if="pointHistories.length === 0" class="py-8 text-center text-sm text-slate-400">
+          포인트 이력이 없습니다
+        </div>
+        <div v-else class="max-h-72 overflow-y-auto">
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 bg-white">
+              <tr class="border-b border-slate-100">
+                <th class="px-3 py-2 text-left text-xs font-medium text-slate-500">일시</th>
+                <th class="px-3 py-2 text-center text-xs font-medium text-slate-500">유형</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-slate-500">포인트</th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-slate-500">잔액</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-slate-500">설명</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              <tr v-for="h in pointHistories" :key="h.id">
+                <td class="px-3 py-2 text-slate-500">{{ formatDate(h.createdAt) }}</td>
+                <td class="px-3 py-2 text-center">
+                  <span class="text-xs font-medium" :class="pointTypeColors[h.type]">
+                    {{ pointTypeLabels[h.type] ?? h.type }}
+                  </span>
+                </td>
+                <td class="px-3 py-2 text-right font-medium" :class="h.type === 'USE' || h.type === 'EXPIRE' ? 'text-red-600' : 'text-green-600'">
+                  {{ h.type === 'USE' || h.type === 'EXPIRE' ? '-' : '+' }}{{ formatNumber(h.amount) }}
+                </td>
+                <td class="px-3 py-2 text-right text-slate-600">{{ formatNumber(h.balance) }}P</td>
+                <td class="px-3 py-2 text-slate-500 truncate max-w-[120px]">{{ h.description ?? '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex justify-end">
+          <button
+            class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            @click="showPointModal = false"
+          >
+            닫기
           </button>
         </div>
       </div>

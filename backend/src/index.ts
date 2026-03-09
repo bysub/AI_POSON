@@ -11,6 +11,7 @@ import { apiRouter } from "./routes/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { logger } from "./utils/logger.js";
 import { prisma } from "./utils/db.js";
+import { orderService } from "./services/order.service.js";
 
 const app = express();
 
@@ -28,12 +29,17 @@ app.use(
         callback(null, true);
         return;
       }
-      // S-3: config에서 허용 origin 목록 참조, 비허용 시 에러
+      // 허용 목록 확인
       if (config.cors.origin.includes(origin)) {
         callback(null, true);
-      } else {
-        callback(new Error(`CORS: Origin '${origin}' is not allowed`));
+        return;
       }
+      // 개발 환경: 로컬 네트워크 IP 자동 허용 (192.168.x.x, 10.x.x.x)
+      if (config.env !== "production" && /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|localhost)/.test(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS: Origin '${origin}' is not allowed`));
     },
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -124,6 +130,15 @@ process.on("SIGTERM", shutdown);
 // Start server
 app.listen(config.port, () => {
   logger.info(`Server running on port ${config.port} in ${config.env} mode`);
+
+  // 분할 결제 타임아웃 보호 배치 (5분 주기)
+  setInterval(async () => {
+    try {
+      await orderService.recoverStaleSplitPayments();
+    } catch (err) {
+      logger.error({ error: err instanceof Error ? err.message : String(err) }, "Split payment recovery batch failed");
+    }
+  }, 5 * 60 * 1000);
 });
 
 export { app };

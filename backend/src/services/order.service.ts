@@ -5,6 +5,8 @@ import { prisma } from "../utils/db.js";
 import { logger } from "../utils/logger.js";
 import { cacheService, CACHE_KEYS } from "../utils/cache.js";
 import { createStockMovement } from "../routes/stock-movements.js";
+import { MemberService } from "./member.service.js";
+import { SettingService } from "./setting.service.js";
 
 type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 
@@ -27,6 +29,9 @@ export interface CreateOrderInput {
 export interface UpdateStatusInput {
   status: OrderStatus;
   paymentType?: string;
+  paymentMethod?: string;
+  approvalNumber?: string;
+  transactionId?: string;
   receivedAmount?: number;
 }
 
@@ -231,7 +236,7 @@ export class OrderService {
    * 주문 상태 변경 (재고 차감/복구 포함)
    */
   async updateStatus(orderId: string, input: UpdateStatusInput) {
-    const { status: newStatus, paymentType, receivedAmount } = input;
+    const { status: newStatus, paymentType, paymentMethod, approvalNumber, transactionId, receivedAmount } = input;
 
     if (!VALID_STATUSES.includes(newStatus)) {
       throw new OrderError(400, "Invalid status", "INVALID_STATUS");
@@ -249,28 +254,137 @@ export class OrderService {
       return existing;
     }
 
+    // 설정 미리 조회 (트랜잭션 밖) — 포인트 적립/환수 + 결제 수단 검증
+    const settings = (newStatus === "PAID" || existing.memberId)
+      ? await SettingService.findAll()
+      : {};
+
+    // PAID 전환 시 결제 수단 활성화 검증 (설정 변조 방지)
+    if (newStatus === "PAID" && paymentType) {
+      const paymentMethodSettingMap: Record<string, string> = {
+        CARD: "payment.cardEnabled",
+        CASH: "payment.cashEnabled",
+        POINT: "payment.storePointEnabled",
+      };
+
+      const simplePayMethodMap: Record<string, string> = {
+        SAMSUNG_PAY: "payment.mobileEnabled",
+        APPLE_PAY: "payment.applePayEnabled",
+        PAYCO: "payment.paycoEnabled",
+        WECHAT_PAY: "payment.wechatPayEnabled",
+        ALIPAY: "payment.alipayEnabled",
+        QR_PAY: "payment.scannerEnabled",
+        FOREIGN_CARD: "payment.foreignCardEnabled",
+      };
+
+      let settingKey = paymentMethodSettingMap[paymentType];
+      if (paymentType === "SIMPLE_PAY" && paymentMethod) {
+        settingKey = simplePayMethodMap[paymentMethod] || "payment.mobileEnabled";
+      }
+
+      if (settingKey && settings[settingKey] === "0") {
+        throw new OrderError(403, "비활성화된 결제 수단입니다", "PAYMENT_METHOD_DISABLED");
+      }
+    }
+
+    let pointResult: { earned: number; newBalance: number; gradeChanged: boolean } | null = null;
+
     const order = await prisma.$transaction(async (tx) => {
       // PAID로 전환: 재고 차감
       if (newStatus === "PAID" && !STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
         await this.deductStockForOrder(tx, orderId, existing.orderNumber);
       }
 
-      // CANCELLED로 전환: 재고 복구
-      if (newStatus === "CANCELLED" && STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
-        await this.restoreStockForOrder(tx, orderId, existing.orderNumber);
+      // CANCELLED로 전환: 재고 복구 + 포인트 환수
+      if (newStatus === "CANCELLED") {
+        if (STOCK_DEDUCTED_STATUSES.includes(prevStatus)) {
+          await this.restoreStockForOrder(tx, orderId, existing.orderNumber);
+        }
+
+        if (existing.memberId) {
+          // 적립 포인트 환수
+          const earnHistory = await tx.pointHistory.findFirst({
+            where: { orderId, memberId: existing.memberId, type: "EARN" },
+          });
+          if (earnHistory) {
+            await tx.member.update({
+              where: { id: existing.memberId },
+              data: {
+                points: { increment: earnHistory.amount },
+                totalEarned: { decrement: earnHistory.amount },
+              },
+            });
+            const updatedMember = await tx.member.findUnique({ where: { id: existing.memberId } });
+            await tx.pointHistory.create({
+              data: {
+                memberId: existing.memberId,
+                type: "CANCEL",
+                amount: earnHistory.amount,
+                balance: updatedMember!.points,
+                orderId,
+                description: "주문 취소 적립 포인트 환수",
+              },
+            });
+          }
+
+          // 포인트 사용 환수
+          const pointPayments = await tx.payment.findMany({
+            where: { orderId, paymentType: "POINT", status: "APPROVED" },
+          });
+          for (const pp of pointPayments) {
+            const refundAmount = Math.floor(Number(pp.amount));
+            await tx.member.update({
+              where: { id: existing.memberId },
+              data: { points: { increment: refundAmount } },
+            });
+            const memberAfter = await tx.member.findUnique({ where: { id: existing.memberId } });
+            await tx.pointHistory.create({
+              data: {
+                memberId: existing.memberId,
+                type: "CANCEL",
+                amount: refundAmount,
+                balance: memberAfter!.points,
+                orderId,
+                description: "주문 취소 포인트 환수",
+              },
+            });
+            await tx.payment.update({ where: { id: pp.id }, data: { status: "CANCELLED" } });
+          }
+        }
       }
 
       // PAID 전환 시 Payment 레코드 생성
       if (newStatus === "PAID" && paymentType) {
-        await tx.payment.create({
-          data: {
-            orderId,
-            paymentType: paymentType as PaymentType,
-            amount: existing.totalAmount,
-            receivedAmount: paymentType === "CASH" && receivedAmount ? receivedAmount : null,
-            status: "APPROVED",
-          },
-        });
+        const pointUsed = existing.pointUsed || 0;
+        const remainingAmount = Number(existing.totalAmount) - pointUsed;
+
+        if (remainingAmount > 0) {
+          await tx.payment.create({
+            data: {
+              orderId,
+              paymentType: paymentType as PaymentType,
+              amount: remainingAmount,
+              receivedAmount: paymentType === "CASH" && receivedAmount ? receivedAmount : null,
+              paymentMethod: paymentMethod ?? null,
+              approvalNumber: approvalNumber ?? null,
+              transactionId: transactionId ?? null,
+              status: "APPROVED",
+            },
+          });
+        }
+      }
+
+      // PAID 전환 시 포인트 적립 (memberId가 있는 주문만)
+      if (newStatus === "PAID" && existing.memberId) {
+        const pointUsed = existing.pointUsed || 0;
+        const earnableAmount = Number(existing.totalAmount) - pointUsed;
+        const originalTotal = Number(existing.totalAmount);
+
+        if (earnableAmount > 0) {
+          pointResult = await MemberService.earnPoints(
+            tx, existing.memberId, orderId, earnableAmount, originalTotal, paymentType || "CARD", settings,
+          );
+        }
       }
 
       return tx.order.update({
@@ -291,8 +405,138 @@ export class OrderService {
       await this.invalidateStockCache();
     }
 
-    logger.info({ orderId, prevStatus, newStatus }, "Order status updated");
-    return order;
+    logger.info({ orderId, prevStatus, newStatus, pointResult }, "Order status updated");
+    return { ...order, pointResult };
+  }
+
+  /**
+   * 포인트 선차감 (분할 결제 1단계)
+   */
+  async usePoints(orderId: string, memberId: number, pointAmount: number) {
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({ where: { id: orderId } });
+      if (!order || order.status !== "PENDING") {
+        throw new OrderError(400, "주문 상태가 올바르지 않습니다", "INVALID_ORDER_STATUS");
+      }
+      if (pointAmount > Number(order.totalAmount)) {
+        throw new OrderError(400, "포인트가 결제 금액을 초과합니다", "POINT_EXCEEDS_AMOUNT");
+      }
+
+      // 비관적 잠금으로 회원 포인트 확인
+      const [member] = await tx.$queryRaw<{ id: number; points: number }[]>`
+        SELECT id, points FROM members WHERE id = ${memberId} FOR UPDATE
+      `;
+      if (!member || member.points < pointAmount) {
+        throw new OrderError(400, "포인트 잔액이 부족합니다", "INSUFFICIENT_POINTS");
+      }
+
+      await tx.member.update({
+        where: { id: memberId },
+        data: { points: { decrement: pointAmount } },
+      });
+
+      await tx.payment.create({
+        data: {
+          orderId,
+          paymentType: "POINT",
+          amount: pointAmount,
+          paymentMethod: "STORE_POINT",
+          status: "APPROVED",
+        },
+      });
+
+      const updatedMember = await tx.member.findUnique({ where: { id: memberId } });
+      await tx.pointHistory.create({
+        data: {
+          memberId,
+          type: "USE",
+          amount: pointAmount,
+          balance: updatedMember!.points,
+          orderId,
+          description: `주문 포인트 사용 (${pointAmount.toLocaleString()}P)`,
+        },
+      });
+
+      await tx.order.update({
+        where: { id: orderId },
+        data: { pointUsed: pointAmount },
+      });
+
+      return { pointUsed: pointAmount, remaining: Number(order.totalAmount) - pointAmount };
+    });
+  }
+
+  /**
+   * 포인트 사용 취소 (분할 결제 실패 시 즉시 환수)
+   */
+  async cancelUsePoints(orderId: string) {
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({ where: { id: orderId } });
+      if (!order || order.status !== "PENDING" || !order.pointUsed || !order.memberId) {
+        throw new OrderError(400, "환수할 포인트가 없습니다", "NO_POINTS_TO_CANCEL");
+      }
+
+      const pointAmount = order.pointUsed;
+      await tx.member.update({
+        where: { id: order.memberId },
+        data: { points: { increment: pointAmount } },
+      });
+
+      const memberAfter = await tx.member.findUnique({ where: { id: order.memberId } });
+      await tx.pointHistory.create({
+        data: {
+          memberId: order.memberId,
+          type: "CANCEL",
+          amount: pointAmount,
+          balance: memberAfter!.points,
+          orderId,
+          description: "분할 결제 취소 포인트 환수",
+        },
+      });
+
+      // 포인트 Payment 취소 처리
+      await tx.payment.updateMany({
+        where: { orderId, paymentType: "POINT", status: "APPROVED" },
+        data: { status: "CANCELLED" },
+      });
+
+      await tx.order.update({
+        where: { id: orderId },
+        data: { pointUsed: 0 },
+      });
+
+      return { refunded: pointAmount };
+    });
+  }
+
+  /**
+   * 분할 결제 타임아웃 보호 (5분 이상 PENDING + pointUsed > 0인 주문 환수)
+   */
+  async recoverStaleSplitPayments() {
+    const threshold = new Date(Date.now() - 5 * 60 * 1000);
+    const staleOrders = await prisma.order.findMany({
+      where: {
+        status: "PENDING",
+        pointUsed: { gt: 0 },
+        updatedAt: { lt: threshold },
+      },
+    });
+
+    let recovered = 0;
+    for (const order of staleOrders) {
+      try {
+        await this.cancelUsePoints(order.id);
+        recovered++;
+        logger.info({ orderId: order.id, pointUsed: order.pointUsed }, "Stale split payment recovered");
+      } catch (err) {
+        logger.error({ orderId: order.id, error: err instanceof Error ? err.message : String(err) }, "Failed to recover stale split payment");
+      }
+    }
+
+    if (recovered > 0) {
+      logger.info({ recovered, total: staleOrders.length }, "Stale split payment recovery completed");
+    }
+    return { recovered };
   }
 
   /**
@@ -488,30 +732,47 @@ export class OrderService {
 
   /**
    * 일별 매출 리포트
+   * startDate/endDate가 있으면 절대 기간 사용, 없으면 days(상대) 사용
    */
-  async getDailyStats(days: number) {
-    const daysNum = Math.min(days, 90);
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - daysNum);
-    startDate.setHours(0, 0, 0, 0);
+  async getDailyStats(params: { days?: number; startDate?: string; endDate?: string }) {
+    let start: Date;
+    let end: Date;
+
+    if (params.startDate && params.endDate) {
+      start = new Date(`${params.startDate}T00:00:00+09:00`);
+      end = new Date(`${params.endDate}T23:59:59.999+09:00`);
+    } else {
+      const daysNum = Math.min(params.days ?? 7, 90);
+      end = new Date();
+      start = new Date();
+      start.setDate(start.getDate() - daysNum);
+      start.setHours(0, 0, 0, 0);
+    }
 
     const orders = await prisma.order.findMany({
       where: {
-        createdAt: { gte: startDate },
+        createdAt: { gte: start, lte: end },
         status: { in: ["PAID", "PREPARING", "COMPLETED"] },
       },
       select: { createdAt: true, totalAmount: true },
     });
 
+    // KST 기준 날짜 키 생성 (UTC → KST +9h)
+    const toKstDateKey = (d: Date) => {
+      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      return kst.toISOString().split("T")[0];
+    };
+
+    // 날짜 범위의 모든 날을 미리 채움
     const dailyMap = new Map<string, { count: number; revenue: number }>();
-    for (let i = 0; i < daysNum; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      dailyMap.set(date.toISOString().split("T")[0], { count: 0, revenue: 0 });
+    const cursorDate = new Date(start);
+    while (cursorDate <= end) {
+      dailyMap.set(toKstDateKey(cursorDate), { count: 0, revenue: 0 });
+      cursorDate.setDate(cursorDate.getDate() + 1);
     }
 
     for (const order of orders) {
-      const dateKey = order.createdAt.toISOString().split("T")[0];
+      const dateKey = toKstDateKey(order.createdAt);
       const current = dailyMap.get(dateKey);
       if (current) {
         current.count++;
@@ -522,6 +783,108 @@ export class OrderService {
     return Array.from(dailyMap.entries())
       .map(([date, stats]) => ({ date, ...stats }))
       .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  /**
+   * 시간대별 매출 (0~23시)
+   */
+  async getHourlyStats(dateRange: { startDate: string; endDate: string }) {
+    const start = new Date(`${dateRange.startDate}T00:00:00+09:00`);
+    const end = new Date(`${dateRange.endDate}T23:59:59.999+09:00`);
+
+    const orders = await prisma.order.findMany({
+      where: {
+        createdAt: { gte: start, lte: end },
+        status: { in: ["PAID", "PREPARING", "COMPLETED"] },
+      },
+      select: { createdAt: true, totalAmount: true },
+    });
+
+    const hourlyMap = Array.from({ length: 24 }, (_, i) => ({
+      hour: i,
+      count: 0,
+      revenue: 0,
+    }));
+
+    for (const order of orders) {
+      // KST 기준 시간 (UTC + 9)
+      const kst = new Date(order.createdAt.getTime() + 9 * 60 * 60 * 1000);
+      const hour = kst.getUTCHours();
+      hourlyMap[hour].count++;
+      hourlyMap[hour].revenue += Number(order.totalAmount);
+    }
+
+    return hourlyMap;
+  }
+
+  /**
+   * 상품별 판매 집계 (서버사이드)
+   */
+  async getProductStats(dateRange: { startDate: string; endDate: string; limit?: number }) {
+    const start = new Date(`${dateRange.startDate}T00:00:00+09:00`);
+    const end = new Date(`${dateRange.endDate}T23:59:59.999+09:00`);
+    const limit = dateRange.limit ?? 10;
+
+    const items = await prisma.orderItem.findMany({
+      where: {
+        order: {
+          createdAt: { gte: start, lte: end },
+          status: { in: ["PAID", "PREPARING", "COMPLETED"] },
+        },
+      },
+      select: {
+        productId: true,
+        name: true,
+        price: true,
+        quantity: true,
+        order: {
+          select: { id: true },
+        },
+      },
+    });
+
+    const productMap = new Map<number, {
+      productId: number;
+      name: string;
+      categoryName: string;
+      totalQuantity: number;
+      totalAmount: number;
+    }>();
+
+    for (const item of items) {
+      const existing = productMap.get(item.productId);
+      if (existing) {
+        existing.totalQuantity += item.quantity;
+        existing.totalAmount += Number(item.price) * item.quantity;
+      } else {
+        productMap.set(item.productId, {
+          productId: item.productId,
+          name: item.name,
+          categoryName: '',
+          totalQuantity: item.quantity,
+          totalAmount: Number(item.price) * item.quantity,
+        });
+      }
+    }
+
+    // 카테고리명 매핑
+    const productIds = Array.from(productMap.keys());
+    if (productIds.length > 0) {
+      const products = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, categories: { select: { name: true }, take: 1 } },
+      });
+      for (const p of products) {
+        const entry = productMap.get(p.id);
+        if (entry) {
+          entry.categoryName = p.categories[0]?.name ?? '-';
+        }
+      }
+    }
+
+    return Array.from(productMap.values())
+      .sort((a, b) => b.totalQuantity - a.totalQuantity)
+      .slice(0, limit);
   }
 
   /**

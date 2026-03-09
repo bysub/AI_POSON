@@ -9,7 +9,8 @@
     "back": "戻る",
     "next": "次へ",
     "close": "閉じる",
-    "currency": "ウォン"
+    "currency": "ウォン",
+    "won": "円"
   },
   "welcome": {
     "title": "ようこそ",
@@ -52,7 +53,7 @@
   "payment": {
     "title": "お支払い",
     "yourOrder": "ご注文内容",
-    "selectMethod": "お支払い方法を選択してください",
+    "selectMethod": "お支払い方法を選択してください。",
     "paymentMethod": "お支払い方法",
     "card": "クレジットカード",
     "cardDesc": "Visa, Mastercard, JCB",
@@ -62,6 +63,18 @@
     "mobilePayDesc": "Apple Pay, Google Pay",
     "scanner": "スキャナー",
     "scannerDesc": "ポイント、クーポン、QRコード",
+    "applePay": "Apple Pay",
+    "applePayDesc": "Apple Pay",
+    "foreignCard": "地域・海外カード",
+    "foreignCardDesc": "海外発行カード、地域通貨",
+    "payco": "PAYCO",
+    "paycoDesc": "PAYCO決済",
+    "wechatPay": "WeChat Pay",
+    "wechatPayDesc": "WeChat Pay決済",
+    "alipay": "Alipay",
+    "alipayDesc": "Alipay決済",
+    "storePoint": "店舗ポイント",
+    "storePointDesc": "貯まったポイントを使用",
     "processing": "決済処理中...",
     "insertCard": "カードを挿入またはタッチしてください",
     "enterCash": "現金を投入してください",
@@ -74,7 +87,24 @@
     "secureCheckout": "安全な決済 · 暗号化された取引",
     "offline": "オフライン",
     "orderCreateFailed": "注文の作成に失敗しました",
-    "scannerNotReady": "スキャナー決済は準備中です"
+    "scannerNotReady": "スキャナー決済は準備中です",
+    "point": {
+      "loading": "ポイント情報を読み込み中...",
+      "loadError": "ポイント情報を読み込めません",
+      "memberSuffix": "様",
+      "currentBalance": "保有ポイント",
+      "orderAmount": "お支払い金額",
+      "pointDeduct": "ポイント使用",
+      "remainingAmount": "残額決済",
+      "payFull": "ポイント全額決済",
+      "paySplit": "{point}P使用 + {remaining}円追加決済",
+      "otherMethod": "他の決済方法を選択",
+      "insufficient": "ポイントが不足しています",
+      "minRequired": "最低{min}P以上保有時に使用可能",
+      "payError": "ポイント決済に失敗しました",
+      "splitError": "ポイント差引に失敗しました",
+      "loginRequired": "ポイント決済は会員認証が必要です"
+    }
   },
   "orderConfirm": {
     "headerTitle": "ご注文内容をご確認ください。",
@@ -109,7 +139,10 @@
     "printingReceipt": "印刷中...",
     "returnToHome": "最初に戻る",
     "autoReset": "{seconds}秒後に自動的にリセットされます",
-    "approvalNumber": "承認番号"
+    "approvalNumber": "承認番号",
+    "earnedPoints": "獲得ポイント",
+    "remainingPoints": "残りポイント",
+    "gradeUp": "ランクUP！"
   },
   "point": {
     "purchaseInProgress": "購入中",
@@ -143,7 +176,9 @@
     "completed": "決済が完了しました",
     "timeout": "決済時間が超過しました。",
     "timeoutShort": "決済タイムアウト",
-    "declined": "カードが拒否されました。他のカードをご使用ください。"
+    "declined": "カードが拒否されました。他のカードをご使用ください。",
+    "tapNfc": "リーダーにスマートフォンをタッチしてください",
+    "insertForeignCard": "海外カードを挿入またはタッチしてください"
   },
   "cashPayment": {
     "amount": "決済金額",
@@ -245,5 +280,30 @@
       "idleWarning": "操作がない場合、{seconds}秒後に最初の画面に戻ります。",
       "settingsOpened": "アクセシビリティ設定画面です。"
     }
+  },
+  "stats": {
+    "totalSales": "総売上",
+    "orderCount": "注文件数",
+    "avgOrderAmount": "平均注文金額",
+    "dailyAvg": "日平均売上",
+    "totalPurchase": "総仕入額",
+    "purchaseCount": "仕入件数",
+    "avgPurchase": "平均仕入単価",
+    "noData": "該当期間のデータがありません",
+    "refresh": "更新",
+    "search": "検索",
+    "weekly": "週間",
+    "monthly": "月間",
+    "yearly": "年間",
+    "dailyTrend": "日別売上推移",
+    "hourlyTrend": "時間帯別売上",
+    "orderStatusRatio": "注文状態割合",
+    "bestSellers": "ベストセラー TOP 10",
+    "categoryRatio": "カテゴリ別売上割合",
+    "purchaseTrend": "仕入推移",
+    "supplierRatio": "取引先別仕入割合",
+    "salesAmount": "売上額",
+    "purchaseAmount": "仕入額",
+    "quantity": "販売数量"
   }
 }

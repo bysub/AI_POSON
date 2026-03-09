@@ -42,6 +42,9 @@ const activeMenu = computed(() => {
   if (path.includes("/admin/stats/purchase")) return "stats-purchase";
   if (path.includes("/admin/stats/sales")) return "stats-sales";
   if (path.includes("/admin/stats/products")) return "stats-products";
+  if (path.includes("/admin/stats/profit")) return "stats-profit";
+  if (path.includes("/admin/stats/payment")) return "stats-payment";
+  if (path.includes("/admin/stats/member")) return "stats-member";
   if (path.includes("/admin/users")) return "users";
   if (path.includes("/admin/business")) return "business";
   if (path.includes("/admin/settings")) return "settings";
@@ -68,7 +71,7 @@ const activeGroup = computed(() => {
   if (["inventory-status", "inventory-adjust", "inventory-history"].includes(menu))
     return "inventory";
   if (["sales-register", "sales-history", "customers"].includes(menu)) return "sales";
-  if (["stats-purchase", "stats-sales", "stats-products"].includes(menu)) return "stats";
+  if (["stats-purchase", "stats-sales", "stats-products", "stats-profit", "stats-payment", "stats-member"].includes(menu)) return "stats";
   if (["users", "business", "settings", "devices"].includes(menu)) return "settings";
   return "main";
 });
@@ -180,6 +183,9 @@ const menuGroups = [
       },
       { id: "stats-sales", label: "매출통계", path: "/admin/stats/sales", icon: "chart-up" },
       { id: "stats-products", label: "상품통계", path: "/admin/stats/products", icon: "chart-bar" },
+      { id: "stats-profit", label: "손익분석", path: "/admin/stats/profit", icon: "chart" },
+      { id: "stats-payment", label: "결제수단 통계", path: "/admin/stats/payment", icon: "cash" },
+      { id: "stats-member", label: "회원/포인트", path: "/admin/stats/member", icon: "users" },
     ],
   },
   {
@@ -680,6 +686,21 @@ function toggleSidebar(): void {
                     stroke-linejoin="round"
                     stroke-width="2"
                     d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                <!-- Chart (손익분석) -->
+                <svg
+                  v-else-if="item.icon === 'chart'"
+                  class="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                   />
                 </svg>
                 <!-- Box (매입상품) -->
