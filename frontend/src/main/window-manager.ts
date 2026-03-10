@@ -1,6 +1,6 @@
-import { BrowserWindow, session, shell, protocol, net } from "electron";
-import { join, resolve, sep } from "path";
-import { pathToFileURL } from "url";
+import { app, BrowserWindow, session, shell, protocol } from "electron";
+import { join, resolve, sep, extname } from "path";
+import { existsSync, readFileSync } from "fs";
 import { is } from "@electron-toolkit/utils";
 
 // electron.vite.config.ts에서 빌드 시 주입 (VITE_API_URL origin)
@@ -25,8 +25,30 @@ function getApiOrigin(): string {
 }
 
 /**
+ * MIME 타입 매핑
+ */
+const MIME_TYPES: Record<string, string> = {
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".webp": "image/webp",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".eot": "application/vnd.ms-fontobject",
+  ".map": "application/json",
+};
+
+/**
  * 커스텀 프로토콜 핸들러 등록 (app:// → renderer 파일 서빙)
- * app.whenReady() 이후에 호출해야 함
+ * .asar 내부 파일은 net.fetch(file://) 불가하므로 fs.readFileSync 사용
  */
 export function registerAppProtocol(): void {
   const RENDERER_ROOT = resolve(__dirname, "../renderer");
@@ -38,7 +60,6 @@ export function registerAppProtocol(): void {
     // Path Traversal 방어
     const filePath = resolve(RENDERER_ROOT, pathname.replace(/^\/+/, ""));
     if (!filePath.startsWith(RENDERER_ROOT + sep) && filePath !== RENDERER_ROOT) {
-      console.error(`[Security] Path traversal blocked: ${request.url}`);
       return new Response("Forbidden", { status: 403 });
     }
 
@@ -47,7 +68,23 @@ export function registerAppProtocol(): void {
       return new Response("Forbidden", { status: 403 });
     }
 
-    return net.fetch(pathToFileURL(filePath).href);
+    const fileExists = existsSync(filePath);
+    const targetPath = fileExists
+      ? filePath
+      : resolve(RENDERER_ROOT, "index.html"); // SPA fallback
+
+    try {
+      const data = readFileSync(targetPath);
+      const ext = extname(targetPath).toLowerCase();
+      const mimeType = MIME_TYPES[ext] ?? "application/octet-stream";
+
+      return new Response(data, {
+        status: 200,
+        headers: { "Content-Type": mimeType },
+      });
+    } catch {
+      return new Response("Not Found", { status: 404 });
+    }
   });
 }
 
@@ -55,6 +92,32 @@ export function registerAppProtocol(): void {
  * BrowserWindow 생성 + CSP 설정
  */
 export function createWindow(): void {
+<<<<<<< HEAD
+  const prodCSP = [
+    "default-src 'self' app:;",
+    "script-src 'self' app: 'unsafe-inline' 'unsafe-eval';",
+    "style-src 'self' app: 'unsafe-inline' https://fonts.googleapis.com;",
+    "img-src 'self' app: data: blob: http://localhost:* https://*.unsplash.com https://images.unsplash.com https://flagcdn.com;",
+    "font-src 'self' app: data: https://fonts.gstatic.com;",
+    `connect-src 'self' app: http://localhost:* http://127.0.0.1:* http://192.168.*:* http://10.*:* http://172.16.*:* https://*.google.com wss://*.google.com https://*.googleapis.com;`,
+  ].join(" ");
+
+  const devCSP =
+    "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: http://localhost:* https://*.unsplash.com https://images.unsplash.com https://flagcdn.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ws://localhost:* http://localhost:* http://127.0.0.1:* https://*.google.com wss://*.google.com https://*.googleapis.com;";
+
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    if (details.resourceType === "mainFrame" || details.resourceType === "subFrame") {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Content-Security-Policy": [is.dev ? devCSP : prodCSP],
+        },
+      });
+    } else {
+      callback(is.dev ? {} : { responseHeaders: details.responseHeaders });
+    }
+  });
+=======
   // CSP 헤더 설정 — API origin을 동적으로 포함
   const apiOrigin = getApiOrigin();
 
@@ -89,6 +152,7 @@ export function createWindow(): void {
       }
     });
   }
+>>>>>>> a74d0e1b9a6c5d03f7270fa69c5c6b70c3bf6900
 
   const mainWindow = new BrowserWindow({
     width: is.dev ? 480 : 1080,
@@ -105,7 +169,7 @@ export function createWindow(): void {
       preload: join(__dirname, "../preload/index.js"),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: !is.dev,
+      sandbox: false,
     },
   });
 
@@ -125,6 +189,12 @@ export function createWindow(): void {
     },
   );
 
+<<<<<<< HEAD
+  const url = is.dev && process.env["ELECTRON_RENDERER_URL"]
+    ? process.env["ELECTRON_RENDERER_URL"]
+    : "app://poson/index.html";
+  mainWindow.loadURL(url);
+=======
   // 프로덕션에서 리소스 로딩 실패 로깅 (디버깅용)
   if (!is.dev) {
     session.defaultSession.webRequest.onErrorOccurred((details) => {
@@ -157,4 +227,5 @@ export function createWindow(): void {
   } else {
     mainWindow.loadURL("app://poson/index.html");
   }
+>>>>>>> a74d0e1b9a6c5d03f7270fa69c5c6b70c3bf6900
 }

@@ -173,8 +173,8 @@ router.delete("/:id/use-points", authenticate, asyncHandler(async (req, res, nex
   }
 }));
 
-// Update order status (S-8: 인증 필수)
-router.patch("/:id/status", authenticate, asyncHandler(async (req, res, next) => {
+// Update order status (키오스크 결제 완료 시 인증 없이 호출)
+router.patch("/:id/status", asyncHandler(async (req, res, next) => {
   const parsed = updateStatusSchema.safeParse(req.body);
   if (!parsed.success) {
     return next(new AppError(400, parsed.error.errors[0]?.message ?? "잘못된 상태값입니다", "VALIDATION_ERROR"));

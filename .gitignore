@@ -8,6 +8,7 @@ frontend/node_modules/
 # Build outputs
 dist/
 backend/dist/
+frontend/dist2/
 frontend/dist/
 out/
 backend/out/

@@ -45,15 +45,16 @@ export const useNetworkStore = defineStore("network", () => {
   async function checkConnection(): Promise<boolean> {
     try {
       // Ping the backend health endpoint
+      // GET 사용 (HEAD는 일부 프록시에서 차단될 수 있음)
+      // 백엔드 응답 자체가 오면 온라인 (DB 장애로 503이어도 네트워크는 정상)
       const response = await fetch(`${API_BASE_URL}/api/health`, {
-        method: "HEAD",
+        method: "GET",
         cache: "no-store",
       });
-      isOnline.value = response.ok;
-      if (response.ok) {
-        lastOnlineAt.value = new Date();
-      }
-      return response.ok;
+      // 백엔드가 응답했으면 온라인 (status 무관)
+      isOnline.value = true;
+      lastOnlineAt.value = new Date();
+      return true;
     } catch {
       isOnline.value = false;
       return false;

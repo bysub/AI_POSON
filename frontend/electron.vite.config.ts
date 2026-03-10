@@ -48,14 +48,15 @@ export default defineConfig({
     plugins: [vue()],
     server: {
       host: true,
-      // Vite proxy: /api, /uploads 요청을 백엔드(localhost:3000)로 전달
+      // Vite proxy: /api, /uploads 요청을 백엔드로 전달
+      // BACKEND_URL 환경변수로 타겟 변경 가능 (기본: localhost:3000)
       proxy: {
         "/api": {
-          target: "http://localhost:3000",
+          target: process.env.BACKEND_URL || "http://localhost:3000",
           changeOrigin: true,
         },
         "/uploads": {
-          target: "http://localhost:3000",
+          target: process.env.BACKEND_URL || "http://localhost:3000",
           changeOrigin: true,
         },
       },

@@ -34,6 +34,11 @@ app.use(
         callback(null, true);
         return;
       }
+      // Electron 앱 프로토콜 허용 (app://poson 등)
+      if (/^app:\/\//.test(origin)) {
+        callback(null, true);
+        return;
+      }
       // 개발 환경: 로컬 네트워크 IP 자동 허용 (192.168.x.x, 10.x.x.x)
       if (config.env !== "production" && /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|localhost)/.test(origin)) {
         callback(null, true);

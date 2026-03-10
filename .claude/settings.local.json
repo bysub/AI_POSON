@@ -204,7 +204,8 @@
       "Read(//tmp/**)",
       "Bash(npx prisma:*)",
       "Bash(xxd:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git rev-list:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
