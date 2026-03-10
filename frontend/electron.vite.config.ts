@@ -1,10 +1,25 @@
 import { resolve } from "path";
 import { defineConfig, externalizeDepsPlugin } from "electron-vite";
+import { loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
+
+// .env에서 VITE_API_URL을 읽어 origin 추출 → main process CSP에 주입
+const env = loadEnv("production", process.cwd(), "VITE_");
+const apiOrigin = (() => {
+  const raw = env.VITE_API_URL || process.env.VITE_API_URL || "http://localhost:3000";
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return "http://localhost:3000";
+  }
+})();
 
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
+    define: {
+      __API_ORIGIN__: JSON.stringify(apiOrigin),
+    },
     build: {
       rollupOptions: {
         input: {

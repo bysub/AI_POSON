@@ -3,10 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' http://localhost:3000 https://flagcdn.com data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' http://localhost:3000 ws://localhost:3000; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
-    />
+    <!-- CSP는 Electron main process (window-manager.ts)에서 response header로 관리 -->
+    <!-- meta CSP를 제거하여 header CSP와의 충돌 방지 (두 CSP가 공존 시 가장 제한적인 교집합 적용) -->
     <!-- FOUC 방지: 렌더링 전 테마/접근성 설정 적용 -->
     <script>
       (function () {
