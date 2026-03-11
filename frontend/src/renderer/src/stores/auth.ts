@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { apiClient } from "@/services/api/client";
+import { apiClient, RateLimitError } from "@/services/api/client";
 
 export interface Admin {
   id: string;
@@ -74,7 +74,11 @@ export const useAuthStore = defineStore("auth", () => {
       return false;
     } catch (err) {
       console.error("Login failed:", err);
-      error.value = "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.";
+      if (err instanceof RateLimitError) {
+        error.value = err.message;
+      } else {
+        error.value = "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.";
+      }
       return false;
     } finally {
       isLoading.value = false;

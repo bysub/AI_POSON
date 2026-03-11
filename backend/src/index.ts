@@ -47,42 +47,99 @@ app.use(
       callback(new Error(`CORS: Origin '${origin}' is not allowed`));
     },
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Device-Id"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   }),
 );
 
-// Rate limiting – global
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // Limit each IP to 1000 requests per windowMs
-    standardHeaders: true,
-    legacyHeaders: false,
-  }),
-);
+// Rate limiting – 공통 설정
+const isDev = config.env === "development";
 
-// Rate limiting – auth endpoints (brute-force 방지)
+/** Device ID 기반 rate limit 키 (NAT 환경에서 기기별 독립 카운터) */
+const deviceKeyGenerator = (req: express.Request): string => {
+  const deviceId = req.headers["x-device-id"] as string | undefined;
+  return deviceId || req.ip || "unknown";
+};
+
+/** 인증된 요청 skip (유효한 JWT 토큰 보유 시 rate limit 면제) */
+const skipAuthenticated = (req: express.Request): boolean => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) return false;
+  try {
+    const { authService } = require("./services/auth.service.js");
+    return !!authService.verifyAccessToken(authHeader.substring(7));
+  } catch { return false; }
+};
+
+/** 공통 JSON 429 핸들러 (로깅 포함) */
+const rateLimitHandler = (message: string) => (req: express.Request, res: express.Response) => {
+  logger.warn(
+    { ip: req.ip, deviceId: req.headers["x-device-id"], path: req.path, method: req.method },
+    `Rate limit exceeded: ${req.path}`,
+  );
+  res.status(429).json({
+    success: false,
+    error: {
+      code: "RATE_LIMITED",
+      message,
+      retryAfter: res.getHeader("Retry-After"),
+    },
+  });
+};
+
+// Rate limiting – global (NAT 환경: 매장 내 10대 기기 공유 고려)
+// ⚠️ express-rate-limit v7: max=0은 "전부 차단"이므로 skip으로 dev 비활성화
 app.use(
-  "/api/v1/auth",
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 30, // 15분에 30회 (로그인 시도 제한)
+    max: 3000, // prod: 15분당 3000회 (기기 10대 × 300회)
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "인증 요청이 너무 많습니다. 잠시 후 다시 시도하세요." },
+    keyGenerator: deviceKeyGenerator,
+    skip: isDev ? () => true : undefined,
+    handler: rateLimitHandler("요청이 너무 많습니다. 잠시 후 다시 시도하세요."),
   }),
 );
 
-// Rate limiting – payment endpoints
+// Rate limiting – 로그인만 (brute-force 방지, refresh/logout/me 제외)
+app.use(
+  "/api/v1/auth/login",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 50, // prod: 15분당 50회 (기기 10대 × 5회 재시도)
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: deviceKeyGenerator,
+    skip: isDev ? () => true : undefined,
+    handler: rateLimitHandler("로그인 요청이 너무 많습니다. 잠시 후 다시 시도하세요."),
+  }),
+);
+
+// Rate limiting – 토큰 갱신 (자동 갱신이므로 넉넉하게)
+app.use(
+  "/api/v1/auth/refresh",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200, // prod: 15분당 200회
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: deviceKeyGenerator,
+    skip: isDev ? () => true : undefined,
+    handler: rateLimitHandler("토큰 갱신 요청이 너무 많습니다. 잠시 후 다시 시도하세요."),
+  }),
+);
+
+// Rate limiting – payment endpoints (인증된 요청은 skip)
 app.use(
   "/api/v1/payments",
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100, // 15분에 100회
+    max: 300, // prod: 15분당 300회 (피크타임 기기 10대 동시 결제)
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "결제 요청이 너무 많습니다. 잠시 후 다시 시도하세요." },
+    keyGenerator: deviceKeyGenerator,
+    skip: isDev ? () => true : skipAuthenticated,
+    handler: rateLimitHandler("결제 요청이 너무 많습니다. 잠시 후 다시 시도하세요."),
   }),
 );
 

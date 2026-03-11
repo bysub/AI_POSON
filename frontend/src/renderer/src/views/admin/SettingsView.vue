@@ -8,21 +8,28 @@ import {
   tabs,
   categoryMap,
   defaultSaleConfig,
+  defaultClosingConfig,
   defaultPaymentConfig,
   defaultPrintConfig,
   defaultPointConfig,
+  defaultNotificationConfig,
   defaultBarcodeConfig,
   defaultSystemConfig,
   defaultAccessibilityConfig,
   saleToggles,
+  closingToggles,
   paymentMethodToggles,
   paymentToggles,
   printToggles,
+  selfPrintToggles,
+  printReceiptToggles,
   pointToggles,
   pointEarnToggles,
   pointUseToggles,
   gradeToggles,
-  selfUIToggles,
+  selfPointPolicyToggles,
+  notificationToggles,
+  soundToggles,
   systemToggles,
   accessibilityToggles,
 } from "./settingsData";
@@ -36,18 +43,22 @@ const isSaving = ref(false);
 
 // ─── Config Refs ───
 const saleConfig = ref<SettingsRecord>({ ...defaultSaleConfig });
+const closingConfig = ref<SettingsRecord>({ ...defaultClosingConfig });
 const paymentConfig = ref<SettingsRecord>({ ...defaultPaymentConfig });
 const printConfig = ref<SettingsRecord>({ ...defaultPrintConfig });
 const pointConfig = ref<SettingsRecord>({ ...defaultPointConfig });
+const notificationConfig = ref<SettingsRecord>({ ...defaultNotificationConfig });
 const barcodeConfig = ref<SettingsRecord>({ ...defaultBarcodeConfig });
 const systemConfig = ref<SettingsRecord>({ ...defaultSystemConfig });
 const accessibilityConfig = ref<SettingsRecord>({ ...defaultAccessibilityConfig });
 
 const configRefs: Record<string, ReturnType<typeof ref<SettingsRecord>>> = {
   sale: saleConfig,
+  closing: closingConfig,
   payment: paymentConfig,
   print: printConfig,
   point: pointConfig,
+  notification: notificationConfig,
   barcode: barcodeConfig,
   system: systemConfig,
   accessibility: accessibilityConfig,
@@ -133,7 +144,7 @@ onMounted(() => {
           공통 환경설정
         </h2>
         <p class="mt-0.5 text-sm text-slate-500">
-          전 기기에서 공유하는 매장 공통 설정입니다
+          기기별 환경설정이 우선 순위를 두며 기기별 설정이 없는 경우 전 기기에서 공유하는 매장 공통 설정입니다.
         </p>
       </div>
       <div class="flex items-center gap-3">
@@ -183,54 +194,22 @@ onMounted(() => {
         <h3 class="mb-6 text-base font-semibold text-slate-800">
           판매 운영 설정
         </h3>
+        <!--
         <p class="mb-4 text-sm text-slate-500">
           ASIS: INI [Sale] + [Other] 공통 항목 (전 기기 공유)
         </p>
-
-        <!-- 영업 관리 -->
+    -->
+        <!-- 전표 관리 -->
         <h4 class="mb-3 text-sm font-semibold text-slate-600">
-          영업 관리
+          전표 관리
         </h4>
-        <div class="mb-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">영업 시작일</label>
-            <div class="flex gap-2">
-              <input
-                v-model="saleConfig.openDay"
-                type="date"
-                class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-              >
-              <button
-                class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
-                @click="saleConfig.openDay = getTodayDate()"
-              >
-                오늘
-              </button>
-            </div>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">마감일</label>
-            <input
-              v-model="saleConfig.finishDay"
-              type="date"
-              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-          </div>
+        <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">전표 시퀀스</label>
             <input
               v-model="saleConfig.receiptSeq"
               type="number"
               min="1"
-              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">시재금</label>
-            <input
-              v-model="saleConfig.startPrice"
-              type="number"
-              min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
           </div>
@@ -338,6 +317,82 @@ onMounted(() => {
         />
       </div>
 
+      <!-- ═══════ TAB: 마감 ═══════ -->
+      <div
+        v-show="activeTab === 'closing'"
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          마감 설정
+        </h3>
+
+        <!-- 영업 기간 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          영업 기간
+        </h4>
+        <div class="mb-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">영업 시작일</label>
+            <div class="flex gap-2">
+              <input
+                v-model="closingConfig.openDay"
+                type="date"
+                class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+              <button
+                class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                @click="closingConfig.openDay = getTodayDate()"
+              >
+                오늘
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">마감일</label>
+            <input
+              v-model="closingConfig.finishDay"
+              type="date"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">시재금</label>
+            <input
+              v-model="closingConfig.startPrice"
+              type="number"
+              min="0"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+            <p class="mt-1 text-xs text-slate-400">
+              영업 시작 시 현금함 시재금 (원)
+            </p>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">전일 이월</label>
+            <select
+              v-model="closingConfig.beforTran"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="0">미사용</option>
+              <option value="1">사용</option>
+            </select>
+            <p class="mt-1 text-xs text-slate-400">
+              전일 잔액을 당일 시재금으로 이월
+            </p>
+          </div>
+        </div>
+
+        <!-- 마감 옵션 -->
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">
+          마감 옵션
+        </h4>
+        <ToggleGrid
+          :items="closingToggles"
+          :config="closingConfig"
+          @toggle="(k) => toggleValue(closingConfig, k)"
+        />
+      </div>
+
       <!-- ═══════ TAB: 결제 정책 ═══════ -->
       <div
         v-show="activeTab === 'payment'"
@@ -346,10 +401,11 @@ onMounted(() => {
         <h3 class="mb-6 text-base font-semibold text-slate-800">
           결제 정책 설정
         </h3>
+        <!--
         <p class="mb-4 text-sm text-slate-500">
           ASIS: INI [Other] 카드/결제 + [Card] 공통 + [SuSu] (전 기기 공유)
         </p>
-
+      -->
         <!-- 결제 수단 on/off -->
         <h4 class="mb-3 text-sm font-semibold text-slate-600">
           결제 수단 활성화
@@ -452,18 +508,16 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- ═══════ TAB: 출력 설정 ═══════ -->
+      <!-- ═══════ TAB: 영수증/출력 ═══════ -->
       <div
         v-show="activeTab === 'print'"
         class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <h3 class="mb-6 text-base font-semibold text-slate-800">
-          출력 설정
+          영수증/출력 설정
         </h3>
-        <p class="mb-4 text-sm text-slate-500">
-          ASIS: INI [Other] 인쇄 관련 + S_Config (전 기기 공유)
-        </p>
 
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">공통 출력</h4>
         <div class="mb-6">
           <ToggleGrid
             :items="printToggles"
@@ -475,7 +529,7 @@ onMounted(() => {
         <h4 class="mb-3 text-sm font-semibold text-slate-600">
           용지 절단
         </h4>
-        <div class="grid gap-5 md:grid-cols-3">
+        <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">절단 위치</label>
             <select
@@ -488,6 +542,24 @@ onMounted(() => {
             </select>
           </div>
         </div>
+
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">키오스크 출력</h4>
+        <div class="mb-6">
+          <ToggleGrid
+            :items="selfPrintToggles"
+            :config="printConfig"
+            @toggle="(k) => toggleValue(printConfig, k)"
+          />
+        </div>
+
+        <h4 class="mb-3 text-sm font-semibold text-slate-600">공통 영수증 옵션</h4>
+        <div class="mb-6">
+          <ToggleGrid
+            :items="printReceiptToggles"
+            :config="printConfig"
+            @toggle="(k) => toggleValue(printConfig, k)"
+          />
+        </div>
       </div>
 
       <!-- ═══════ TAB: 포인트/회원 ═══════ -->
@@ -498,10 +570,11 @@ onMounted(() => {
         <h3 class="mb-6 text-base font-semibold text-slate-800">
           포인트/회원 설정
         </h3>
+        <!--
         <p class="mb-4 text-sm text-slate-500">
           ASIS: S_Config + INI [Other] 회원 관련 (전 기기 공유)
         </p>
-
+        -->
         <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">중량 상품 포인트</label>
@@ -766,93 +839,58 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 고객 UI (키오스크) -->
+        <!-- 키오스크 포인트 정책 -->
         <h4 class="mb-3 text-sm font-semibold text-slate-600">
-          고객 인터페이스 (키오스크)
+          키오스크 포인트 정책
         </h4>
+        <ToggleGrid
+          :items="selfPointPolicyToggles"
+          :config="pointConfig"
+          @toggle="(k) => toggleValue(pointConfig, k)"
+        />
+      </div>
+
+      <!-- ═══════ TAB: 알림/통신 ═══════ -->
+      <div
+        v-show="activeTab === 'notification'"
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <h3 class="mb-6 text-base font-semibold text-slate-800">
+          알림/통신 설정
+        </h3>
         <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">상단 메시지</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">고객 알람 시간 (초)</label>
             <input
-              v-model="pointConfig.selfCusTopMsg"
-              type="text"
+              v-model="notificationConfig.selfCusAlarmTime"
+              type="number"
+              min="0"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
           </div>
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">버튼 메시지 1</label>
-            <input
-              v-model="pointConfig.selfCusBTMsg1"
-              type="text"
-              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">버튼 메시지 2</label>
-            <input
-              v-model="pointConfig.selfCusBTMsg2"
-              type="text"
-              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">고객 선택 방식</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">SNS 구분</label>
             <select
-              v-model="pointConfig.selfCusSelect"
-              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option value="0">방식 0</option>
-              <option value="1">방식 1</option>
-              <option value="2">방식 2</option>
-            </select>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">ID 리더기 유형</label>
-            <select
-              v-model="pointConfig.selfReader"
+              v-model="notificationConfig.selfSNSGubun"
               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
               <option value="0">미사용</option>
-              <option value="1">바코드</option>
-              <option value="2">RF</option>
-            </select>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">시작 핫키</label>
-            <select
-              v-model="pointConfig.selfStartHotKey"
-              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option value="0">미사용</option>
-              <option value="1">사용</option>
-            </select>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">가격 표시 유형</label>
-            <select
-              v-model="pointConfig.selfPriceType"
-              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option value="0">기본</option>
-              <option value="1">유형 1</option>
-              <option value="2">유형 2</option>
-            </select>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">고객추가 기타</label>
-            <select
-              v-model="pointConfig.selfCusAddEtc"
-              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option value="0">미사용</option>
-              <option value="1">사용</option>
+              <option value="1">카카오</option>
+              <option value="2">SMS</option>
             </select>
           </div>
         </div>
         <ToggleGrid
-          :items="selfUIToggles"
-          :config="pointConfig"
-          @toggle="(k) => toggleValue(pointConfig, k)"
+          :items="notificationToggles"
+          :config="notificationConfig"
+          @toggle="(k) => toggleValue(notificationConfig, k)"
+        />
+
+        <h4 class="mb-3 mt-6 text-sm font-semibold text-slate-600">효과음 설정</h4>
+        <ToggleGrid
+          :items="soundToggles"
+          :config="notificationConfig"
+          @toggle="(k) => toggleValue(notificationConfig, k)"
         />
       </div>
 
@@ -864,10 +902,11 @@ onMounted(() => {
         <h3 class="mb-6 text-base font-semibold text-slate-800">
           바코드 / 중량 설정
         </h3>
+        <!--
         <p class="mb-4 text-sm text-slate-500">
           ASIS: INI [Length] + S_Config (전 기기 공유)
         </p>
-
+      -->
         <!-- 바코드 -->
         <h4 class="mb-3 text-sm font-semibold text-slate-600">
           바코드 자동부여
@@ -960,10 +999,11 @@ onMounted(() => {
         <h3 class="mb-6 text-base font-semibold text-slate-800">
           시스템 설정
         </h3>
+        <!--
         <p class="mb-4 text-sm text-slate-500">
           ASIS: INI [Other] 시스템 + [Application] + [Backup] (전 기기 공유)
         </p>
-
+      -->
         <div class="mb-6 grid gap-5 md:grid-cols-3">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">마스터 다운 주기 (주)</label>

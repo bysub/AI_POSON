@@ -2,12 +2,14 @@
 export type SettingsRecord = Record<string, string>;
 export type ToggleItem = { key: string; title: string; desc: string };
 
-// ─── Tabs ───
+// ─── Tabs (9개: 마감 탭 추가) ───
 export const tabs = [
   { id: "sale", label: "판매 운영", icon: "cart" },
+  { id: "closing", label: "마감", icon: "lock" },
   { id: "payment", label: "결제 정책", icon: "card" },
-  { id: "print", label: "출력 설정", icon: "printer" },
+  { id: "print", label: "영수증/출력", icon: "printer" },
   { id: "point", label: "포인트/회원", icon: "point" },
+  { id: "notification", label: "알림/통신", icon: "bell" },
   { id: "barcode", label: "바코드/중량", icon: "barcode" },
   { id: "system", label: "시스템", icon: "system" },
   { id: "accessibility", label: "접근성", icon: "a11y" },
@@ -16,9 +18,11 @@ export const tabs = [
 // ─── categoryMap (tab id → prefix + apiCategory) ───
 export const categoryMap: Record<string, { prefix: string; apiCategory: string }> = {
   sale: { prefix: "sale", apiCategory: "SALE" },
+  closing: { prefix: "closing", apiCategory: "CLOSING" },
   payment: { prefix: "payment", apiCategory: "PAYMENT" },
   print: { prefix: "print", apiCategory: "PRINT" },
   point: { prefix: "point", apiCategory: "POINT" },
+  notification: { prefix: "noti", apiCategory: "NOTIFICATION" },
   barcode: { prefix: "barcode", apiCategory: "BARCODE" },
   system: { prefix: "system", apiCategory: "SYSTEM" },
   accessibility: { prefix: "a11y", apiCategory: "ACCESSIBILITY" },
@@ -28,37 +32,23 @@ export const categoryMap: Record<string, { prefix: string; apiCategory: string }
 // Config Defaults
 // ═══════════════════════════════════════════════
 
-// ─── 판매 운영 (ASIS: [Sale] + [Other] 공통) ───
+// ─── 판매 운영 (19키: 마감 8키 → closing 탭 이동) ───
 export const defaultSaleConfig: SettingsRecord = {
   // [Sale] 섹션
-  openDay: "",
-  finishDay: "",
   receiptSeq: "1",
   receiptNumber: "",
-  startPrice: "0",
-  beforTran: "0",
   // [Other] 판매 관련 공통
   priceEditable: "0",
-  productSound: "1",
   maxPrice: "9999990",
   maxCashPrice: "9999990",
   saleView: "1",
   grouping: "0",
   totalQtyShow: "0",
-  orderCallEnabled: "0",
-  gridFix: "0",
   gridSaleEx: "0",
   freeOpt: "0",
-  price11: "0",
   boryuEnabled: "0",
   boryuTranOpt: "0",
-  infoDeskEnabled: "0",
   infoDeskViewAll: "1",
-  allFinish: "1",
-  saleFinishOpt: "0",
-  dayFinishMsgOpt: "0",
-  jobFinishCashdraw: "0",
-  engEnabled: "0",
   scancop: "0",
   delay: "1",
   // 주방/테이블
@@ -67,9 +57,21 @@ export const defaultSaleConfig: SettingsRecord = {
   tableCount: "0",
 };
 
-// ─── 결제 정책 (ASIS: [Other] 카드/결제 + [Card] 공통 + [SuSu]) ───
+// ─── 마감 (8키: sale에서 이동) ───
+export const defaultClosingConfig: SettingsRecord = {
+  openDay: "",
+  finishDay: "",
+  startPrice: "0",
+  beforTran: "0",
+  allFinish: "1",
+  saleFinishOpt: "0",
+  dayFinishMsgOpt: "0",
+  jobFinishCashdraw: "0",
+};
+
+// ─── 결제 정책 (31키: cardWavOpt → 알림/통신 이동) ───
 export const defaultPaymentConfig: SettingsRecord = {
-  // 결제 수단 on/off (Part 1)
+  // 결제 수단 on/off
   cardEnabled: "1",
   mobileEnabled: "1",
   cashEnabled: "1",
@@ -86,7 +88,6 @@ export const defaultPaymentConfig: SettingsRecord = {
   offCardKeyUse: "1",
   handCardEnabled: "0",
   cardTimerEnabled: "0",
-  cardWavOpt: "0",
   cardView: "0",
   eCardEnabled: "1",
   noCvmBillPrint: "0",
@@ -106,10 +107,13 @@ export const defaultPaymentConfig: SettingsRecord = {
   commCashBack: "0",
   commCash: "0",
   commCashRate: "0",
+  // 키오스크 앱카드 (from DeviceSetting SELF_ETC)
+  selfAppCard: "0",
 };
 
-// ─── 출력 설정 (ASIS: [Other] 인쇄 관련 공통) ───
+// ─── 영수증/출력 (25키: 기존 9 + selfPrint 4 + posPrint 공통 12) ───
 export const defaultPrintConfig: SettingsRecord = {
+  // 기존 공통 출력
   printVat: "1",
   printBarcode: "1",
   bottomPrint: "1",
@@ -119,16 +123,35 @@ export const defaultPrintConfig: SettingsRecord = {
   printerOffCheck: "0",
   slotAdd: "1",
   cutPosition: "0",
+  // 키오스크 출력 (from DeviceSetting SELF_PRINT)
+  selfAutoPrint: "0",
+  selfStoPrint: "0",
+  selfPrintAddress: "0",
+  selfPrintPhon: "0",
+  // 가격 표시 (from SALE)
+  price11: "0",
+  // POS 공통 영수증 (from DeviceSetting POS_PRINT)
+  receiptProductOneLine: "0",
+  receiptBarcode: "0",
+  receiptVat: "1",
+  receiptBottleTotal: "0",
+  receiptItemSeq: "0",
+  receiptPhoneMask: "0",
+  receiptNameMask: "0",
+  cashReceiptAutoIssue: "0",
+  cashReceiptIdShow: "0",
+  saleMessageHide: "1",
+  noCostPriceShow: "1",
+  memberTotalHide: "0",
 };
 
-// ─── 포인트/회원 (ASIS: S_Config 포인트 관련 공통) ───
+// ─── 포인트/회원 (40키: noBillSound → 알림/통신 이동) ───
 export const defaultPointConfig: SettingsRecord = {
   salePoint: "0",
   weightPoint: "0",
   memberAddScreen: "0",
   gradeMemo: "0",
   noBillMessage: "0",
-  noBillSound: "0",
   noBillCusPoint: "0",
   // ── 포인트 적립 설정 ──
   pointEarnEnabled: "0",
@@ -166,29 +189,29 @@ export const defaultPointConfig: SettingsRecord = {
   // ── 포인트 만료 (향후) ──
   pointExpireEnabled: "0",
   pointExpireMonths: "12",
-  // 고객 UI (키오스크)
-  selfSoundGuide: "1",
-  selfCusNum4: "1",
-  selfNoCustomer: "0",
-  selfCusSelect: "1",
-  selfCusAddUse: "0",
-  selfCusAddEtc: "0",
-  selfCusTopMsg: "",
-  selfCusBTMsg1: "",
-  selfCusBTMsg2: "",
-  selfTouchSoundYN: "1",
-  selfMainPage: "1",
-  selfBTInit: "1",
-  selfOneCancel: "1",
-  selfZHotKey: "1",
-  selfCountYN: "1",
-  selfStartHotKey: "0",
-  selfPriceUse: "0",
-  selfPriceType: "0",
-  selfReader: "2",
+  // ── 키오스크 포인트 정책 (from DeviceSetting SELF_POINT) ──
+  selfNoAutoPoint: "0",
+  selfPointZero: "0",
+  selfPointHidden: "0",
+  selfZero: "1",
 };
 
-// ─── 바코드/중량 (ASIS: [Length] + S_Config) ───
+// ─── 알림/통신 (10키: 기존 7 + 소리 3키 이동) ───
+export const defaultNotificationConfig: SettingsRecord = {
+  selfPointSMSUse: "0",
+  selfUserCall: "0",
+  selfSMSAdmin: "1",
+  selfKakao: "1",
+  selfCusAlarmUse: "1",
+  selfCusAlarmTime: "0",
+  selfSNSGubun: "0",
+  // 소리/효과음 (from SALE, PAYMENT, POINT)
+  productSound: "1",
+  cardWavOpt: "0",
+  noBillSound: "0",
+};
+
+// ─── 바코드/중량 (5키: 변경없음) ───
 export const defaultBarcodeConfig: SettingsRecord = {
   barCodeLen: "95",
   scaleLen: "4",
@@ -197,7 +220,7 @@ export const defaultBarcodeConfig: SettingsRecord = {
   scalePriceCut: "0",
 };
 
-// ─── 시스템 (ASIS: [Other] 시스템 + [Application]) ───
+// ─── 시스템 (9키: 변경없음) ───
 export const defaultSystemConfig: SettingsRecord = {
   errorLog: "1",
   mdbCompact: "0",
@@ -210,7 +233,7 @@ export const defaultSystemConfig: SettingsRecord = {
   backupPath: "",
 };
 
-// ─── 접근성 (키오스크 접근성 기본값) ───
+// ─── 접근성 (10키: 변경없음) ───
 export const defaultAccessibilityConfig: SettingsRecord = {
   enabled: "1",
   ttsEnabled: "1",
@@ -230,18 +253,17 @@ export const defaultAccessibilityConfig: SettingsRecord = {
 
 export const saleToggles: ToggleItem[] = [
   { key: "priceEditable", title: "가격 수정 허용", desc: "판매 시 상품 가격 수정 가능" },
-  { key: "productSound", title: "상품 스캔 소리", desc: "상품 스캔/등록 시 효과음" },
-  { key: "orderCallEnabled", title: "주문 호출", desc: "주문 완료 시 호출 알림" },
   { key: "totalQtyShow", title: "총 수량 표시", desc: "판매 화면에 총 수량 표시" },
   { key: "grouping", title: "상품 그룹핑", desc: "동일 상품 자동 합산" },
   { key: "boryuEnabled", title: "보류 기능", desc: "거래 보류 기능 사용" },
-  { key: "infoDeskEnabled", title: "안내데스크 모드", desc: "안내 데스크 모드 사용" },
-  { key: "allFinish", title: "전체 마감", desc: "전체 마감 기능 사용" },
-  { key: "jobFinishCashdraw", title: "마감시 현금함", desc: "업무 마감 시 현금함 열기" },
   { key: "freeOpt", title: "무료 옵션", desc: "무료 상품 처리 옵션" },
-  { key: "price11", title: "3단 가격 표시", desc: "3단 가격 적용" },
-  { key: "engEnabled", title: "영어 모드", desc: "영문 인터페이스 사용" },
-  { key: "gridFix", title: "그리드 고정", desc: "테이블 컬럼 너비 고정" },
+];
+
+export const closingToggles: ToggleItem[] = [
+  { key: "allFinish", title: "전체 마감", desc: "전체 마감 기능 사용" },
+  { key: "saleFinishOpt", title: "판매 마감 옵션", desc: "판매 마감 시 추가 옵션" },
+  { key: "dayFinishMsgOpt", title: "일마감 메시지", desc: "일 마감 시 메시지 표시" },
+  { key: "jobFinishCashdraw", title: "마감시 현금함", desc: "업무 마감 시 현금함 열기" },
 ];
 
 export const paymentMethodToggles: ToggleItem[] = [
@@ -255,6 +277,7 @@ export const paymentMethodToggles: ToggleItem[] = [
   { key: "wechatPayEnabled", title: "위챗페이", desc: "WeChat Pay 결제 허용" },
   { key: "alipayEnabled", title: "알리페이", desc: "Alipay 결제 허용" },
   { key: "storePointEnabled", title: "매장 포인트", desc: "매장 포인트 결제 허용" },
+  { key: "selfAppCard", title: "앱카드 (키오스크)", desc: "키오스크 앱카드 결제 사용" },
 ];
 
 export const paymentToggles: ToggleItem[] = [
@@ -262,7 +285,6 @@ export const paymentToggles: ToggleItem[] = [
   { key: "offCardKeyUse", title: "오프라인 카드 키", desc: "오프라인 카드 키 사용" },
   { key: "handCardEnabled", title: "수기 카드 입력", desc: "카드번호 직접 입력 허용" },
   { key: "cardTimerEnabled", title: "카드 타이머", desc: "카드 결제 타임아웃 사용" },
-  { key: "cardWavOpt", title: "카드 결제 소리", desc: "카드 결제 시 효과음" },
   { key: "cardView", title: "카드 정보 표시", desc: "카드 정보 화면 표시" },
   { key: "eCardEnabled", title: "전자카드 사용", desc: "전자카드 결제 사용" },
   { key: "noCvmBillPrint", title: "비CVM 영수증", desc: "비CVM 거래 영수증 출력" },
@@ -284,6 +306,29 @@ export const printToggles: ToggleItem[] = [
   { key: "memberReceiptPrint", title: "회원 미수 인쇄", desc: "회원 미수 잔액 영수증 인쇄" },
   { key: "printerOffCheck", title: "프린터 오프 체크", desc: "프린터 미연결 시 경고" },
   { key: "slotAdd", title: "용지 슬롯 추가", desc: "영수증 슬롯(여백) 추가" },
+  { key: "price11", title: "3단 가격 표시", desc: "3단 가격 적용" },
+];
+
+export const selfPrintToggles: ToggleItem[] = [
+  { key: "selfAutoPrint", title: "자동 출력 (키오스크)", desc: "결제 후 자동 영수증 출력" },
+  { key: "selfStoPrint", title: "출력 중지 (키오스크)", desc: "영수증 출력 중지" },
+  { key: "selfPrintAddress", title: "주소 출력 (키오스크)", desc: "영수증에 주소 출력" },
+  { key: "selfPrintPhon", title: "전화번호 출력 (키오스크)", desc: "영수증에 전화번호 출력" },
+];
+
+export const printReceiptToggles: ToggleItem[] = [
+  { key: "receiptProductOneLine", title: "상품정보 1줄 표시", desc: "영수증에 상품정보 1줄 표시" },
+  { key: "receiptBarcode", title: "영수증 바코드", desc: "영수증에 바코드 표시" },
+  { key: "receiptVat", title: "영수증 부가세", desc: "영수증에 부가세 표시" },
+  { key: "receiptBottleTotal", title: "공병합계 표시", desc: "영수증에 공병합계 금액 표시" },
+  { key: "receiptItemSeq", title: "상품순번 출력", desc: "영수증에 상품순번 출력" },
+  { key: "receiptPhoneMask", title: "전화번호 마스킹", desc: "영수증 회원 전화번호 마스킹" },
+  { key: "receiptNameMask", title: "회원명 마스킹", desc: "영수증 회원명 마스킹" },
+  { key: "cashReceiptAutoIssue", title: "현금영수증 자진발급", desc: "현금영수증 자진발급 사용" },
+  { key: "cashReceiptIdShow", title: "현금영수증 고객표시", desc: "현금영수증 신분정보 고객모니터 표시" },
+  { key: "saleMessageHide", title: "판매메시지 숨김", desc: "판매메시지 숨기기" },
+  { key: "noCostPriceShow", title: "매입가 미표시", desc: "가격확인시 매입가 표시안함" },
+  { key: "memberTotalHide", title: "회원 구매금액 숨김", desc: "회원 총 구매금액 숨기기" },
 ];
 
 export const pointToggles: ToggleItem[] = [
@@ -291,7 +336,6 @@ export const pointToggles: ToggleItem[] = [
   { key: "memberAddScreen", title: "회원 추가 화면", desc: "판매 시 회원 등록 화면" },
   { key: "gradeMemo", title: "등급 메모", desc: "회원 등급 메모 표시" },
   { key: "noBillMessage", title: "무영수증 메시지", desc: "무영수증 시 메시지 표시" },
-  { key: "noBillSound", title: "무영수증 소리", desc: "무영수증 시 효과음" },
   { key: "noBillCusPoint", title: "무영수증 포인트", desc: "무영수증 시 포인트 적용" },
 ];
 
@@ -313,18 +357,26 @@ export const gradeToggles: ToggleItem[] = [
   { key: "gradeDownEnabled", title: "등급 하향 허용", desc: "기준 미달 시 등급 강등 허용" },
 ];
 
-export const selfUIToggles: ToggleItem[] = [
-  { key: "selfSoundGuide", title: "음성 안내", desc: "음성 안내 사용" },
-  { key: "selfCusNum4", title: "회원번호 4자리", desc: "4자리 회원번호 입력" },
-  { key: "selfNoCustomer", title: "비회원 판매", desc: "비회원 판매 허용" },
-  { key: "selfCusAddUse", title: "고객 추가", desc: "고객 추가 기능 사용" },
-  { key: "selfTouchSoundYN", title: "터치 소리", desc: "터치 시 효과음" },
-  { key: "selfMainPage", title: "메인페이지 표시", desc: "메인 페이지 표시" },
-  { key: "selfBTInit", title: "초기화 버튼", desc: "초기화 버튼 표시" },
-  { key: "selfOneCancel", title: "개별 취소", desc: "개별 상품 취소 버튼" },
-  { key: "selfZHotKey", title: "Z 핫키", desc: "Z 핫키 사용" },
-  { key: "selfCountYN", title: "계수 버튼", desc: "계수 버튼 표시" },
-  { key: "selfPriceUse", title: "가격 조정", desc: "가격 조정 기능 사용" },
+export const selfPointPolicyToggles: ToggleItem[] = [
+  { key: "selfNoAutoPoint", title: "자동포인트 비활성 (키오스크)", desc: "키오스크 자동 포인트 적립 비활성" },
+  { key: "selfPointZero", title: "포인트 초기화 (키오스크)", desc: "키오스크 포인트 0원 초기화" },
+  { key: "selfPointHidden", title: "포인트 숨김 (키오스크)", desc: "키오스크 포인트 정보 미표시" },
+  { key: "selfZero", title: "잔액 처리 (키오스크)", desc: "키오스크 잔액 처리 방식" },
+];
+
+export const notificationToggles: ToggleItem[] = [
+  { key: "selfPointSMSUse", title: "포인트 SMS", desc: "포인트 적립/사용 SMS 발송" },
+  { key: "selfUserCall", title: "직원 호출", desc: "키오스크 직원 호출 기능" },
+  { key: "selfSMSAdmin", title: "관리자 SMS", desc: "관리자에게 SMS 알림" },
+  { key: "selfKakao", title: "카카오 알림", desc: "카카오톡 알림 발송" },
+  { key: "selfCusAlarmUse", title: "고객 알람", desc: "고객 알람 사용" },
+  { key: "selfSNSGubun", title: "알림 채널 구분", desc: "SMS/카카오 알림 채널 선택" },
+];
+
+export const soundToggles: ToggleItem[] = [
+  { key: "productSound", title: "상품 스캔 소리", desc: "상품 스캔/등록 시 효과음" },
+  { key: "cardWavOpt", title: "카드 결제 소리", desc: "카드 결제 시 효과음" },
+  { key: "noBillSound", title: "무영수증 소리", desc: "무영수증 시 효과음" },
 ];
 
 export const systemToggles: ToggleItem[] = [

@@ -363,73 +363,142 @@ async function main() {
   ]);
   console.log(`Created ${kiosks.length} kiosks`);
 
-  // 6. 시스템 설정
-  const settings = await Promise.all([
-    prisma.systemSetting.upsert({
-      where: { key: "store.name" },
+  // 6. 기기 등록
+  const devices = await Promise.all([
+    prisma.device.upsert({
+      where: { id: "POS-001" },
       update: {},
-      create: {
-        key: "store.name",
-        value: "POSON 카페",
-        category: "store",
-      },
+      create: { id: "POS-001", name: "POS 1번", type: "POS", isActive: true },
     }),
-    prisma.systemSetting.upsert({
-      where: { key: "store.businessNumber" },
+    prisma.device.upsert({
+      where: { id: "KIOSK-001" },
       update: {},
-      create: {
-        key: "store.businessNumber",
-        value: "123-45-67890",
-        category: "store",
-      },
+      create: { id: "KIOSK-001", name: "키오스크 1번", type: "KIOSK", isActive: true },
     }),
-    prisma.systemSetting.upsert({
-      where: { key: "store.address" },
+    prisma.device.upsert({
+      where: { id: "KIOSK-002" },
       update: {},
-      create: {
-        key: "store.address",
-        value: "서울시 강남구 테헤란로 123",
-        category: "store",
-      },
+      create: { id: "KIOSK-002", name: "키오스크 2번", type: "KIOSK", isActive: true },
     }),
-    prisma.systemSetting.upsert({
-      where: { key: "payment.defaultVan" },
+    prisma.device.upsert({
+      where: { id: "KITCHEN-001" },
       update: {},
-      create: {
-        key: "payment.defaultVan",
-        value: "NICE",
-        category: "payment",
-      },
-    }),
-    prisma.systemSetting.upsert({
-      where: { key: "payment.timeout" },
-      update: {},
-      create: {
-        key: "payment.timeout",
-        value: "30000",
-        category: "payment",
-      },
-    }),
-    prisma.systemSetting.upsert({
-      where: { key: "kiosk.idleTimeout" },
-      update: {},
-      create: {
-        key: "kiosk.idleTimeout",
-        value: "60000",
-        category: "kiosk",
-      },
-    }),
-    prisma.systemSetting.upsert({
-      where: { key: "kiosk.defaultLanguage" },
-      update: {},
-      create: {
-        key: "kiosk.defaultLanguage",
-        value: "ko",
-        category: "kiosk",
-      },
+      create: { id: "KITCHEN-001", name: "주방 디스플레이", type: "KITCHEN", isActive: true },
     }),
   ]);
-  console.log(`Created ${settings.length} system settings`);
+  console.log(`Created ${devices.length} devices`);
+
+  // 7. 시스템 설정 (공통 환경설정 — 8개 카테고리)
+  const systemSettingsData: { key: string; value: string; category: string }[] = [
+    // 매장 기본
+    { key: "store.name", value: "POSON 카페", category: "STORE" },
+    { key: "store.businessNumber", value: "123-45-67890", category: "STORE" },
+    { key: "store.address", value: "서울시 강남구 테헤란로 123", category: "STORE" },
+    // SALE (판매 운영) — 주요 키만 시드
+    { key: "sale.taxRate", value: "10", category: "SALE" },
+    { key: "sale.tableSelectEnabled", value: "0", category: "SALE" },
+    // CLOSING (마감)
+    { key: "closing.openDay", value: "", category: "CLOSING" },
+    { key: "closing.startPrice", value: "0", category: "CLOSING" },
+    { key: "closing.allFinish", value: "1", category: "CLOSING" },
+    { key: "closing.jobFinishCashdraw", value: "0", category: "CLOSING" },
+    // PAYMENT (결제 정책) — 주요 키만 시드
+    { key: "payment.defaultVan", value: "NICE", category: "PAYMENT" },
+    { key: "payment.timeout", value: "30000", category: "PAYMENT" },
+    { key: "payment.cardEnabled", value: "1", category: "PAYMENT" },
+    { key: "payment.cashEnabled", value: "1", category: "PAYMENT" },
+    { key: "payment.applePayEnabled", value: "0", category: "PAYMENT" },
+    { key: "payment.selfAppCard", value: "0", category: "PAYMENT" },
+    // PRINT (영수증/출력)
+    { key: "print.printWidth", value: "42", category: "PRINT" },
+    { key: "print.headerLine1", value: "POSON 카페", category: "PRINT" },
+    { key: "print.receiptVat", value: "1", category: "PRINT" },
+    { key: "print.selfAutoPrint", value: "0", category: "PRINT" },
+    // POINT (포인트/회원)
+    { key: "point.salePoint", value: "5", category: "POINT" },
+    { key: "point.selfNoAutoPoint", value: "0", category: "POINT" },
+    { key: "point.selfPointZero", value: "0", category: "POINT" },
+    // NOTIFICATION (알림/통신)
+    { key: "noti.selfPointSMSUse", value: "0", category: "NOTIFICATION" },
+    { key: "noti.selfUserCall", value: "0", category: "NOTIFICATION" },
+    { key: "noti.selfSMSAdmin", value: "1", category: "NOTIFICATION" },
+    { key: "noti.selfKakao", value: "1", category: "NOTIFICATION" },
+    { key: "noti.selfCusAlarmUse", value: "1", category: "NOTIFICATION" },
+    { key: "noti.selfCusAlarmTime", value: "0", category: "NOTIFICATION" },
+    { key: "noti.selfSNSGubun", value: "0", category: "NOTIFICATION" },
+    // 소리/효과음 (from SALE, PAYMENT, POINT)
+    { key: "noti.productSound", value: "1", category: "NOTIFICATION" },
+    { key: "noti.cardWavOpt", value: "0", category: "NOTIFICATION" },
+    { key: "noti.noBillSound", value: "0", category: "NOTIFICATION" },
+    // SYSTEM
+    { key: "system.logLevel", value: "1", category: "SYSTEM" },
+    { key: "system.autoBackup", value: "1", category: "SYSTEM" },
+  ];
+
+  for (const s of systemSettingsData) {
+    await prisma.systemSetting.upsert({
+      where: { key: s.key },
+      update: {},
+      create: s,
+    });
+  }
+  console.log(`Created ${systemSettingsData.length} system settings`);
+
+  // 8. 기기별 설정 (DeviceSetting — 새 카테고리 체계)
+  const deviceSettingsData: { deviceId: string; key: string; value: string; category: string }[] = [
+    // POS-01: TERMINAL
+    { deviceId: "POS-001", key: "terminal.posNo", value: "1", category: "TERMINAL" },
+    { deviceId: "POS-001", key: "terminal.printerPort", value: "COM1", category: "TERMINAL" },
+    { deviceId: "POS-001", key: "terminal.drawerPort", value: "COM2", category: "TERMINAL" },
+    // POS-01: VAN
+    { deviceId: "POS-001", key: "van.vanSelect", value: "4", category: "VAN" },
+    { deviceId: "POS-001", key: "van.vanIp", value: "127.0.0.1", category: "VAN" },
+    { deviceId: "POS-001", key: "van.vanPort", value: "9100", category: "VAN" },
+    // POS-01: POS_OPERATION (판매/동작)
+    { deviceId: "POS-001", key: "posOp.saleNewProduct", value: "1", category: "POS_OPERATION" },
+    { deviceId: "POS-001", key: "posOp.cashBackUse", value: "1", category: "POS_OPERATION" },
+    { deviceId: "POS-001", key: "posOp.cashForceInput", value: "1", category: "POS_OPERATION" },
+    // POS-01: POS_SETTLE
+    { deviceId: "POS-001", key: "posSettle.settleCategoryPrint", value: "1", category: "POS_SETTLE" },
+    // POS-01: POS_RECEIPT
+    { deviceId: "POS-001", key: "posReceipt.checkResponsePrint", value: "1", category: "POS_RECEIPT" },
+    // KIOSK-01: TERMINAL
+    { deviceId: "KIOSK-001", key: "terminal.posNo", value: "101", category: "TERMINAL" },
+    { deviceId: "KIOSK-001", key: "terminal.printerPort", value: "COM1", category: "TERMINAL" },
+    { deviceId: "KIOSK-001", key: "terminal.selfJPYN", value: "0", category: "TERMINAL" },
+    { deviceId: "KIOSK-001", key: "terminal.selfCamUse", value: "1", category: "TERMINAL" },
+    { deviceId: "KIOSK-001", key: "terminal.selfICSiren", value: "0", category: "TERMINAL" },
+    // KIOSK-01: VAN
+    { deviceId: "KIOSK-001", key: "van.vanSelect", value: "4", category: "VAN" },
+    { deviceId: "KIOSK-001", key: "van.vanIp", value: "127.0.0.1", category: "VAN" },
+    // KIOSK-01: SELF_CASH
+    { deviceId: "KIOSK-001", key: "selfCash.selfCash", value: "1", category: "SELF_CASH" },
+    // KIOSK-01: SELF_BAG
+    { deviceId: "KIOSK-001", key: "selfBag.selfBagUse", value: "0", category: "SELF_BAG" },
+    // KIOSK-01: SELF_UI (키오스크 화면)
+    { deviceId: "KIOSK-001", key: "selfUI.selfSoundGuide", value: "1", category: "SELF_UI" },
+    { deviceId: "KIOSK-001", key: "selfUI.selfTouchSoundYN", value: "1", category: "SELF_UI" },
+    { deviceId: "KIOSK-001", key: "selfUI.selfMainPage", value: "1", category: "SELF_UI" },
+    { deviceId: "KIOSK-001", key: "selfUI.autoOpenYN", value: "0", category: "SELF_UI" },
+    // KIOSK-02: 최소 설정 (독립 기기별 값)
+    { deviceId: "KIOSK-002", key: "terminal.posNo", value: "102", category: "TERMINAL" },
+    { deviceId: "KIOSK-002", key: "van.vanSelect", value: "4", category: "VAN" },
+    { deviceId: "KIOSK-002", key: "selfUI.selfSoundGuide", value: "0", category: "SELF_UI" },
+    { deviceId: "KIOSK-002", key: "selfUI.selfMainPage", value: "2", category: "SELF_UI" },
+    // KITCHEN-01: TERMINAL
+    { deviceId: "KITCHEN-001", key: "terminal.posNo", value: "201", category: "TERMINAL" },
+    // KITCHEN-01: KITCHEN
+    { deviceId: "KITCHEN-001", key: "kitchen.msgLine1", value: "주문번호", category: "KITCHEN" },
+  ];
+
+  for (const ds of deviceSettingsData) {
+    await prisma.deviceSetting.upsert({
+      where: { deviceId_key: { deviceId: ds.deviceId, key: ds.key } },
+      update: {},
+      create: ds,
+    });
+  }
+  console.log(`Created ${deviceSettingsData.length} device settings`);
 
   // 7. 거래처 생성
   const suppliers = await Promise.all([

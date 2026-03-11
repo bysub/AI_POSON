@@ -3,12 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<<<<<<< HEAD
     <!-- CSP는 window-manager.ts에서 동적으로 설정 (dev/prod 분기) -->
-=======
-    <!-- CSP는 Electron main process (window-manager.ts)에서 response header로 관리 -->
-    <!-- meta CSP를 제거하여 header CSP와의 충돌 방지 (두 CSP가 공존 시 가장 제한적인 교집합 적용) -->
->>>>>>> a74d0e1b9a6c5d03f7270fa69c5c6b70c3bf6900
     <!-- FOUC 방지: 렌더링 전 테마/접근성 설정 적용 -->
     <script>
       (function () {

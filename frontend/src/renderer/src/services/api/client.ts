@@ -11,7 +11,20 @@ interface ApiResponse<T> {
   error?: {
     code: string;
     message: string;
+    retryAfter?: string | number;
   };
+}
+
+/**
+ * Rate Limit 에러 (429)
+ */
+export class RateLimitError extends Error {
+  readonly retryAfter: number | null;
+  constructor(message: string, retryAfter?: string | number | null) {
+    super(message);
+    this.name = "RateLimitError";
+    this.retryAfter = retryAfter ? Number(retryAfter) : null;
+  }
 }
 
 /**
@@ -153,6 +166,23 @@ function getStoredToken(): string | null {
 }
 
 /**
+ * 캐시된 Device ID (rate limit 키로 사용)
+ */
+let cachedDeviceId: string | null = null;
+function getDeviceId(): string {
+  if (!cachedDeviceId) {
+    cachedDeviceId = localStorage.getItem("POSON_DEVICE_ID") || "";
+  }
+  return cachedDeviceId;
+}
+
+/** Device ID 캐시 설정 (settingsStore 초기화 시 호출) */
+export function setDeviceId(id: string): void {
+  cachedDeviceId = id;
+  if (id) localStorage.setItem("POSON_DEVICE_ID", id);
+}
+
+/**
  * 토큰 갱신 상태 (중복 갱신 방지)
  */
 let isRefreshing = false;
@@ -245,6 +275,12 @@ async function request<T>(
       headers["Authorization"] = `Bearer ${token}`;
     }
 
+    // NAT 환경 기기별 rate limit 분리용
+    const deviceId = getDeviceId();
+    if (deviceId) {
+      headers["X-Device-Id"] = deviceId;
+    }
+
     const response = await fetch(`${BASE_URL}${url}${queryString}`, {
       method,
       headers,
@@ -253,6 +289,17 @@ async function request<T>(
     });
 
     clearTimeout(timeoutId);
+
+    // 429 Rate Limit 에러 — 별도 처리 (재시도 유도)
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("Retry-After");
+      let message = "요청이 너무 많습니다. 잠시 후 다시 시도하세요.";
+      try {
+        const body = await response.json();
+        if (body?.error?.message) message = body.error.message;
+      } catch { /* JSON 파싱 실패 시 기본 메시지 사용 */ }
+      throw new RateLimitError(message, retryAfter);
+    }
 
     // 401 에러 시 토큰 갱신 시도 후 재요청
     if (response.status === 401 && !url.includes("/auth/")) {

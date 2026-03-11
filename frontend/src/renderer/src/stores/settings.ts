@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { apiClient } from "@/services/api/client";
+import { apiClient, setDeviceId } from "@/services/api/client";
 
 interface DeviceInfo {
   id: string;
@@ -30,9 +30,10 @@ export const useSettingsStore = defineStore("settings", () => {
     error.value = null;
 
     try {
-      // 1) POSON_DEVICE_ID 환경변수 조회
+      // 1) POSON_DEVICE_ID 환경변수 조회 + API 클라이언트 Device ID 캐시 설정
       if (window.api?.getEnv) {
         deviceId.value = await window.api.getEnv("POSON_DEVICE_ID");
+        if (deviceId.value) setDeviceId(deviceId.value);
       }
 
       // 2) 매장 공통 설정 + 기기 정보/설정 병렬 fetch

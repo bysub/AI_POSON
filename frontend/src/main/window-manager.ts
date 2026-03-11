@@ -92,7 +92,6 @@ export function registerAppProtocol(): void {
  * BrowserWindow 생성 + CSP 설정
  */
 export function createWindow(): void {
-<<<<<<< HEAD
   const prodCSP = [
     "default-src 'self' app:;",
     "script-src 'self' app: 'unsafe-inline' 'unsafe-eval';",
@@ -117,42 +116,6 @@ export function createWindow(): void {
       callback(is.dev ? {} : { responseHeaders: details.responseHeaders });
     }
   });
-=======
-  // CSP 헤더 설정 — API origin을 동적으로 포함
-  const apiOrigin = getApiOrigin();
-
-  if (is.dev) {
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      if (details.resourceType === "mainFrame" || details.resourceType === "subFrame") {
-        callback({
-          responseHeaders: {
-            ...details.responseHeaders,
-            "Content-Security-Policy": [
-              `default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: http://localhost:* ${apiOrigin} https://*.unsplash.com https://images.unsplash.com https://flagcdn.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ws://localhost:* http://localhost:* http://127.0.0.1:* ${apiOrigin} https://*.google.com wss://*.google.com https://*.googleapis.com;`,
-            ],
-          },
-        });
-      } else {
-        callback({});
-      }
-    });
-  } else {
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      if (details.resourceType === "mainFrame" || details.resourceType === "subFrame") {
-        callback({
-          responseHeaders: {
-            ...details.responseHeaders,
-            "Content-Security-Policy": [
-              `default-src 'self' app:; script-src 'self' app: 'unsafe-inline' 'unsafe-eval'; style-src 'self' app: 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' app: data: blob: ${apiOrigin} https://*.unsplash.com https://images.unsplash.com https://flagcdn.com; font-src 'self' app: data: https://fonts.gstatic.com; connect-src 'self' app: http://localhost:* http://127.0.0.1:* ${apiOrigin} https://*.google.com wss://*.google.com https://*.googleapis.com;`,
-            ],
-          },
-        });
-      } else {
-        callback({ responseHeaders: details.responseHeaders });
-      }
-    });
-  }
->>>>>>> a74d0e1b9a6c5d03f7270fa69c5c6b70c3bf6900
 
   const mainWindow = new BrowserWindow({
     width: is.dev ? 480 : 1080,
@@ -189,43 +152,8 @@ export function createWindow(): void {
     },
   );
 
-<<<<<<< HEAD
   const url = is.dev && process.env["ELECTRON_RENDERER_URL"]
     ? process.env["ELECTRON_RENDERER_URL"]
     : "app://poson/index.html";
   mainWindow.loadURL(url);
-=======
-  // 프로덕션에서 리소스 로딩 실패 로깅 (디버깅용)
-  if (!is.dev) {
-    session.defaultSession.webRequest.onErrorOccurred((details) => {
-      console.error(`[Load Error] ${details.resourceType}: ${details.url} - ${details.error}`);
-    });
-  }
-
-  // 프로덕션 디버깅: F12로 DevTools 토글
-  mainWindow.webContents.on("before-input-event", (_event, input) => {
-    if (input.key === "F12" && input.type === "keyDown") {
-      mainWindow.webContents.toggleDevTools();
-    }
-  });
-
-  // 페이지 로드 실패 시 에러 로깅
-  mainWindow.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
-    console.error(`[Page Load Failed] code=${errorCode}, desc=${errorDescription}, url=${validatedURL}`);
-  });
-
-  // 렌더러 콘솔 메시지를 main process 로그에도 출력
-  mainWindow.webContents.on("console-message", (_event, level, message, line, sourceId) => {
-    if (level >= 2) {
-      // level 2 = warning, 3 = error
-      console.warn(`[Renderer ${level === 3 ? "ERROR" : "WARN"}] ${message} (${sourceId}:${line})`);
-    }
-  });
-
-  if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-    mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
-  } else {
-    mainWindow.loadURL("app://poson/index.html");
-  }
->>>>>>> a74d0e1b9a6c5d03f7270fa69c5c6b70c3bf6900
 }

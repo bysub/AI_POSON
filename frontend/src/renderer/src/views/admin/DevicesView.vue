@@ -14,27 +14,27 @@ import {
   defaultVanConfig,
   defaultSelfCashConfig,
   defaultSelfBagConfig,
-  defaultSelfAutoConfig,
-  defaultSelfPointConfig,
-  defaultSelfPrintConfig,
-  defaultSelfEtcConfig,
-  defaultPosPrintConfig,
-  defaultPosSaleConfig,
+  defaultSelfUIConfig,
+  defaultPosOperationConfig,
   defaultPosSettleConfig,
   defaultPosReceiptConfig,
   defaultKitchenConfig,
   terminalToggles,
+  terminalKioskHwToggles,
   selfCashToggles,
   selfBagToggles,
-  selfAutoToggles,
-  selfPointToggles,
-  selfPrintToggles,
-  selfEtcToggles,
-  posPrintToggles,
-  posSaleToggles,
+  selfUIAutoToggles,
+  posOpSaleToggles,
+  posOpCardToggles,
+  posOpDiscountToggles,
+  posOpDeliveryToggles,
+  posOpHoldToggles,
+  posOpSaleExtraToggles,
   staffSettleToggles,
   closeSettleToggles,
+  posSettleExtraToggles,
   posReceiptToggles,
+  posReceiptExtraToggles,
 } from "./deviceSettingsData";
 
 // ─── 기기 목록 상태 ───
@@ -66,12 +66,8 @@ const terminalConfig = ref<SettingsRecord>({ ...defaultTerminalConfig });
 const vanConfig = ref<SettingsRecord>({ ...defaultVanConfig });
 const selfCashConfig = ref<SettingsRecord>({ ...defaultSelfCashConfig });
 const selfBagConfig = ref<SettingsRecord>({ ...defaultSelfBagConfig });
-const selfAutoConfig = ref<SettingsRecord>({ ...defaultSelfAutoConfig });
-const selfPointConfig = ref<SettingsRecord>({ ...defaultSelfPointConfig });
-const selfPrintConfig = ref<SettingsRecord>({ ...defaultSelfPrintConfig });
-const selfEtcConfig = ref<SettingsRecord>({ ...defaultSelfEtcConfig });
-const posPrintConfig = ref<SettingsRecord>({ ...defaultPosPrintConfig });
-const posSaleConfig = ref<SettingsRecord>({ ...defaultPosSaleConfig });
+const selfUIConfig = ref<SettingsRecord>({ ...defaultSelfUIConfig });
+const posOpConfig = ref<SettingsRecord>({ ...defaultPosOperationConfig });
 const posSettleConfig = ref<SettingsRecord>({ ...defaultPosSettleConfig });
 const posReceiptConfig = ref<SettingsRecord>({ ...defaultPosReceiptConfig });
 const kitchenConfig = ref<SettingsRecord>({ ...defaultKitchenConfig });
@@ -82,12 +78,8 @@ const configRefs: Record<string, ReturnType<typeof ref<SettingsRecord>>> = {
   van: vanConfig,
   selfCash: selfCashConfig,
   selfBag: selfBagConfig,
-  selfAuto: selfAutoConfig,
-  selfPoint: selfPointConfig,
-  selfPrint: selfPrintConfig,
-  selfEtc: selfEtcConfig,
-  posPrint: posPrintConfig,
-  posSale: posSaleConfig,
+  selfUI: selfUIConfig,
+  posOp: posOpConfig,
   posSettle: posSettleConfig,
   posReceipt: posReceiptConfig,
   kitchenMsg: kitchenConfig,
@@ -499,6 +491,14 @@ onMounted(async () => {
                 :config="terminalConfig"
                 @toggle="(k) => toggleValue(terminalConfig, k)"
               />
+              <div v-if="selectedDevice?.type === 'KIOSK'" class="mt-6">
+                <h4 class="mb-3 text-sm font-semibold text-slate-700">키오스크 하드웨어</h4>
+                <ToggleGrid
+                  :items="terminalKioskHwToggles"
+                  :config="terminalConfig"
+                  @toggle="(k) => toggleValue(terminalConfig, k)"
+                />
+              </div>
             </div>
 
             <!-- ═══ VAN 결제 ═══ -->
@@ -598,47 +598,50 @@ onMounted(async () => {
               </div>
             </div>
 
-            <!-- ═══ POS: 인쇄/출력 ═══ -->
+            <!-- ═══ POS: 판매/동작 ═══ -->
             <div
-              v-show="activeTab === 'posPrint'"
+              v-show="activeTab === 'posOp'"
               class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
             >
-              <h3 class="mb-4 text-base font-semibold text-slate-800">POS 인쇄/출력</h3>
-              <ToggleGrid
-                :items="posPrintToggles"
-                :config="posPrintConfig"
-                @toggle="(k) => toggleValue(posPrintConfig, k)"
-              />
-            </div>
+              <h3 class="mb-4 text-base font-semibold text-slate-800">판매/동작 설정</h3>
 
-            <!-- ═══ POS: 판매설정 ═══ -->
-            <div
-              v-show="activeTab === 'posSale'"
-              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h3 class="mb-4 text-base font-semibold text-slate-800">POS 판매설정</h3>
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">판매 규칙</h4>
+              <div class="mb-6">
+                <ToggleGrid :items="posOpSaleToggles" :config="posOpConfig" @toggle="(k) => toggleValue(posOpConfig, k)" />
+              </div>
+
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">결제/카드 규칙</h4>
+              <div class="mb-6">
+                <ToggleGrid :items="posOpCardToggles" :config="posOpConfig" @toggle="(k) => toggleValue(posOpConfig, k)" />
+              </div>
+
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">할인/포인트 규칙</h4>
+              <div class="mb-6">
+                <ToggleGrid :items="posOpDiscountToggles" :config="posOpConfig" @toggle="(k) => toggleValue(posOpConfig, k)" />
+              </div>
+
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">배달 설정</h4>
+              <div class="mb-6">
+                <ToggleGrid :items="posOpDeliveryToggles" :config="posOpConfig" @toggle="(k) => toggleValue(posOpConfig, k)" />
+              </div>
+
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">보류/기타</h4>
+              <div class="mb-6">
+                <ToggleGrid :items="posOpHoldToggles" :config="posOpConfig" @toggle="(k) => toggleValue(posOpConfig, k)" />
+              </div>
+
               <h4 class="mb-3 text-sm font-semibold text-slate-600">영수증/절사 설정</h4>
               <div class="mb-6 grid gap-5 md:grid-cols-3">
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >할인상품 표시</label
-                  >
-                  <select
-                    v-model="posSaleConfig.receiptDiscountDisplay"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  >
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">할인상품 표시</label>
+                  <select v-model="posOpConfig.receiptDiscountDisplay" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="0">할인금액만 표시</option>
                     <option value="1">원가+할인 모두 표시</option>
                   </select>
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >총매출금액 절사</label
-                  >
-                  <select
-                    v-model="posSaleConfig.totalRounding"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  >
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">총매출금액 절사</label>
+                  <select v-model="posOpConfig.totalRounding" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="0">원단위 절사</option>
                     <option value="1">십단위 절사</option>
                     <option value="2">백단위 절사</option>
@@ -646,13 +649,8 @@ onMounted(async () => {
                   </select>
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >저울상품 절사</label
-                  >
-                  <select
-                    v-model="posSaleConfig.scaleRounding"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  >
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">저울상품 절사</label>
+                  <select v-model="posOpConfig.scaleRounding" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="0">원단위 절사</option>
                     <option value="1">십단위 절사</option>
                     <option value="2">백단위 절사</option>
@@ -660,25 +658,15 @@ onMounted(async () => {
                   </select>
                 </div>
               </div>
-              <h4 class="mb-3 text-sm font-semibold text-slate-600">분류별 매출 출력</h4>
               <div class="mb-6">
+                <h4 class="mb-3 text-sm font-semibold text-slate-600">분류별 매출 출력</h4>
                 <div class="flex items-center gap-4">
                   <label class="flex items-center gap-2">
-                    <input
-                      v-model="posSaleConfig.categoryPrintType"
-                      type="radio"
-                      value="0"
-                      class="h-4 w-4 text-indigo-600"
-                    />
+                    <input v-model="posOpConfig.categoryPrintType" type="radio" value="0" class="h-4 w-4 text-indigo-600" />
                     <span class="text-sm text-slate-700">대분류</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input
-                      v-model="posSaleConfig.categoryPrintType"
-                      type="radio"
-                      value="1"
-                      class="h-4 w-4 text-indigo-600"
-                    />
+                    <input v-model="posOpConfig.categoryPrintType" type="radio" value="1" class="h-4 w-4 text-indigo-600" />
                     <span class="text-sm text-slate-700">중분류</span>
                   </label>
                 </div>
@@ -686,41 +674,27 @@ onMounted(async () => {
               <h4 class="mb-3 text-sm font-semibold text-slate-600">포인트/금액 설정</h4>
               <div class="mb-6 grid gap-5 md:grid-cols-2">
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >배달판매 포인트 적립율 (%)</label
-                  >
-                  <input v-model="posSaleConfig.deliveryPointRate" type="number" min="0" max="100" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">배달판매 포인트 적립율 (%)</label>
+                  <input v-model="posOpConfig.deliveryPointRate" type="number" min="0" max="100" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >외상판매 포인트 적립율 (%)</label
-                  >
-                  <input v-model="posSaleConfig.creditPointRate" type="number" min="0" max="100" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">외상판매 포인트 적립율 (%)</label>
+                  <input v-model="posOpConfig.creditPointRate" type="number" min="0" max="100" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >영수증 미발행 기준 (원 미만)</label
-                  >
-                  <input v-model="posSaleConfig.minReceiptAmount" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">영수증 미발행 기준 (원 미만)</label>
+                  <input v-model="posOpConfig.minReceiptAmount" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >포인트 미적립 기준 (원 미만)</label
-                  >
-                  <input v-model="posSaleConfig.minPointAmount" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">포인트 미적립 기준 (원 미만)</label>
+                  <input v-model="posOpConfig.minPointAmount" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700"
-                    >카드 무서명 금액 (원 이하)</label
-                  >
-                  <input v-model="posSaleConfig.cardNoSignAmount" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">카드 무서명 금액 (원 이하)</label>
+                  <input v-model="posOpConfig.cardNoSignAmount" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
               </div>
-              <ToggleGrid
-                :items="posSaleToggles"
-                :config="posSaleConfig"
-                @toggle="(k) => toggleValue(posSaleConfig, k)"
-              />
+              <ToggleGrid :items="posOpSaleExtraToggles" :config="posOpConfig" @toggle="(k) => toggleValue(posOpConfig, k)" />
             </div>
 
             <!-- ═══ POS: 정산/마감 ═══ -->
@@ -764,6 +738,8 @@ onMounted(async () => {
                   <input v-model="posSettleConfig.receiptBottomMsg3" type="text" placeholder="영수증 하단 메시지 3줄" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
               </div>
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">정산 출력 옵션</h4>
+              <ToggleGrid :items="posSettleExtraToggles" :config="posSettleConfig" @toggle="(k) => toggleValue(posSettleConfig, k)" />
             </div>
 
             <!-- ═══ POS: 영수증 ═══ -->
@@ -778,11 +754,15 @@ onMounted(async () => {
               <p class="mb-4 text-xs text-slate-400">
                 체크된 결제 방식은 영수증 OFF 상태에서도 영수증이 출력됩니다
               </p>
-              <ToggleGrid
-                :items="posReceiptToggles"
-                :config="posReceiptConfig"
-                @toggle="(k) => toggleValue(posReceiptConfig, k)"
-              />
+              <div class="mb-6">
+                <ToggleGrid
+                  :items="posReceiptToggles"
+                  :config="posReceiptConfig"
+                  @toggle="(k) => toggleValue(posReceiptConfig, k)"
+                />
+              </div>
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">인쇄 상세 옵션</h4>
+              <ToggleGrid :items="posReceiptExtraToggles" :config="posReceiptConfig" @toggle="(k) => toggleValue(posReceiptConfig, k)" />
             </div>
 
             <!-- ═══ 셀프: 현금 결제 ═══ -->
@@ -827,6 +807,10 @@ onMounted(async () => {
                   <input v-model="selfBagConfig.selfScalePort" type="text" placeholder="COM0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
                 <div>
+                  <label class="mb-1.5 block text-sm font-medium text-slate-700">JP 봉투 포트</label>
+                  <input v-model="selfBagConfig.selfBagJPPort" type="text" placeholder="COM0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                </div>
+                <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">저울 무게 한도 (g)</label>
                   <input v-model="selfBagConfig.selfScaleLimitG" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
@@ -834,20 +818,22 @@ onMounted(async () => {
               <ToggleGrid :items="selfBagToggles" :config="selfBagConfig" @toggle="(k) => toggleValue(selfBagConfig, k)" />
             </div>
 
-            <!-- ═══ 셀프: 자동 운영 ═══ -->
+            <!-- ═══ 셀프: 키오스크 화면 ═══ -->
             <div
-              v-show="activeTab === 'selfAuto'"
+              v-show="activeTab === 'selfUI'"
               class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
             >
-              <h3 class="mb-4 text-base font-semibold text-slate-800">자동 운영 (무인 모드)</h3>
+              <h3 class="mb-4 text-base font-semibold text-slate-800">자동 운영 설정</h3>
+
+              <h4 class="mb-3 text-sm font-semibold text-slate-600">자동 운영 (무인 모드)</h4>
               <div class="mb-6 grid gap-5 md:grid-cols-3">
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">자동 운영 날짜</label>
-                  <input v-model="selfAutoConfig.autoDay" type="date" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                  <input v-model="selfUIConfig.autoDay" type="date" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">AM/PM</label>
-                  <select v-model="selfAutoConfig.autoAP" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                  <select v-model="selfUIConfig.autoAP" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="0">AM</option>
                     <option value="1">PM</option>
                   </select>
@@ -855,74 +841,23 @@ onMounted(async () => {
                 <div class="grid grid-cols-2 gap-3">
                   <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700">시</label>
-                    <input v-model="selfAutoConfig.autoHH" type="text" maxlength="2" placeholder="00" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                    <input v-model="selfUIConfig.autoHH" type="text" maxlength="2" placeholder="00" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                   </div>
                   <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700">분</label>
-                    <input v-model="selfAutoConfig.autoMM" type="text" maxlength="2" placeholder="00" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                    <input v-model="selfUIConfig.autoMM" type="text" maxlength="2" placeholder="00" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                   </div>
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">자동 로그인 ID</label>
-                  <input v-model="selfAutoConfig.autoID" type="text" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                  <input v-model="selfUIConfig.autoID" type="text" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-sm font-medium text-slate-700">자동 로그인 PW</label>
-                  <input v-model="selfAutoConfig.autoPass" type="password" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                  <input v-model="selfUIConfig.autoPass" type="password" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                 </div>
               </div>
-              <ToggleGrid :items="selfAutoToggles" :config="selfAutoConfig" @toggle="(k) => toggleValue(selfAutoConfig, k)" />
-            </div>
-
-            <!-- ═══ 셀프: 포인트/알림 ═══ -->
-            <div
-              v-show="activeTab === 'selfPoint'"
-              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h3 class="mb-4 text-base font-semibold text-slate-800">포인트/알림</h3>
-              <div class="mb-6 grid gap-5 md:grid-cols-3">
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700">고객 알람 시간 (초)</label>
-                  <input v-model="selfPointConfig.selfCusAlarmTime" type="number" min="0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700">SNS 구분</label>
-                  <select v-model="selfPointConfig.selfSNSGubun" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                    <option value="0">미사용</option>
-                    <option value="1">카카오</option>
-                    <option value="2">SMS</option>
-                  </select>
-                </div>
-              </div>
-              <ToggleGrid :items="selfPointToggles" :config="selfPointConfig" @toggle="(k) => toggleValue(selfPointConfig, k)" />
-            </div>
-
-            <!-- ═══ 셀프: 인쇄/출력 ═══ -->
-            <div
-              v-show="activeTab === 'selfPrint'"
-              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h3 class="mb-4 text-base font-semibold text-slate-800">인쇄/출력</h3>
-              <ToggleGrid :items="selfPrintToggles" :config="selfPrintConfig" @toggle="(k) => toggleValue(selfPrintConfig, k)" />
-            </div>
-
-            <!-- ═══ 셀프: 기타 ═══ -->
-            <div
-              v-show="activeTab === 'selfEtc'"
-              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h3 class="mb-4 text-base font-semibold text-slate-800">기타</h3>
-              <div class="mb-6 grid gap-5 md:grid-cols-3">
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700">JP 봉투 포트</label>
-                  <input v-model="selfEtcConfig.selfBagJPPort" type="text" placeholder="COM0" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
-                </div>
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-slate-700">GIF 파일 경로</label>
-                  <input v-model="selfEtcConfig.selfGif" type="text" placeholder="경로" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
-                </div>
-              </div>
-              <ToggleGrid :items="selfEtcToggles" :config="selfEtcConfig" @toggle="(k) => toggleValue(selfEtcConfig, k)" />
+              <ToggleGrid :items="selfUIAutoToggles" :config="selfUIConfig" @toggle="(k) => toggleValue(selfUIConfig, k)" />
             </div>
 
             <!-- ═══ 주방 메시지 ═══ -->
